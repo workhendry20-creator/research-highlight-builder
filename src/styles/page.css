@@ -1,0 +1,225 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+.paper-scroll {
+  background: #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.page {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--page-w);
+  height: var(--page-h);
+  padding: var(--margin);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  break-after: page;
+}
+
+.hero {
+  position: relative;
+  height: var(--hero-h);
+  background: var(--hero);
+  overflow: hidden;
+}
+
+.hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header {
+  margin-top: var(--gutter);
+}
+
+.header .eyebrow {
+  margin: 0;
+  font-size: var(--fs-eyebrow);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.header .title {
+  margin: 0.1em 0;
+  font-family: var(--serif);
+  font-size: var(--fs-title);
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.header .subtitle {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--fs-subtitle);
+  color: var(--ink);
+  opacity: 0.8;
+}
+
+.header .byline {
+  margin: 0.3em 0 0;
+  font-size: var(--fs-author);
+  color: var(--ink);
+}
+
+.header .byline .affiliation {
+  font-size: var(--fs-affil);
+  opacity: 0.75;
+}
+
+.body-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gutter);
+  margin-top: var(--gutter);
+}
+
+.body-cols {
+  column-fill: auto;
+  column-gap: var(--gutter);
+  text-align: left;
+  font-size: var(--fs-body);
+  font-family: var(--sans);
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.body-cols p {
+  margin: 0 0 0.8em;
+}
+
+.body-cols--p1 {
+  width: var(--body-1);
+  column-count: var(--cols-1);
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
+  overflow: hidden;
+}
+
+.body-cols--p2 {
+  width: var(--body-2);
+  column-count: var(--cols-2);
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--gutter) - var(--footer-h));
+  overflow: hidden;
+}
+
+/* Drop cap: first paragraph of page 1 only. */
+.body-cols--p1 p:first-child::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-size: calc(var(--fs-title) * 1.1);
+  line-height: 0.8;
+  padding-right: 6px;
+  color: var(--accent);
+}
+
+.sidebar {
+  box-sizing: border-box;
+  width: var(--col);
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  padding: 0 0.6em;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-size: calc(var(--fs-body) * 0.9);
+}
+
+.sidebar h3 {
+  margin: 0.6em 0 0.3em;
+  font-size: calc(var(--fs-eyebrow) + 1pt);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.sidebar ul.highlights {
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.sidebar ul.highlights li {
+  margin-bottom: 0.5em;
+}
+
+.sidebar ol.references {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: calc(var(--fs-body) * 0.75);
+  line-height: 1.3;
+}
+
+.sidebar ol.references li {
+  margin-bottom: 0.5em;
+}
+
+.page2-footer {
+  position: absolute;
+  right: var(--margin);
+  bottom: calc(var(--margin) / 2);
+  font-size: 8pt;
+  color: var(--ink);
+  opacity: 0.6;
+}
+
+.fit-badge {
+  align-self: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font: 11px/1.4 system-ui, sans-serif;
+}
+
+.fit-badge.fit-ok {
+  background: #dcf5e3;
+  color: #1a7a3a;
+}
+
+.fit-badge.fit-warn {
+  background: #fdf0d5;
+  color: #94660a;
+}
+
+.fit-badge.fit-bad {
+  background: #fbe0e0;
+  color: #a3242f;
+}
+
+.measure-root {
+  position: fixed;
+  top: 0;
+  left: -99999px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media print {
+  .paper-scroll {
+    background: none;
+    padding: 0;
+    gap: 0;
+    display: block;
+  }
+
+  .page {
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .fit-badge {
+    display: none;
+  }
+}
