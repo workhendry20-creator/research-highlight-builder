@@ -99,7 +99,11 @@
 .body-cols {
   column-fill: auto;
   column-gap: var(--gutter);
-  text-align: left;
+  /* Justified per request (overrides the left-align house rule); hyphens
+     auto keeps narrow columns from opening up rivers of whitespace. */
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
   font-size: var(--fs-body);
   font-family: var(--sans);
   line-height: 1.4;
@@ -131,17 +135,18 @@
   font-size: calc(var(--fs-title) * 1.1);
   line-height: 0.8;
   padding-right: 6px;
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .sidebar {
   box-sizing: border-box;
   width: var(--col);
-  height: calc(var(--page-h) - 2 * var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
+  /* Box hugs its content instead of spanning the full column height. */
+  height: auto;
+  align-self: flex-start;
   background: var(--accent-soft);
   border-left: 3px solid var(--accent);
-  padding: 0 0.6em;
-  overflow: hidden;
+  padding: 0 0.6em 0.8em;
   font-family: var(--sans);
   font-size: calc(var(--fs-body) * 0.9);
 }
