@@ -380,15 +380,13 @@
     display: none;
   }
 
-  /* Zoom is a screen-only affordance — print at true A4. */
-  .pages-frame {
-    width: auto !important;
-    height: auto !important;
-    margin: 0;
-  }
-
+  /* Zoom wrappers must not exist in the paged layout. `display: contents`
+     removes their boxes entirely so each .page sheet is an effective child of
+     .paper-scroll again — the flat structure the whole-sheet rules below are
+     tuned for. With a box in between, Safari (which ignores break-inside)
+     fragments the sheet into pieces. This is a screen-only affordance. */
+  .pages-frame,
   .pages {
-    width: auto !important;
-    transform: none !important;
+    display: contents;
   }
 }
