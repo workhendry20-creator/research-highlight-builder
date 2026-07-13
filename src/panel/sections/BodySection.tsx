@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
 import { RowButtons, Section, SegmentField } from '../Field';
@@ -26,6 +26,14 @@ export function BodySection() {
   // without waiting for a re-render between dragstart and drop.
   const dragFrom = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
+
+  // Grow the writing box to its content so paragraphs never type into a small
+  // inner-scrolling area. Stable identity: runs on mount (initial + tab switch).
+  const autosize = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
 
   const setText = (i: number, text: string) =>
     update((d) => {
@@ -144,11 +152,15 @@ export function BodySection() {
 
           {b.type === 'paragraph' ? (
             <textarea
-              className="field-input field-textarea"
+              ref={autosize}
+              className="field-input field-textarea field-textarea--grow"
               value={b.text}
-              rows={5}
+              rows={2}
               placeholder="Tulis paragraf…"
-              onChange={(e) => setText(i, e.target.value)}
+              onChange={(e) => {
+                setText(i, e.target.value);
+                autosize(e.currentTarget);
+              }}
             />
           ) : (
             <div className="figure-edit">
