@@ -12,15 +12,16 @@ export const overflows = (el: HTMLElement) => el.scrollWidth > el.clientWidth + 
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
 
-/** Input item. Figures carry the geometry needed to measure their block. */
+/** Input item. Figures carry the geometry needed to measure their block.
+ *  `full` = spans all columns (body width); otherwise one column wide. */
 export type FlowItem =
   | { kind: 'text'; text: string }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean };
 
 /** Working item during the search — a text run may be flagged as a continuation. */
 type PaintItem =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean };
 
 /** Output piece. Pages are rendered from these; figures resolve by id. */
 export type Piece =
@@ -50,11 +51,17 @@ const toPieces = (items: PaintItem[]): Piece[] =>
  */
 function paint(el: HTMLElement, items: PaintItem[]) {
   el.innerHTML = '';
-  const w = el.clientWidth;
+  const cs = getComputedStyle(el);
+  const gap = parseFloat(cs.columnGap) || 0;
+  const count = parseInt(cs.columnCount) || 1;
+  const colW = count > 1 ? (el.clientWidth - (count - 1) * gap) / count : el.clientWidth;
   for (const it of items) {
     if (it.kind === 'figure') {
       const d = document.createElement('div');
-      d.className = 'flow-fig';
+      // Full-width figures span all columns; one-column figures displace only a
+      // single column's worth of height.
+      d.className = it.full ? 'flow-fig flow-fig--full' : 'flow-fig flow-fig--col';
+      const w = it.full ? el.clientWidth : colW;
       const capPx = it.hasCaption ? Math.max(16, w * 0.06) : 0;
       d.style.height = `${w * it.aspect + capPx}px`;
       el.appendChild(d);

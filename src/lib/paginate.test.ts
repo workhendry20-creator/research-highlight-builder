@@ -37,7 +37,7 @@ describe('paginate', () => {
   it('never splits a figure — a straddling figure moves whole to page 2', () => {
     const items: FlowItem[] = [
       text('Alpha bravo charlie delta echo foxtrot.'),
-      { kind: 'figure', id: 'fig-1', aspect: 0.6, hasCaption: true },
+      { kind: 'figure', id: 'fig-1', aspect: 0.6, hasCaption: true, full: true },
       text('Golf hotel india juliet kilo lima.'),
     ];
 

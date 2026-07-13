@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useDoc } from './store/useDoc';
+import { Toolbar } from './panel/Toolbar';
 import { Panel } from './panel/Panel';
 import { PaperPreview } from './paper/PaperPreview';
 import { sampleDoc } from './sample';
@@ -20,8 +21,11 @@ export default function App() {
 
   return (
     <div className="app">
-      <Panel />
-      <PaperPreview />
+      <Toolbar />
+      <div className="workspace">
+        <Panel />
+        <PaperPreview />
+      </div>
     </div>
   );
 }

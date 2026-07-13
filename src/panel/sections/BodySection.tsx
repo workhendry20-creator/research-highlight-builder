@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
-import { RowButtons, Section } from '../Field';
+import { RowButtons, Section, SegmentField } from '../Field';
 
 /** Open a native file picker without a persistent <input> in the tree. */
 function pickImage(onPick: (file: File) => void) {
@@ -37,6 +37,12 @@ export function BodySection() {
     update((d) => {
       const b = d.blocks[i];
       if (b.type === 'figure') b.caption = caption;
+    });
+
+  const setSpan = (i: number, span: 1 | 'body') =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'figure') b.span = span;
     });
 
   const remove = (i: number) =>
@@ -152,6 +158,15 @@ export function BodySection() {
                 value={b.caption}
                 placeholder="Keterangan gambar (caption)…"
                 onChange={(e) => setCaption(i, e.target.value)}
+              />
+              <SegmentField<1 | 'body'>
+                label="Ukuran"
+                value={b.span}
+                options={[
+                  { value: 1, label: '1 kolom' },
+                  { value: 'body', label: 'Selebar' },
+                ]}
+                onChange={(v) => setSpan(i, v)}
               />
               <button type="button" className="add-btn" onClick={() => replaceImage(i)}>
                 Ganti gambar

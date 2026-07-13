@@ -114,13 +114,20 @@
   margin: 0 0 0.8em;
 }
 
-/* Inline figure: spans all columns so text flows above and below it — never
-   over it. The measuring host renders a same-class placeholder div, so the
-   break is computed against the real displaced height. */
+/* Inline figure: text flows above and below it — never over it. The measuring
+   host renders a same-class placeholder div, so the break is computed against
+   the real displaced height. Full = spans all columns; col = one column wide. */
 .flow-fig {
-  column-span: all;
   margin: 0.2em 0 0.8em;
   break-inside: avoid;
+}
+
+.flow-fig--full {
+  column-span: all;
+}
+
+.flow-fig--col {
+  column-span: none;
 }
 
 .flow-fig img {

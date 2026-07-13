@@ -21,6 +21,7 @@ export function PaperPreview() {
           id: b.id,
           aspect: asset ? asset.naturalHeight / asset.naturalWidth : 0.6,
           hasCaption: b.caption.trim() !== '',
+          full: b.span === 'body',
         };
       }),
     [doc.blocks, doc.assets],

@@ -13,7 +13,7 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
           const asset = doc.assets[block.assetId];
           if (!asset) return null;
           return (
-            <figure className="flow-fig" key={i}>
+            <figure className={`flow-fig ${block.span === 'body' ? 'flow-fig--full' : 'flow-fig--col'}`} key={i}>
               <img src={asset.src} alt="" />
               {block.caption.trim() && <figcaption>{block.caption}</figcaption>}
             </figure>
