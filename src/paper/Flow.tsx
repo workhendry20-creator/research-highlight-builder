@@ -1,5 +1,10 @@
 import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
+import { HighlightsBody } from './Sidebar';
+
+/** Synthetic flow item id: the highlights block when placed below the article.
+ *  It rides the atomic full-width figure machinery so paginate() is untouched. */
+export const HIGHLIGHTS_BLOCK_ID = '__highlights__';
 
 /** Renders a page's pieces into the column flow: paragraphs and full-width
  *  figures. Figures resolve their image/caption from the doc by id. */
@@ -8,6 +13,13 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
     <>
       {pieces.map((pc, i) => {
         if (pc.kind === 'figure') {
+          if (pc.id === HIGHLIGHTS_BLOCK_ID) {
+            return (
+              <aside className="hl-below" key={i}>
+                <HighlightsBody doc={doc} />
+              </aside>
+            );
+          }
           const block = doc.blocks.find((b) => b.id === pc.id);
           if (!block || block.type !== 'figure') return null;
           const asset = doc.assets[block.assetId];

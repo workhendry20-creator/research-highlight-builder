@@ -35,6 +35,12 @@ export interface Design {
   /** Body columns on page 1. Page 2 turns the sidebar slot into a text column. */
   bodyCols: 2 | 3 | 4;
   sidebar: boolean;
+  /**
+   * Where the highlights/references box sits. Absent = 'page1' (v1 files).
+   * 'page1' = right rail, page 1 only. 'all' = right rail on every page.
+   * 'below' = full-width block at the end of the article (in the text flow).
+   */
+  highlightsPlacement?: 'page1' | 'all' | 'below';
   fontDisplay: string;
   fontBody: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
@@ -85,6 +91,7 @@ export const emptyDoc = (): Doc => ({
   design: {
     bodyCols: 3,
     sidebar: true,
+    highlightsPlacement: 'page1',
     fontDisplay: 'Source Serif 4',
     fontBody: 'Source Sans 3',
     colors: { hero: '#0F2A5C', accent: '#C8102E', accentSoft: '#FDE7EA', ink: '#111418' },

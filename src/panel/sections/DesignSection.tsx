@@ -50,10 +50,22 @@ export function DesignSection() {
         onChange={(v) => set('bodyCols', v)}
       />
       <Toggle
-        label="Sidebar (halaman 1)"
+        label="Tampilkan highlights"
         checked={design.sidebar}
         onChange={(v) => set('sidebar', v)}
       />
+      {design.sidebar && (
+        <LabeledSelect
+          label="Posisi highlights"
+          value={design.highlightsPlacement ?? 'page1'}
+          options={[
+            { value: 'page1', label: 'Sidebar kanan (hal. 1)' },
+            { value: 'all', label: 'Sidebar kanan (tiap hal.)' },
+            { value: 'below', label: 'Di bawah teks (akhir)' },
+          ]}
+          onChange={(v) => set('highlightsPlacement', v as Design['highlightsPlacement'])}
+        />
+      )}
       {cpl && <p className="hint hint--warn">{cpl}</p>}
 
       <p className="group-label">Spasi (mm)</p>

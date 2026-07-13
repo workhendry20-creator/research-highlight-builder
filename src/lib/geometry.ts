@@ -9,7 +9,13 @@ export const PAGE_H = 297;
  * Never set a different `column-count` per page — the pages stop looking related.
  */
 export function grid(d: Design) {
-  const totalCols = d.bodyCols + (d.sidebar ? 1 : 0);
+  const placement = d.highlightsPlacement ?? 'page1';
+  // A right rail exists only when the sidebar is on AND not placed below the
+  // text. 'all' repeats that rail on page 2; 'page1' gives page 2 back to text.
+  const rail = d.sidebar && placement !== 'below';
+  const railEvery = rail && placement === 'all';
+
+  const totalCols = d.bodyCols + (rail ? 1 : 0);
   const content = PAGE_W - 2 * d.margin;
   const col = (content - (totalCols - 1) * d.gutter) / totalCols;
   const span = (n: number) => n * col + (n - 1) * d.gutter;
@@ -18,9 +24,14 @@ export function grid(d: Design) {
     totalCols,
     col,
     content,
-    body1: span(d.bodyCols),
-    body2: content,
-    cols2: totalCols,
+    rail,
+    railEvery,
+    // Page 1 body: rail present → bodyCols wide; otherwise full content width.
+    cols1: d.bodyCols,
+    body1: rail ? span(d.bodyCols) : content,
+    // Page 2 body: only 'all' keeps a rail (so bodyCols wide); else full width.
+    cols2: railEvery ? d.bodyCols : totalCols,
+    body2: railEvery ? span(d.bodyCols) : content,
     span,
   };
 }
@@ -37,7 +48,7 @@ export function cssVars(d: Design): Record<string, string> {
     '--body-1': `${g.body1}mm`,
     '--body-2': `${g.body2}mm`,
     '--hero-h': `${d.heroHeight}mm`,
-    '--cols-1': String(d.bodyCols),
+    '--cols-1': String(g.cols1),
     '--cols-2': String(g.cols2),
     '--hero': d.colors.hero,
     '--accent': d.colors.accent,

@@ -4,6 +4,8 @@ import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { Page1 } from './Page1';
 import { Page2 } from './Page2';
+import { HighlightsBody } from './Sidebar';
+import { HIGHLIGHTS_BLOCK_ID } from './Flow';
 
 const EMPTY: Pagination = { page1: [], page2: [], fill: 0, overflow: false, spill: 0 };
 
@@ -38,8 +40,15 @@ export function PaperPreview() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
   const host2Ref = useRef<HTMLDivElement>(null);
+  const hlRef = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
+
+  // Highlights placed below the article become the last item in the text flow.
+  const hlBelow =
+    doc.design.sidebar &&
+    (doc.design.highlightsPlacement ?? 'page1') === 'below' &&
+    (doc.highlights.some((h) => h.trim()) || doc.references.length > 0);
 
   // Preview zoom. 'fit' tracks the pane width (Word's "Page Width"); a number is
   // a manual zoom. Cosmetic only — the sheet scales, the pt/mm sizes do not.
@@ -78,8 +87,18 @@ export function PaperPreview() {
       root.style.setProperty('--footer-h', '10mm');
     }
 
-    setPagination(paginate(h1, h2, items));
-  }, [baseVars, items, doc.meta, doc.design]);
+    // When highlights sit below the article, measure that block at body width
+    // and append it as an atomic full-width item so it paginates like a figure.
+    let flow = items;
+    if (hlBelow && hlRef.current) {
+      const bodyW = h1.clientWidth || 1;
+      flow = [
+        ...items,
+        { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: hlRef.current.offsetHeight / bodyW, hasCaption: false, full: true },
+      ];
+    }
+    setPagination(paginate(h1, h2, flow));
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow]);
 
   const vars = {
     ...baseVars,
@@ -146,6 +165,14 @@ export function PaperPreview() {
         <div className="page">
           <div className="body-cols body-cols--p2" ref={host2Ref} />
         </div>
+        {/* Below-article highlights: measured at body width to size its atom. */}
+        {hlBelow && (
+          <div style={{ width: 'var(--body-1)' }}>
+            <aside className="hl-below" ref={hlRef}>
+              <HighlightsBody doc={doc} />
+            </aside>
+          </div>
+        )}
       </div>
     </div>
   );

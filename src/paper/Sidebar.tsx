@@ -1,10 +1,11 @@
 import type { Doc } from '../schema/document';
 
-export function Sidebar({ doc }: { doc: Doc }) {
+/** The highlights + references content, shared by the right rail (Sidebar) and
+ *  the full-width end-of-article block (HighlightsBody in a .hl-below wrapper). */
+export function HighlightsBody({ doc }: { doc: Doc }) {
   const highlights = doc.highlights.filter((h) => h.trim());
-
   return (
-    <aside className="sidebar">
+    <>
       <h3>Highlights</h3>
       <ul className="highlights">
         {highlights.map((h, i) => (
@@ -24,6 +25,14 @@ export function Sidebar({ doc }: { doc: Doc }) {
           </ol>
         </>
       )}
+    </>
+  );
+}
+
+export function Sidebar({ doc }: { doc: Doc }) {
+  return (
+    <aside className="sidebar">
+      <HighlightsBody doc={doc} />
     </aside>
   );
 }

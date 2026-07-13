@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Doc } from '../schema/document';
 import type { Pagination } from '../lib/paginate';
+import { grid } from '../lib/geometry';
 import { Sidebar } from './Sidebar';
 import { Flow } from './Flow';
 
@@ -13,6 +14,7 @@ interface Props {
 export function Page1({ doc, vars, pagination }: Props) {
   const { meta, hero, design } = doc;
   const heroAsset = hero.assetId ? doc.assets[hero.assetId] : null;
+  const { rail } = grid(design);
 
   return (
     <div className="page" style={vars}>
@@ -38,7 +40,7 @@ export function Page1({ doc, vars, pagination }: Props) {
         <div className="body-cols body-cols--p1">
           <Flow pieces={pagination.page1} doc={doc} />
         </div>
-        {design.sidebar && <Sidebar doc={doc} />}
+        {rail && <Sidebar doc={doc} />}
       </div>
     </div>
   );

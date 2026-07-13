@@ -181,7 +181,29 @@
   font-size: calc(var(--fs-body) * 0.9);
 }
 
-.sidebar h3 {
+/* Highlights placed below the article: a full-width band spanning all columns
+   at the end of the flow. Shares the rail's inner styling via grouped selectors. */
+.hl-below {
+  column-span: all;
+  break-inside: avoid;
+  box-sizing: border-box;
+  margin: 0.2em 0 0.6em;
+  padding: 0 0.9em 0.7em;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  font-family: var(--sans);
+  font-size: calc(var(--fs-body) * 0.9);
+}
+
+/* The lists flow in two columns inside the wide band so it stays short. */
+.hl-below ul.highlights,
+.hl-below ol.references {
+  columns: 2;
+  column-gap: var(--gutter);
+}
+
+.sidebar h3,
+.hl-below h3 {
   margin: 0.6em 0 0.3em;
   font-size: calc(var(--fs-eyebrow) + 1pt);
   text-transform: uppercase;
@@ -189,23 +211,27 @@
   color: var(--accent);
 }
 
-.sidebar ul.highlights {
+.sidebar ul.highlights,
+.hl-below ul.highlights {
   margin: 0;
   padding-left: 1.1em;
 }
 
-.sidebar ul.highlights li {
+.sidebar ul.highlights li,
+.hl-below ul.highlights li {
   margin-bottom: 0.5em;
 }
 
-.sidebar ol.references {
+.sidebar ol.references,
+.hl-below ol.references {
   margin: 0;
   padding-left: 1.1em;
   font-size: calc(var(--fs-body) * 0.75);
   line-height: 1.3;
 }
 
-.sidebar ol.references li {
+.sidebar ol.references li,
+.hl-below ol.references li {
   margin-bottom: 0.5em;
 }
 
