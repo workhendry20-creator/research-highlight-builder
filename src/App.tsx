@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDoc } from './store/useDoc';
+import { hydrate, startAutosave } from './store/persist';
 import { Toolbar } from './panel/Toolbar';
 import { Panel } from './panel/Panel';
 import { PaperPreview } from './paper/PaperPreview';
@@ -8,16 +9,33 @@ import './styles/page.css';
 import './styles/panel.css';
 
 export default function App() {
-  const load = useDoc((s) => s.load);
+  const [ready, setReady] = useState(false);
 
-  // Seed a real highlight the first time, only when the doc is truly empty.
+  // Restore the last session, then keep mirroring edits to IndexedDB. Seed a
+  // real highlight only on a genuinely empty first run. The `ready` gate avoids
+  // flashing the sample before a stored doc loads.
   useEffect(() => {
-    const { doc } = useDoc.getState();
-    const blank =
-      !doc.meta.title && doc.blocks.every((b) => b.type !== 'paragraph' || !b.text.trim());
-    if (blank) load(sampleDoc());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let stop = () => {};
+    let cancelled = false;
+    (async () => {
+      const result = await hydrate();
+      if (cancelled) return;
+      if (result === 'empty') {
+        const { doc, load } = useDoc.getState();
+        const blank =
+          !doc.meta.title && doc.blocks.every((b) => b.type !== 'paragraph' || !b.text.trim());
+        if (blank) load(sampleDoc());
+      }
+      stop = startAutosave();
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+      stop();
+    };
   }, []);
+
+  if (!ready) return <div className="app" />;
 
   return (
     <div className="app">
