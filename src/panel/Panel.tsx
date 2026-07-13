@@ -1,4 +1,5 @@
 import { MetaSection } from './sections/MetaSection';
+import { HeroSection } from './sections/HeroSection';
 import { BodySection } from './sections/BodySection';
 import { HighlightsSection } from './sections/HighlightsSection';
 import { ReferencesSection } from './sections/ReferencesSection';
@@ -12,6 +13,7 @@ export function Panel() {
         <p className="panel-sub">USM School of Physics</p>
       </header>
       <MetaSection />
+      <HeroSection />
       <BodySection />
       <HighlightsSection />
       <ReferencesSection />

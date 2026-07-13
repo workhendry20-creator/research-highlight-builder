@@ -185,6 +185,57 @@
   border-color: #C8102E;
 }
 
+/* ---- Hero image ----------------------------------------------------------- */
+
+.hero-thumb {
+  position: relative;
+  width: 100%;
+  max-height: 160px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0f2a5c;
+}
+
+.hero-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.hero-actions .add-btn {
+  flex: 1;
+}
+
+.hero-actions .icon-btn {
+  width: 34px;
+  flex: 0 0 auto;
+}
+
+.hero-upload {
+  padding: 22px 8px;
+  margin-bottom: 12px;
+}
+
+.range-label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.range-input {
+  width: 100%;
+  accent-color: #C8102E;
+  cursor: pointer;
+}
+
 /* ---- Design controls ------------------------------------------------------ */
 
 .group-label {

@@ -59,7 +59,6 @@ export function DesignSection() {
       <p className="group-label">Spasi (mm)</p>
       <LabeledNumber label="Margin" unit="mm" value={design.margin} min={8} max={30} step={1} onChange={(v) => set('margin', v)} />
       <LabeledNumber label="Gutter" unit="mm" value={design.gutter} min={2} max={12} step={0.5} onChange={(v) => set('gutter', v)} />
-      <LabeledNumber label="Tinggi hero" unit="mm" value={design.heroHeight} min={0} max={160} step={1} onChange={(v) => set('heroHeight', v)} />
 
       <p className="group-label">Ukuran huruf (pt)</p>
       <LabeledNumber label="Judul" unit="pt" value={design.sizes.title} min={16} max={48} step={0.5} onChange={setSize('title')} />

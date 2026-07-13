@@ -69,6 +69,34 @@ export function LabeledNumber({ label, value, onChange, min, max, step, unit }: 
   );
 }
 
+export function LabeledRange({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  format,
+}: NumberProps & { format?: (v: number) => string }) {
+  return (
+    <label className="field">
+      <span className="field-label range-label">
+        {label}
+        <span className="field-unit">{format ? format(value) : value}</span>
+      </span>
+      <input
+        className="range-input"
+        type="range"
+        value={value}
+        min={min}
+        max={max}
+        step={step ?? 1}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+    </label>
+  );
+}
+
 export function LabeledColor({ label, value, onChange }: LabeledProps) {
   return (
     <label className="field field--inline">
