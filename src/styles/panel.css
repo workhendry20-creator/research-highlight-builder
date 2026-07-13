@@ -1,3 +1,33 @@
+/* Editor chrome only — the A4 paper (page.css) is the author's own design and
+   is never restyled here. One coherent token ramp, neutrals biased slightly
+   cool toward the navy identity, crimson as the single accent. */
+:root {
+  --ink: #14181f;
+  --ink-2: #3d434f;
+  --muted: #69707d;
+  --faint: #969ca8;
+
+  --surface: #ffffff;
+  --field: #f6f7f9;
+  --field-hover: #f0f2f5;
+  --line: #e7e9ee;
+  --line-soft: #eef0f4;
+
+  --navy: #0f2a5c;
+  --accent: #c8102e;
+  --accent-strong: #a50d26;
+  --accent-soft: #fde7ea;
+
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 11px;
+  --pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(20, 24, 31, 0.06);
+  --shadow: 0 1px 3px rgba(20, 24, 31, 0.08), 0 8px 24px rgba(20, 24, 31, 0.06);
+  --ring: 0 0 0 3px rgba(200, 16, 46, 0.14);
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -19,15 +49,16 @@
   align-items: center;
   gap: 16px;
   flex: 0 0 auto;
-  padding: 8px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e2e3e7;
+  padding: 10px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
 }
 
 .toolbar-brand {
   font-size: 13px;
   font-weight: 650;
-  color: #111418;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 .toolbar-spacer {
@@ -43,16 +74,18 @@
   padding: 6px 12px;
   font: inherit;
   font-size: 13px;
-  color: #1b1d22;
-  background: #fff;
-  border: 1px solid #d3d5da;
-  border-radius: 6px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, opacity 0.12s;
 }
 
 .tool-btn:hover:not(:disabled) {
-  background: #f1f2f4;
+  background: var(--field-hover);
+  border-color: #dcdfe5;
 }
 
 .tool-btn:disabled {
@@ -62,12 +95,25 @@
 
 .tool-btn--primary {
   color: #fff;
-  background: #C8102E;
-  border-color: #C8102E;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .tool-btn--primary:hover:not(:disabled) {
-  background: #a50d26;
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.tool-btn:focus-visible,
+.icon-btn:focus-visible,
+.panel-tab:focus-visible,
+.segment-btn:focus-visible,
+.add-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
 }
 
 /* ---- Left editor panel ---------------------------------------------------- */
@@ -76,43 +122,127 @@
   flex: 0 0 380px;
   max-width: 380px;
   height: 100%;
-  overflow-y: auto;
-  background: #fff;
-  border-right: 1px solid #e2e3e7;
-  padding: 20px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
 }
 
 .panel-head {
-  margin-bottom: 8px;
+  padding: 18px 20px 12px;
 }
 
 .panel-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
-  color: #111418;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 .panel-sub {
-  margin: 2px 0 0;
+  margin: 3px 0 0;
   font-size: 12px;
-  color: #8a8f98;
+  color: var(--faint);
+}
+
+/* ---- Tabs: one section at a time keeps the writing surface calm ----------- */
+
+.panel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-tab {
+  flex: 1;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 10px 4px 11px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.12s;
+}
+
+.panel-tab:hover {
+  color: var(--ink);
+}
+
+.panel-tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.panel-tab-ico {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.panel-tab .badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--faint);
+  border-radius: var(--pill);
+  padding: 0 5px;
+  line-height: 15px;
+  min-width: 15px;
+  text-align: center;
+}
+
+.panel-tab.is-active .badge {
+  background: var(--accent);
+}
+
+.panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 20px 60px;
+  scrollbar-width: thin;
+  scrollbar-color: #d5d8de transparent;
+}
+
+.panel-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.panel-scroll::-webkit-scrollbar-thumb {
+  background: #d5d8de;
+  border: 3px solid var(--surface);
+  border-radius: var(--pill);
 }
 
 /* ---- Sections ------------------------------------------------------------- */
 
 .section {
   padding: 18px 0;
-  border-top: 1px solid #eceef1;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* First section in a tab sits right under the tab bar — no double rule. */
+.panel-scroll > .section:first-child {
+  border-top: 0;
 }
 
 .section-title {
-  margin: 0 0 12px;
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: 0.06em;
+  margin: 0 0 14px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--faint);
 }
 
 /* ---- Fields --------------------------------------------------------------- */
@@ -124,33 +254,54 @@
 
 .field-label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
   font-size: 12px;
   font-weight: 550;
-  color: #4b5563;
+  color: var(--ink-2);
 }
 
 .field-input {
   width: 100%;
-  padding: 7px 9px;
+  padding: 8px 11px;
   font: inherit;
   font-size: 13px;
-  color: #111418;
-  background: #fff;
-  border: 1px solid #d3d5da;
-  border-radius: 6px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   outline: none;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+
+.field-input::placeholder {
+  color: var(--faint);
+}
+
+.field-input:hover {
+  border-color: #dcdfe5;
 }
 
 .field-input:focus {
-  border-color: #C8102E;
-  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: var(--ring);
 }
 
 .field-textarea {
   resize: vertical;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+/* The writing surface itself: roomier type, grows with the text (JS-driven),
+   so paragraphs never type into a cramped, inner-scrolling box. */
+.field-textarea--grow {
+  resize: none;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 11px 13px;
+  border-radius: var(--radius-lg);
+  min-height: 46px;
 }
 
 /* ---- List items (paragraphs, highlights, references) ---------------------- */
@@ -171,9 +322,9 @@
   gap: 0;
   padding: 12px;
   margin-bottom: 12px;
-  background: #f8f9fa;
-  border: 1px solid #eceef1;
-  border-radius: 8px;
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
 }
 
 .list-item-head {
@@ -186,7 +337,7 @@
 .list-item-num {
   font-size: 12px;
   font-weight: 650;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 /* ---- Buttons -------------------------------------------------------------- */
@@ -202,23 +353,24 @@
 }
 
 .icon-btn {
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   line-height: 1;
-  color: #4b5563;
-  background: #fff;
-  border: 1px solid #d3d5da;
-  border-radius: 6px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
 .icon-btn:hover:not(:disabled) {
-  background: #f1f2f4;
+  background: var(--field-hover);
+  color: var(--ink);
 }
 
 .icon-btn:disabled {
@@ -227,36 +379,36 @@
 }
 
 .icon-btn--danger:hover {
-  color: #C8102E;
-  border-color: #C8102E;
-  background: #fde7ea;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .add-btn {
   width: 100%;
-  padding: 8px;
+  padding: 9px;
   font: inherit;
   font-size: 13px;
   font-weight: 550;
-  color: #C8102E;
-  background: #fff;
-  border: 1px dashed #d3d5da;
-  border-radius: 6px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px dashed #d6d9e0;
+  border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s;
 }
 
 .add-btn:hover {
-  background: #fde7ea;
-  border-color: #C8102E;
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 /* ---- Body blocks: drag handle + figure editor ----------------------------- */
 
 .list-item.is-drop {
-  outline: 2px dashed #C8102E;
+  outline: 2px dashed var(--accent);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .drag-handle {
@@ -265,10 +417,15 @@
   display: flex;
   align-items: center;
   padding: 0 2px;
-  color: #b7bcc4;
+  color: #c2c7cf;
   font-size: 15px;
   cursor: grab;
   user-select: none;
+  transition: color 0.12s;
+}
+
+.drag-handle:hover {
+  color: var(--muted);
 }
 
 .drag-handle:active {
@@ -279,7 +436,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .figure-thumb {
@@ -290,8 +447,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 6px;
-  background: #eceef1;
+  border-radius: var(--radius);
+  background: var(--line-soft);
 }
 
 .figure-thumb img {
@@ -303,7 +460,7 @@
 
 .figure-missing {
   font-size: 12px;
-  color: #9096a0;
+  color: var(--faint);
 }
 
 .add-row {
@@ -323,8 +480,8 @@
   max-height: 160px;
   margin-bottom: 8px;
   overflow: hidden;
-  border-radius: 8px;
-  background: #0f2a5c;
+  border-radius: var(--radius-lg);
+  background: var(--navy);
 }
 
 .hero-thumb img {
@@ -362,17 +519,18 @@
 
 .range-input {
   width: 100%;
-  accent-color: #C8102E;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
 /* ---- Design controls ------------------------------------------------------ */
 
 .group-label {
-  margin: 16px 0 8px;
+  margin: 18px 0 9px;
   font-size: 11px;
   font-weight: 600;
-  color: #9096a0;
+  letter-spacing: 0.02em;
+  color: var(--faint);
 }
 
 .group-label:first-child {
@@ -384,7 +542,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 9px;
 }
 
 .field--inline .field-label {
@@ -393,7 +551,7 @@
 }
 
 .field-unit {
-  color: #9096a0;
+  color: var(--faint);
   font-weight: 400;
 }
 
@@ -410,7 +568,7 @@
 .toggle input[type='checkbox'] {
   width: 16px;
   height: 16px;
-  accent-color: #C8102E;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
@@ -422,10 +580,10 @@
 
 .color-input input[type='color'] {
   width: 30px;
-  height: 26px;
+  height: 27px;
   padding: 0;
-  border: 1px solid #d3d5da;
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   background: none;
   cursor: pointer;
 }
@@ -438,36 +596,43 @@
 
 .segment {
   display: inline-flex;
-  border: 1px solid #d3d5da;
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
+  background: var(--field);
 }
 
 .segment-btn {
   min-width: 34px;
-  padding: 6px 10px;
+  padding: 6px 11px;
   font: inherit;
   font-size: 13px;
-  color: #4b5563;
-  background: #fff;
+  color: var(--muted);
+  background: transparent;
   border: none;
-  border-left: 1px solid #d3d5da;
+  border-left: 1px solid var(--line);
   cursor: pointer;
+  transition: background 0.12s, color 0.12s;
 }
 
 .segment-btn:first-child {
   border-left: none;
 }
 
+.segment-btn:hover:not(.is-active) {
+  color: var(--ink);
+  background: var(--field-hover);
+}
+
 .segment-btn.is-active {
   color: #fff;
-  background: #C8102E;
+  background: var(--accent);
 }
 
 .hint {
   margin: 0 0 10px;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .hint--warn {
