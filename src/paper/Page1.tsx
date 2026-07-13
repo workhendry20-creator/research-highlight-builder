@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { Doc } from '../schema/document';
 import type { Pagination } from '../lib/paginate';
 import { Sidebar } from './Sidebar';
+import { Flow } from './Flow';
 
 interface Props {
   doc: Doc;
@@ -35,9 +36,7 @@ export function Page1({ doc, vars, pagination }: Props) {
       </header>
       <div className="body-row">
         <div className="body-cols body-cols--p1">
-          {pagination.page1.map((p, i) => (
-            <p key={i}>{p.text}</p>
-          ))}
+          <Flow pieces={pagination.page1} doc={doc} />
         </div>
         {design.sidebar && <Sidebar doc={doc} />}
       </div>

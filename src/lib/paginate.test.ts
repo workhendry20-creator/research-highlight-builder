@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { paginate } from './paginate';
+import { paginate, type FlowItem } from './paginate';
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
+const text = (t: string): FlowItem => ({ kind: 'text', text: t });
 
 const budgetOverflow = (budget: number) => (el: HTMLElement) => (el.textContent?.length ?? 0) > budget;
 
@@ -21,12 +22,39 @@ describe('paginate', () => {
     const host1 = document.createElement('div');
     const host2 = document.createElement('div');
 
-    const result = paginate(host1, host2, paragraphs, isOverflowing);
+    const result = paginate(host1, host2, paragraphs.map(text), isOverflowing);
 
     const originalWords = paragraphs.flatMap(words);
-    const producedWords = [...result.page1, ...result.page2].flatMap((p) => words(p.text));
+    const producedWords = [...result.page1, ...result.page2]
+      .filter((p): p is { kind: 'text'; text: string; cont?: boolean } => p.kind === 'text')
+      .flatMap((p) => words(p.text));
     expect(producedWords).toEqual(originalWords);
 
-    expect(result.page2[0]?.cont).toBe(true);
+    expect(result.page2[0]?.kind).toBe('text');
+    expect((result.page2[0] as { cont?: boolean }).cont).toBe(true);
+  });
+
+  it('never splits a figure — a straddling figure moves whole to page 2', () => {
+    const items: FlowItem[] = [
+      text('Alpha bravo charlie delta echo foxtrot.'),
+      { kind: 'figure', id: 'fig-1', aspect: 0.6, hasCaption: true },
+      text('Golf hotel india juliet kilo lima.'),
+    ];
+
+    // jsdom has no layout, so a figure adds no textContent. Model its height by
+    // counting the placeholder divs paginate paints. Budget of 500 fits the
+    // first paragraph (~39 chars) but not once the figure's 1000 lands.
+    const isOverflowing = (el: HTMLElement) =>
+      (el.textContent?.length ?? 0) + el.querySelectorAll('.flow-fig').length * 1000 > 500;
+
+    const host1 = document.createElement('div');
+    const host2 = document.createElement('div');
+    const result = paginate(host1, host2, items, isOverflowing);
+
+    const figures = [...result.page1, ...result.page2].filter((p) => p.kind === 'figure');
+    expect(figures).toEqual([{ kind: 'figure', id: 'fig-1' }]);
+    // The figure is atomic: it appears exactly once and is never on both pages.
+    expect(result.page1.some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(false);
+    expect(result.page2.some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(true);
   });
 });
