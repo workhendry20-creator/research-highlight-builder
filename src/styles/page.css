@@ -32,7 +32,6 @@
   font-family: var(--sans);
   overflow: hidden;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  break-after: page;
 }
 
 .hero {
@@ -260,6 +259,25 @@
   .page {
     box-shadow: none;
     margin: 0;
+    /* Force the sheet to exactly one printed A4, no matter the printer's
+       reported printable area. */
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Page break only BETWEEN sheets — never a trailing blank page after the
+     last one. */
+  .page + .page {
+    break-before: page;
+  }
+
+  /* The hidden measuring rig must not reach the printer — its fixed position
+     otherwise adds width and stray pages. */
+  .measure-root {
+    display: none !important;
   }
 
   .fit-badge {
