@@ -15,7 +15,9 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
           return (
             <figure className={`flow-fig ${block.span === 'body' ? 'flow-fig--full' : 'flow-fig--col'}`} key={i}>
               <img src={asset.src} alt="" />
-              {block.caption.trim() && <figcaption>{block.caption}</figcaption>}
+              {block.caption.trim() && (
+                <figcaption style={{ textAlign: block.align ?? 'left' }}>{block.caption}</figcaption>
+              )}
             </figure>
           );
         }

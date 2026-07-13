@@ -45,6 +45,12 @@ export function BodySection() {
       if (b.type === 'figure') b.span = span;
     });
 
+  const setAlign = (i: number, align: 'left' | 'center' | 'right') =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'figure') b.align = align;
+    });
+
   const remove = (i: number) =>
     update((d) => {
       const [b] = d.blocks.splice(i, 1);
@@ -88,7 +94,7 @@ export function BodySection() {
   const addImage = () =>
     pickImage((file) =>
       readAsset(file, (aid, d) => {
-        d.blocks.push({ id: uid(), type: 'figure', assetId: aid, caption: '', span: 'body' });
+        d.blocks.push({ id: uid(), type: 'figure', assetId: aid, caption: '', span: 'body', align: 'left' });
       }),
     );
 
@@ -158,6 +164,16 @@ export function BodySection() {
                 value={b.caption}
                 placeholder="Keterangan gambar (caption)…"
                 onChange={(e) => setCaption(i, e.target.value)}
+              />
+              <SegmentField<'left' | 'center' | 'right'>
+                label="Rata caption"
+                value={b.align ?? 'left'}
+                options={[
+                  { value: 'left', label: 'Kiri' },
+                  { value: 'center', label: 'Tengah' },
+                  { value: 'right', label: 'Kanan' },
+                ]}
+                onChange={(v) => setAlign(i, v)}
               />
               <SegmentField<1 | 'body'>
                 label="Ukuran"

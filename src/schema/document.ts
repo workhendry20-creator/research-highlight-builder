@@ -10,6 +10,8 @@ export type Block =
       caption: string;
       /** 1 = one column wide, 'body' = full body width. No free dragging. */
       span: 1 | 'body';
+      /** Caption text alignment. Absent = left (back-compat with v1 files). */
+      align?: 'left' | 'center' | 'right';
     };
 
 export interface Asset {
