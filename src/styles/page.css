@@ -1,5 +1,6 @@
 @page {
-  size: A4;
+  /* Lock to portrait A4 so the print dialog can't switch it to landscape. */
+  size: A4 portrait;
   margin: 0;
 }
 
@@ -260,14 +261,14 @@
     box-shadow: none;
     margin: 0;
     width: 210mm;
-    height: 297mm;
+    /* A hair under A4 (297mm). At exactly 297mm the browser — Safari especially,
+       which ignores break-inside — fragments the sheet and shoves the body row
+       onto the next page. The real content ends at the 281mm padding edge, so
+       this only trims 1mm of empty bottom padding. */
+    height: 296mm;
     overflow: hidden;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-    /* Keep each sheet whole. Without this the 297mm page is a hair taller than
-       the printable area, so the browser fragments it — the top prints, the
-       rest (body columns + sidebar) is clipped by overflow:hidden and lands as
-       a blank page. */
     break-inside: avoid;
     page-break-inside: avoid;
   }
