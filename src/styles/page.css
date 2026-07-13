@@ -259,13 +259,17 @@
   .page {
     box-shadow: none;
     margin: 0;
-    /* Force the sheet to exactly one printed A4, no matter the printer's
-       reported printable area. */
     width: 210mm;
     height: 297mm;
     overflow: hidden;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+    /* Keep each sheet whole. Without this the 297mm page is a hair taller than
+       the printable area, so the browser fragments it — the top prints, the
+       rest (body columns + sidebar) is clipped by overflow:hidden and lands as
+       a blank page. */
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   /* Page break only BETWEEN sheets — never a trailing blank page after the
