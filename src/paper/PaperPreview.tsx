@@ -1,11 +1,19 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDoc } from '../store/useDoc';
-import { cssVars } from '../lib/geometry';
+import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { Page1 } from './Page1';
 import { Page2 } from './Page2';
 
 const EMPTY: Pagination = { page1: [], page2: [], fill: 0, overflow: false, spill: 0 };
+
+// A4 in CSS px at the reference 96dpi (1mm = 96/25.4 px). Preview-only: used to
+// size the zoom frame, never for layout/pagination (those stay in mm/pt).
+const MM_PX = 96 / 25.4;
+const PAGE_W_PX = PAGE_W * MM_PX;
+const PAGE_H_PX = PAGE_H * MM_PX;
+const PAGE_GAP_PX = 20; // .page bottom margin
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 export function PaperPreview() {
   const doc = useDoc((s) => s.doc);
@@ -32,6 +40,24 @@ export function PaperPreview() {
   const host2Ref = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
+
+  // Preview zoom. 'fit' tracks the pane width (Word's "Page Width"); a number is
+  // a manual zoom. Cosmetic only — the sheet scales, the pt/mm sizes do not.
+  const [zoom, setZoom] = useState<number | 'fit'>('fit');
+  const [fitScale, setFitScale] = useState(1);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const measure = () => {
+      const avail = el.clientWidth - 40; // .paper-scroll padding (20px each side)
+      setFitScale(clamp(avail / PAGE_W_PX, 0.25, 1)); // cap 1: fit only shrinks
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // The two body boxes are sized off --header-h / --footer-h, which we only know
   // after the real header paints. Measure it, feed the measuring hosts the same
@@ -64,14 +90,53 @@ export function PaperPreview() {
   const fit = fitMessage(pagination);
   const hasPage2 = pagination.page2.length > 0;
 
+  const scale = zoom === 'fit' ? fitScale : zoom;
+  const pct = Math.round(scale * 100);
+  const nPages = hasPage2 ? 2 : 1;
+  const frame = {
+    width: PAGE_W_PX * scale,
+    height: nPages * (PAGE_H_PX + PAGE_GAP_PX) * scale,
+  };
+  const step = (d: number) => setZoom(clamp(Math.round((scale + d) * 100) / 100, 0.25, 2));
+
   return (
     <div className="paper-scroll" ref={scrollRef}>
       {/* Escape hatch — raw CSS from the design panel, scoped by author intent. */}
       {doc.design.customCss && <style>{doc.design.customCss}</style>}
-      <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
 
-      <Page1 doc={doc} vars={vars} pagination={pagination} />
-      {hasPage2 && <Page2 doc={doc} vars={vars} pagination={pagination} />}
+      <div className="preview-bar">
+        <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
+        <div className="zoom-bar">
+          <button
+            type="button"
+            className={`zoom-btn${zoom === 'fit' ? ' is-active' : ''}`}
+            onClick={() => setZoom('fit')}
+          >
+            Fit
+          </button>
+          <button type="button" className="zoom-btn" onClick={() => step(-0.1)} title="Perkecil">
+            −
+          </button>
+          <span className="zoom-val">{pct}%</span>
+          <button type="button" className="zoom-btn" onClick={() => step(0.1)} title="Perbesar">
+            +
+          </button>
+          <button
+            type="button"
+            className={`zoom-btn${zoom === 1 ? ' is-active' : ''}`}
+            onClick={() => setZoom(1)}
+          >
+            100%
+          </button>
+        </div>
+      </div>
+
+      <div className="pages-frame" style={frame}>
+        <div className="pages" style={{ transform: `scale(${scale})` }}>
+          <Page1 doc={doc} vars={vars} pagination={pagination} />
+          {hasPage2 && <Page2 doc={doc} vars={vars} pagination={pagination} />}
+        </div>
+      </div>
 
       {/* Hidden measuring rig — same box as the real body columns. */}
       <div className="measure-root" style={vars} aria-hidden>

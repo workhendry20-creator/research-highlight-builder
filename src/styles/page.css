@@ -241,6 +241,71 @@
   color: #a3242f;
 }
 
+/* Preview-only zoom. The pt/mm sizes stay physically correct (export prints at
+   true A4); this only scales how big the sheet looks on screen — like Word's
+   zoom. transform (not `zoom`) so offsetHeight stays layout-true and pagination
+   is unaffected; the frame carries the scaled footprint so scrollbars track. */
+.preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.preview-bar .fit-badge {
+  margin-bottom: 0;
+}
+
+.zoom-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.zoom-btn {
+  border: 0;
+  background: none;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font: 11px/1 system-ui, sans-serif;
+  color: #333;
+  cursor: pointer;
+}
+
+.zoom-btn:hover {
+  background: #eee;
+}
+
+.zoom-btn.is-active {
+  background: #111418;
+  color: #fff;
+}
+
+.zoom-val {
+  min-width: 46px;
+  text-align: center;
+  font: 11px/1 system-ui, sans-serif;
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.pages-frame {
+  margin: 0 auto;
+}
+
+.pages {
+  width: var(--page-w);
+  transform-origin: top left;
+}
+
 .measure-root {
   position: fixed;
   top: 0;
@@ -285,7 +350,19 @@
     display: none !important;
   }
 
-  .fit-badge {
+  .preview-bar {
     display: none;
+  }
+
+  /* Zoom is a screen-only affordance — print at true A4. */
+  .pages-frame {
+    width: auto !important;
+    height: auto !important;
+    margin: 0;
+  }
+
+  .pages {
+    width: auto !important;
+    transform: none !important;
   }
 }
