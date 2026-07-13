@@ -4,6 +4,10 @@
 }
 
 .paper-scroll {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
   background: #e5e5e5;
   display: flex;
   flex-direction: column;
@@ -17,6 +21,7 @@
 .page {
   position: relative;
   box-sizing: border-box;
+  text-align: left;
   width: var(--page-w);
   height: var(--page-h);
   padding: var(--margin);
