@@ -58,6 +58,8 @@ export function PaperPreview() {
 
   return (
     <div className="paper-scroll" ref={scrollRef}>
+      {/* Escape hatch — raw CSS from the design panel, scoped by author intent. */}
+      {doc.design.customCss && <style>{doc.design.customCss}</style>}
       <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
 
       <Page1 doc={doc} vars={vars} pagination={pagination} />

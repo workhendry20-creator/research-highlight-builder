@@ -2,6 +2,7 @@ import { MetaSection } from './sections/MetaSection';
 import { BodySection } from './sections/BodySection';
 import { HighlightsSection } from './sections/HighlightsSection';
 import { ReferencesSection } from './sections/ReferencesSection';
+import { DesignSection } from './sections/DesignSection';
 
 export function Panel() {
   return (
@@ -14,6 +15,7 @@ export function Panel() {
       <BodySection />
       <HighlightsSection />
       <ReferencesSection />
+      <DesignSection />
     </aside>
   );
 }

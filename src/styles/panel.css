@@ -185,6 +185,114 @@
   border-color: #C8102E;
 }
 
+/* ---- Design controls ------------------------------------------------------ */
+
+.group-label {
+  margin: 16px 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9096a0;
+}
+
+.group-label:first-child {
+  margin-top: 0;
+}
+
+.field--inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.field--inline .field-label {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.field-unit {
+  color: #9096a0;
+  font-weight: 400;
+}
+
+.field-input--num {
+  width: 84px;
+  flex: 0 0 auto;
+}
+
+.field--inline select.field-input {
+  width: 150px;
+  flex: 0 0 auto;
+}
+
+.toggle input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #C8102E;
+  cursor: pointer;
+}
+
+.color-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-input input[type='color'] {
+  width: 30px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d3d5da;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.field-input--hex {
+  width: 92px;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.segment {
+  display: inline-flex;
+  border: 1px solid #d3d5da;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segment-btn {
+  min-width: 34px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: #4b5563;
+  background: #fff;
+  border: none;
+  border-left: 1px solid #d3d5da;
+  cursor: pointer;
+}
+
+.segment-btn:first-child {
+  border-left: none;
+}
+
+.segment-btn.is-active {
+  color: #fff;
+  background: #C8102E;
+}
+
+.hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.hint--warn {
+  color: #94660a;
+}
+
 /* ---- Print: panel disappears, only the paper prints ----------------------- */
 
 @media print {
