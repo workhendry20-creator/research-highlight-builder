@@ -39,8 +39,10 @@ export interface Design {
    * Where the highlights/references box sits. Absent = 'page1' (v1 files).
    * 'page1' = right rail, page 1 only. 'all' = right rail on every page.
    * 'below' = full-width block at the end of the article (in the text flow).
+   * 'page1-flow' = single-column box at the end of the page-1 body flow, so
+   *   body text fills the gap above it (col 4 top) before spilling to page 2.
    */
-  highlightsPlacement?: 'page1' | 'all' | 'below';
+  highlightsPlacement?: 'page1' | 'all' | 'below' | 'page1-flow';
   fontDisplay: string;
   fontBody: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };

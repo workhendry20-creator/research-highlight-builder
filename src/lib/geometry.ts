@@ -10,12 +10,18 @@ export const PAGE_H = 297;
  */
 export function grid(d: Design) {
   const placement = d.highlightsPlacement ?? 'page1';
-  // A right rail exists only when the sidebar is on AND not placed below the
-  // text. 'all' repeats that rail on page 2; 'page1' gives page 2 back to text.
-  const rail = d.sidebar && placement !== 'below';
+  // A right rail is a *separate* sidebar column: sidebar on, and placement is
+  // 'page1' or 'all'. 'all' repeats it on page 2; 'page1' gives page 2 to text.
+  const rail = d.sidebar && (placement === 'page1' || placement === 'all');
   const railEvery = rail && placement === 'all';
+  // 'page1-flow': no separate rail — the highlights box rides the page-1 body
+  // flow as a one-column atom, so text fills the gap above it before spilling.
+  const flow = d.sidebar && placement === 'page1-flow';
+  // Either way the highlights consume one grid column, so the column width
+  // stays identical to 'page1'. (The invariant: same col width on every page.)
+  const extraCol = rail || flow;
 
-  const totalCols = d.bodyCols + (rail ? 1 : 0);
+  const totalCols = d.bodyCols + (extraCol ? 1 : 0);
   const content = PAGE_W - 2 * d.margin;
   const col = (content - (totalCols - 1) * d.gutter) / totalCols;
   const span = (n: number) => n * col + (n - 1) * d.gutter;
@@ -26,8 +32,10 @@ export function grid(d: Design) {
     content,
     rail,
     railEvery,
-    // Page 1 body: rail present → bodyCols wide; otherwise full content width.
-    cols1: d.bodyCols,
+    flow,
+    // Page 1 body: separate rail → bodyCols wide; flow → all columns (the box
+    // rides the flow); otherwise full content width.
+    cols1: flow ? totalCols : d.bodyCols,
     body1: rail ? span(d.bodyCols) : content,
     // Page 2 body: only 'all' keeps a rail (so bodyCols wide); else full width.
     cols2: railEvery ? d.bodyCols : totalCols,

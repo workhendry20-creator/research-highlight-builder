@@ -60,6 +60,7 @@ export function DesignSection() {
           value={design.highlightsPlacement ?? 'page1'}
           options={[
             { value: 'page1', label: 'Sidebar kanan (hal. 1)' },
+            { value: 'page1-flow', label: 'Sidebar kanan + teks isi celah (hal. 1)' },
             { value: 'all', label: 'Sidebar kanan (tiap hal.)' },
             { value: 'below', label: 'Di bawah teks (akhir)' },
           ]}

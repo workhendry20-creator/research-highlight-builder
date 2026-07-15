@@ -29,13 +29,12 @@ export type Piece =
   | { kind: 'figure'; id: string };
 
 export interface Pagination {
-  page1: Piece[];
-  page2: Piece[];
-  /** 0..1 — how much of page 2 is used. Drives the "cut N words" nudge. */
+  /** pages[0] = page-1 geometry (hero + header). pages[1..] = continuation pages,
+   *  all sharing the same taller box. As many pages as the text needs. */
+  pages: Piece[][];
+  /** 0..1 — how full the LAST page is. Drives the fit nudge. */
   fill: number;
-  /** content exceeds two pages */
-  overflow: boolean;
-  /** words currently living on page 2 */
+  /** words living beyond page 1 (for the fit message) */
   spill: number;
 }
 
@@ -75,8 +74,62 @@ function paint(el: HTMLElement, items: PaintItem[]) {
 }
 
 /**
- * `host1` / `host2` are hidden measuring nodes with the SAME box as the real
- * body containers. Never measure the visible DOM — React will fight you.
+ * Fill one page box `host` with as many items as fit, splitting the straddling
+ * paragraph at a word boundary (figures stay atomic). Returns what landed on the
+ * page and what spills past it. This is the single break point — `paginate` just
+ * calls it once per page.
+ */
+function fillOne(
+  host: HTMLElement,
+  src: PaintItem[],
+  isOverflowing: (el: HTMLElement) => boolean,
+): { placed: PaintItem[]; rest: PaintItem[] } {
+  paint(host, src);
+  if (!isOverflowing(host)) return { placed: src, rest: [] };
+
+  let n = src.length;
+  while (n > 0) {
+    n--;
+    paint(host, src.slice(0, n));
+    if (!isOverflowing(host)) break;
+  }
+
+  const straddle = src[n];
+
+  if (straddle.kind === 'figure') {
+    // Atomic: the figure can't split, so it starts the next page.
+    return { placed: src.slice(0, n), rest: src.slice(n) };
+  }
+
+  // Binary-search the word boundary: ~10 iterations, all inside one JS task,
+  // so no intermediate paint survives and no flicker.
+  const w = words(straddle.text);
+  let lo = 0,
+    hi = w.length,
+    best = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    paint(host, [...src.slice(0, n), { kind: 'text', text: w.slice(0, mid).join(' ') }]);
+    if (!isOverflowing(host)) {
+      best = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  const head = w.slice(0, best).join(' ');
+  const tail = w.slice(best).join(' ');
+  return {
+    placed: [...src.slice(0, n), ...(head ? [{ kind: 'text' as const, text: head }] : [])],
+    rest: [
+      ...(tail ? [{ kind: 'text' as const, text: tail, cont: Boolean(head) }] : []),
+      ...src.slice(n + 1),
+    ],
+  };
+}
+
+/**
+ * `host1` is the hidden measuring node for page 1 (hero + header eat its top).
+ * `host2` is the taller continuation box — reused to measure every page ≥ 2,
+ * since they share geometry. Never measure the visible DOM — React will fight you.
  */
 export function paginate(
   host1: HTMLElement,
@@ -85,63 +138,43 @@ export function paginate(
   isOverflowing: (el: HTMLElement) => boolean = overflows,
 ): Pagination {
   const src: PaintItem[] = items.filter((it) => it.kind === 'figure' || it.text.trim() !== '');
-  const none: Pagination = { page1: [], page2: [], fill: 0, overflow: false, spill: 0 };
-  if (!src.length) return none;
+  if (!src.length) return { pages: [], fill: 0, spill: 0 };
 
-  paint(host1, src);
-  if (!isOverflowing(host1)) return { ...none, page1: toPieces(src) };
+  const pages: PaintItem[][] = [];
+  let rest = src;
+  let host = host1; // page 1 first, then the continuation box for the rest
 
-  let n = src.length;
-  while (n > 0) {
-    n--;
-    paint(host1, src.slice(0, n));
-    if (!isOverflowing(host1)) break;
-  }
-
-  const straddle = src[n];
-  let page1: PaintItem[];
-  let page2: PaintItem[];
-
-  if (straddle.kind === 'figure') {
-    // Atomic: the figure can't split, so it starts page 2.
-    page1 = src.slice(0, n);
-    page2 = src.slice(n);
-  } else {
-    // Binary-search the word boundary: ~10 iterations, all inside one JS task,
-    // so no intermediate paint survives and no flicker.
-    const w = words(straddle.text);
-    let lo = 0,
-      hi = w.length,
-      best = 0;
-    while (lo <= hi) {
-      const mid = (lo + hi) >> 1;
-      paint(host1, [...src.slice(0, n), { kind: 'text', text: w.slice(0, mid).join(' ') }]);
-      if (!isOverflowing(host1)) {
-        best = mid;
-        lo = mid + 1;
-      } else hi = mid - 1;
+  while (rest.length) {
+    let { placed, rest: next } = fillOne(host, rest, isOverflowing);
+    // Progress guard: a single item taller than a whole page fits nowhere.
+    // Force it onto its own page (clipped by overflow:hidden) rather than loop.
+    if (placed.length === 0) {
+      placed = [rest[0]];
+      next = rest.slice(1);
     }
-    const head = w.slice(0, best).join(' ');
-    const tail = w.slice(best).join(' ');
-    page1 = [...src.slice(0, n), ...(head ? [{ kind: 'text' as const, text: head }] : [])];
-    page2 = [
-      ...(tail ? [{ kind: 'text' as const, text: tail, cont: Boolean(head) }] : []),
-      ...src.slice(n + 1),
-    ];
+    pages.push(placed);
+    rest = next;
+    host = host2;
   }
 
-  paint(host2, page2);
-  host2.insertAdjacentHTML(
+  // Re-measure the last page to report how full it is + its word count.
+  const last = pages[pages.length - 1];
+  const lastHost = pages.length === 1 ? host1 : host2;
+  paint(lastHost, last);
+  lastHost.insertAdjacentHTML(
     'beforeend',
     '<span data-sentinel style="display:inline-block;width:1px;height:1px"></span>',
   );
 
+  const spill = pages
+    .slice(1)
+    .flat()
+    .reduce((a, it) => a + (it.kind === 'text' ? words(it.text).length : 0), 0);
+
   return {
-    page1: toPieces(page1),
-    page2: toPieces(page2),
-    fill: fillOf(host2),
-    overflow: isOverflowing(host2),
-    spill: page2.reduce((a, it) => a + (it.kind === 'text' ? words(it.text).length : 0), 0),
+    pages: pages.map(toPieces),
+    fill: fillOf(lastHost),
+    spill,
   };
 }
 
@@ -161,16 +194,16 @@ export function fillOf(el: HTMLElement): number {
 
 export type FitLevel = 'ok' | 'warn' | 'bad';
 
-/** The most useful sentence in the product: "cut about N words." */
+/** How many pages, and how full the last one is. */
 export function fitMessage(p: Pagination): { level: FitLevel; text: string } {
-  if (p.overflow)
-    return { level: 'bad', text: `Over two pages. Cut roughly ${Math.round(p.spill * 0.3)} words.` };
-  if (!p.spill) {
-    // No text spilled — but a figure can still have pushed a second page.
-    if (!p.page2.length) return { level: 'ok', text: '1 page' };
-    return { level: 'ok', text: `2 pages · page 2 is ${Math.round(p.fill * 100)}% full` };
-  }
-  if (p.fill < 0.25)
-    return { level: 'warn', text: `Page 2 is nearly empty. Cut about ${p.spill} words to fit one page.` };
-  return { level: 'ok', text: `2 pages · page 2 is ${Math.round(p.fill * 100)}% full` };
+  const n = p.pages.length;
+  if (n <= 1) return { level: 'ok', text: '1 page' };
+  const pct = Math.round(p.fill * 100);
+  // A barely-used last page is worth a gentle nudge, not an error — long is fine.
+  if (p.spill && p.fill < 0.25)
+    return {
+      level: 'warn',
+      text: `${n} pages · last page nearly empty. Cut ~${p.spill} words to save a page.`,
+    };
+  return { level: 'ok', text: `${n} pages · last page ${pct}% full` };
 }

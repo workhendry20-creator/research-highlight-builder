@@ -3,11 +3,11 @@ import { useDoc } from '../store/useDoc';
 import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { Page1 } from './Page1';
-import { Page2 } from './Page2';
+import { ContPage } from './ContPage';
 import { HighlightsBody } from './Sidebar';
 import { HIGHLIGHTS_BLOCK_ID } from './Flow';
 
-const EMPTY: Pagination = { page1: [], page2: [], fill: 0, overflow: false, spill: 0 };
+const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
 // A4 in CSS px at the reference 96dpi (1mm = 96/25.4 px). Preview-only: used to
 // size the zoom frame, never for layout/pagination (those stay in mm/pt).
@@ -41,14 +41,18 @@ export function PaperPreview() {
   const host1Ref = useRef<HTMLDivElement>(null);
   const host2Ref = useRef<HTMLDivElement>(null);
   const hlRef = useRef<HTMLDivElement>(null);
+  const hlColRef = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
 
-  // Highlights placed below the article become the last item in the text flow.
-  const hlBelow =
-    doc.design.sidebar &&
-    (doc.design.highlightsPlacement ?? 'page1') === 'below' &&
-    (doc.highlights.some((h) => h.trim()) || doc.references.length > 0);
+  // Highlights that ride the text flow as the last item: 'below' as a full-width
+  // band, 'page1-flow' as a one-column box that lets text fill the gap above it.
+  const placement = doc.design.highlightsPlacement ?? 'page1';
+  const hasHl =
+    doc.design.sidebar && (doc.highlights.some((h) => h.trim()) || doc.references.length > 0);
+  const hlBelow = hasHl && placement === 'below';
+  const hlFlow = hasHl && placement === 'page1-flow';
+  const hlInFlow = hlBelow || hlFlow;
 
   // Preview zoom. 'fit' tracks the pane width (Word's "Page Width"); a number is
   // a manual zoom. Cosmetic only — the sheet scales, the pt/mm sizes do not.
@@ -87,18 +91,20 @@ export function PaperPreview() {
       root.style.setProperty('--footer-h', '10mm');
     }
 
-    // When highlights sit below the article, measure that block at body width
-    // and append it as an atomic full-width item so it paginates like a figure.
+    // Highlights that ride the flow are appended as one atomic item, measured at
+    // its own render width so it paginates like a figure. 'below' is full-width
+    // (spans all columns); 'page1-flow' is one column wide (text fills the gap).
     let flow = items;
-    if (hlBelow && hlRef.current) {
-      const bodyW = h1.clientWidth || 1;
+    const hlNode = hlFlow ? hlColRef.current : hlBelow ? hlRef.current : null;
+    if (hlNode) {
+      const w = hlNode.offsetWidth || 1;
       flow = [
         ...items,
-        { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: hlRef.current.offsetHeight / bodyW, hasCaption: false, full: true },
+        { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: hlNode.offsetHeight / w, hasCaption: false, full: hlBelow },
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow]);
 
   const vars = {
     ...baseVars,
@@ -107,11 +113,11 @@ export function PaperPreview() {
   } as React.CSSProperties;
 
   const fit = fitMessage(pagination);
-  const hasPage2 = pagination.page2.length > 0;
+  const pages = pagination.pages;
 
   const scale = zoom === 'fit' ? fitScale : zoom;
   const pct = Math.round(scale * 100);
-  const nPages = hasPage2 ? 2 : 1;
+  const nPages = Math.max(1, pages.length);
   const frame = {
     width: PAGE_W_PX * scale,
     height: nPages * (PAGE_H_PX + PAGE_GAP_PX) * scale,
@@ -152,8 +158,10 @@ export function PaperPreview() {
 
       <div className="pages-frame" style={frame}>
         <div className="pages" style={{ transform: `scale(${scale})` }}>
-          <Page1 doc={doc} vars={vars} pagination={pagination} />
-          {hasPage2 && <Page2 doc={doc} vars={vars} pagination={pagination} />}
+          <Page1 doc={doc} vars={vars} pieces={pages[0] ?? []} />
+          {pages.slice(1).map((pcs, i) => (
+            <ContPage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 2} />
+          ))}
         </div>
       </div>
 
@@ -169,6 +177,14 @@ export function PaperPreview() {
         {hlBelow && (
           <div style={{ width: 'var(--body-1)' }}>
             <aside className="hl-below" ref={hlRef}>
+              <HighlightsBody doc={doc} />
+            </aside>
+          </div>
+        )}
+        {/* In-flow highlights: measured at one column's width. */}
+        {hlFlow && (
+          <div style={{ width: 'var(--col)' }}>
+            <aside className="hl-col" ref={hlColRef}>
               <HighlightsBody doc={doc} />
             </aside>
           </div>
