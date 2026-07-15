@@ -34,13 +34,17 @@ export interface Reference {
 export interface Design {
   /** Body columns on page 1. Page 2 turns the sidebar slot into a text column. */
   bodyCols: 2 | 3 | 4;
+  /** Body paragraph alignment. Absent = 'justify' (v1 files kept their look). */
+  bodyAlign?: 'left' | 'center' | 'right' | 'justify';
   sidebar: boolean;
   /**
    * Where the highlights/references box sits. Absent = 'page1' (v1 files).
    * 'page1' = right rail, page 1 only. 'all' = right rail on every page.
    * 'below' = full-width block at the end of the article (in the text flow).
+   * 'page1-flow' = single-column box at the end of the page-1 body flow, so
+   *   body text fills the gap above it (col 4 top) before spilling to page 2.
    */
-  highlightsPlacement?: 'page1' | 'all' | 'below';
+  highlightsPlacement?: 'page1' | 'all' | 'below' | 'page1-flow';
   fontDisplay: string;
   fontBody: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
@@ -90,6 +94,7 @@ export const emptyDoc = (): Doc => ({
   assets: {},
   design: {
     bodyCols: 3,
+    bodyAlign: 'justify',
     sidebar: true,
     highlightsPlacement: 'page1',
     fontDisplay: 'Source Serif 4',

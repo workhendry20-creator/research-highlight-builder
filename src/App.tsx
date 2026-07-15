@@ -5,6 +5,7 @@ import { Toolbar } from './panel/Toolbar';
 import { Panel } from './panel/Panel';
 import { PaperPreview } from './paper/PaperPreview';
 import { sampleDoc } from './sample';
+import './styles/fonts.css';
 import './styles/page.css';
 import './styles/panel.css';
 
@@ -18,14 +19,15 @@ export default function App() {
     let stop = () => {};
     let cancelled = false;
     (async () => {
-      const result = await hydrate();
+      await hydrate();
       if (cancelled) return;
-      if (result === 'empty') {
-        const { doc, load } = useDoc.getState();
-        const blank =
-          !doc.meta.title && doc.blocks.every((b) => b.type !== 'paragraph' || !b.text.trim());
-        if (blank) load(sampleDoc());
-      }
+      // Seed the sample whenever the doc is blank — a genuinely empty first run,
+      // or a previously-autosaved empty doc that hydrate() faithfully restored.
+      // An empty canvas is never what you want to look at.
+      const { doc, load } = useDoc.getState();
+      const blank =
+        !doc.meta.title && doc.blocks.every((b) => b.type !== 'paragraph' || !b.text.trim());
+      if (blank) load(sampleDoc());
       stop = startAutosave();
       setReady(true);
     })();

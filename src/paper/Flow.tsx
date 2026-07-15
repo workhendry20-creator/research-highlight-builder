@@ -9,13 +9,16 @@ export const HIGHLIGHTS_BLOCK_ID = '__highlights__';
 /** Renders a page's pieces into the column flow: paragraphs and full-width
  *  figures. Figures resolve their image/caption from the doc by id. */
 export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
+  // 'page1-flow' rides the same end-of-flow atom as 'below', but renders it as a
+  // one-column box (.hl-col) instead of the full-width band (.hl-below).
+  const hlClass = doc.design.highlightsPlacement === 'page1-flow' ? 'hl-col' : 'hl-below';
   return (
     <>
       {pieces.map((pc, i) => {
         if (pc.kind === 'figure') {
           if (pc.id === HIGHLIGHTS_BLOCK_ID) {
             return (
-              <aside className="hl-below" key={i}>
+              <aside className={hlClass} key={i}>
                 <HighlightsBody doc={doc} />
               </aside>
             );

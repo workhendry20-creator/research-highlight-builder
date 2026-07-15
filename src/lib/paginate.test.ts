@@ -25,13 +25,14 @@ describe('paginate', () => {
     const result = paginate(host1, host2, paragraphs.map(text), isOverflowing);
 
     const originalWords = paragraphs.flatMap(words);
-    const producedWords = [...result.page1, ...result.page2]
+    const producedWords = result.pages
+      .flat()
       .filter((p): p is { kind: 'text'; text: string; cont?: boolean } => p.kind === 'text')
       .flatMap((p) => words(p.text));
     expect(producedWords).toEqual(originalWords);
 
-    expect(result.page2[0]?.kind).toBe('text');
-    expect((result.page2[0] as { cont?: boolean }).cont).toBe(true);
+    expect(result.pages[1][0]?.kind).toBe('text');
+    expect((result.pages[1][0] as { cont?: boolean }).cont).toBe(true);
   });
 
   it('never splits a figure — a straddling figure moves whole to page 2', () => {
@@ -51,10 +52,35 @@ describe('paginate', () => {
     const host2 = document.createElement('div');
     const result = paginate(host1, host2, items, isOverflowing);
 
-    const figures = [...result.page1, ...result.page2].filter((p) => p.kind === 'figure');
+    const figures = result.pages.flat().filter((p) => p.kind === 'figure');
     expect(figures).toEqual([{ kind: 'figure', id: 'fig-1' }]);
     // The figure is atomic: it appears exactly once and is never on both pages.
-    expect(result.page1.some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(false);
-    expect(result.page2.some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(true);
+    expect(result.pages[0].some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(false);
+    expect(result.pages[1].some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(true);
+  });
+
+  it('spills onto a third page (and beyond) without losing any words', () => {
+    // Twelve paragraphs against a tight budget force at least three pages.
+    const paragraphs = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `Paragraph ${i} carries several words alpha bravo charlie delta echo foxtrot golf hotel india juliet.`,
+    );
+    // Budget fits only ~2.5 paragraphs per page, so 12 need 5 pages.
+    const budget = paragraphs[0].length * 2.5;
+    const isOverflowing = budgetOverflow(budget);
+
+    const host1 = document.createElement('div');
+    const host2 = document.createElement('div');
+    const result = paginate(host1, host2, paragraphs.map(text), isOverflowing);
+
+    expect(result.pages.length).toBeGreaterThanOrEqual(3);
+
+    const originalWords = paragraphs.flatMap(words);
+    const producedWords = result.pages
+      .flat()
+      .filter((p): p is { kind: 'text'; text: string; cont?: boolean } => p.kind === 'text')
+      .flatMap((p) => words(p.text));
+    expect(producedWords).toEqual(originalWords);
   });
 });

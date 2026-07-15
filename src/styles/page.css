@@ -38,6 +38,11 @@
 .hero {
   position: relative;
   height: var(--hero-h);
+  /* Full-bleed: pull out of the page padding so the hero meets the sheet edges
+     on top and both sides. `.page` overflow:hidden clips it; the body below
+     reclaims the released top margin (see .body-cols--p1 height). Margins are
+     part of layout, so this stays true through preview zoom and print. */
+  margin: calc(-1 * var(--margin)) calc(-1 * var(--margin)) 0;
   background: var(--hero);
   overflow: hidden;
 }
@@ -99,9 +104,10 @@
 .body-cols {
   column-fill: auto;
   column-gap: var(--gutter);
-  /* Justified per request (overrides the left-align house rule); hyphens
-     auto keeps narrow columns from opening up rivers of whitespace. */
-  text-align: justify;
+  /* Alignment is author-controlled (Desain panel), default justify. Hyphens
+     auto keeps narrow justified/left columns from opening rivers of whitespace;
+     it's harmless for center/right. */
+  text-align: var(--body-align, justify);
   hyphens: auto;
   -webkit-hyphens: auto;
   font-size: var(--fs-body);
@@ -147,7 +153,9 @@
 .body-cols--p1 {
   width: var(--body-1);
   column-count: var(--cols-1);
-  height: calc(var(--page-h) - 2 * var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
+  /* One --margin only: the hero now bleeds into the top margin, so the body
+     reclaims it and still bottoms out exactly on the bottom-margin line. */
+  height: calc(var(--page-h) - var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
   overflow: hidden;
 }
 
@@ -173,7 +181,9 @@
   width: var(--col);
   /* Box hugs its content instead of spanning the full column height. */
   height: auto;
-  align-self: flex-start;
+  /* Anchored to the bottom of the body row: a short box sits at the foot of
+     the rail and grows upward, so little content leaves the gap on top. */
+  align-self: flex-end;
   background: var(--accent-soft);
   border-left: 3px solid var(--accent);
   padding: 0 0.6em 0.8em;
@@ -202,8 +212,24 @@
   column-gap: var(--gutter);
 }
 
+/* In-flow highlights ('page1-flow'): a one-column box kept whole at the end of
+   the page-1 body, so text fills the columns and the gap above it first. Same
+   inner styling as the rail via the grouped selectors below. */
+.hl-col {
+  column-span: none;
+  break-inside: avoid;
+  box-sizing: border-box;
+  margin: 0.2em 0 0;
+  padding: 0 0.6em 0.8em;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  font-family: var(--sans);
+  font-size: calc(var(--fs-body) * 0.9);
+}
+
 .sidebar h3,
-.hl-below h3 {
+.hl-below h3,
+.hl-col h3 {
   margin: 0.6em 0 0.3em;
   font-size: calc(var(--fs-eyebrow) + 1pt);
   text-transform: uppercase;
@@ -212,18 +238,21 @@
 }
 
 .sidebar ul.highlights,
-.hl-below ul.highlights {
+.hl-below ul.highlights,
+.hl-col ul.highlights {
   margin: 0;
   padding-left: 1.1em;
 }
 
 .sidebar ul.highlights li,
-.hl-below ul.highlights li {
+.hl-below ul.highlights li,
+.hl-col ul.highlights li {
   margin-bottom: 0.5em;
 }
 
 .sidebar ol.references,
-.hl-below ol.references {
+.hl-below ol.references,
+.hl-col ol.references {
   margin: 0;
   padding-left: 1.1em;
   font-size: calc(var(--fs-body) * 0.75);
@@ -231,11 +260,12 @@
 }
 
 .sidebar ol.references li,
-.hl-below ol.references li {
+.hl-below ol.references li,
+.hl-col ol.references li {
   margin-bottom: 0.5em;
 }
 
-.page2-footer {
+.page-footer {
   position: absolute;
   right: var(--margin);
   bottom: calc(var(--margin) / 2);
