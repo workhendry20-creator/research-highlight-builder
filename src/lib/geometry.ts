@@ -58,6 +58,7 @@ export function cssVars(d: Design): Record<string, string> {
     '--hero-h': `${d.heroHeight}mm`,
     '--cols-1': String(g.cols1),
     '--cols-2': String(g.cols2),
+    '--body-align': d.bodyAlign ?? 'justify',
     '--hero': d.colors.hero,
     '--accent': d.colors.accent,
     '--accent-soft': d.colors.accentSoft,

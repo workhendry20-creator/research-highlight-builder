@@ -34,6 +34,8 @@ export interface Reference {
 export interface Design {
   /** Body columns on page 1. Page 2 turns the sidebar slot into a text column. */
   bodyCols: 2 | 3 | 4;
+  /** Body paragraph alignment. Absent = 'justify' (v1 files kept their look). */
+  bodyAlign?: 'left' | 'center' | 'right' | 'justify';
   sidebar: boolean;
   /**
    * Where the highlights/references box sits. Absent = 'page1' (v1 files).
@@ -92,6 +94,7 @@ export const emptyDoc = (): Doc => ({
   assets: {},
   design: {
     bodyCols: 3,
+    bodyAlign: 'justify',
     sidebar: true,
     highlightsPlacement: 'page1',
     fontDisplay: 'Source Serif 4',

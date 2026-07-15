@@ -38,6 +38,11 @@
 .hero {
   position: relative;
   height: var(--hero-h);
+  /* Full-bleed: pull out of the page padding so the hero meets the sheet edges
+     on top and both sides. `.page` overflow:hidden clips it; the body below
+     reclaims the released top margin (see .body-cols--p1 height). Margins are
+     part of layout, so this stays true through preview zoom and print. */
+  margin: calc(-1 * var(--margin)) calc(-1 * var(--margin)) 0;
   background: var(--hero);
   overflow: hidden;
 }
@@ -99,9 +104,10 @@
 .body-cols {
   column-fill: auto;
   column-gap: var(--gutter);
-  /* Justified per request (overrides the left-align house rule); hyphens
-     auto keeps narrow columns from opening up rivers of whitespace. */
-  text-align: justify;
+  /* Alignment is author-controlled (Desain panel), default justify. Hyphens
+     auto keeps narrow justified/left columns from opening rivers of whitespace;
+     it's harmless for center/right. */
+  text-align: var(--body-align, justify);
   hyphens: auto;
   -webkit-hyphens: auto;
   font-size: var(--fs-body);
@@ -147,7 +153,9 @@
 .body-cols--p1 {
   width: var(--body-1);
   column-count: var(--cols-1);
-  height: calc(var(--page-h) - 2 * var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
+  /* One --margin only: the hero now bleeds into the top margin, so the body
+     reclaims it and still bottoms out exactly on the bottom-margin line. */
+  height: calc(var(--page-h) - var(--margin) - var(--hero-h) - var(--header-h) - 2 * var(--gutter));
   overflow: hidden;
 }
 

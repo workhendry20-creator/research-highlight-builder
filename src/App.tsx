@@ -5,6 +5,7 @@ import { Toolbar } from './panel/Toolbar';
 import { Panel } from './panel/Panel';
 import { PaperPreview } from './paper/PaperPreview';
 import { sampleDoc } from './sample';
+import './styles/fonts.css';
 import './styles/page.css';
 import './styles/panel.css';
 

@@ -52,7 +52,6 @@ export function PaperPreview() {
     doc.design.sidebar && (doc.highlights.some((h) => h.trim()) || doc.references.length > 0);
   const hlBelow = hasHl && placement === 'below';
   const hlFlow = hasHl && placement === 'page1-flow';
-  const hlInFlow = hlBelow || hlFlow;
 
   // Preview zoom. 'fit' tracks the pane width (Word's "Page Width"); a number is
   // a manual zoom. Cosmetic only — the sheet scales, the pt/mm sizes do not.

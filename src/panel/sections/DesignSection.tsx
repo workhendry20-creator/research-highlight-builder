@@ -11,8 +11,8 @@ import {
   Toggle,
 } from '../Field';
 
-const SERIF_FONTS = ['Source Serif 4', 'Georgia', 'Times New Roman', 'Palatino'];
-const SANS_FONTS = ['Source Sans 3', 'Helvetica', 'Arial', 'Verdana', 'system-ui'];
+const SERIF_FONTS = ['Source Serif 4', 'Avenir Next', 'Georgia', 'Times New Roman', 'Palatino'];
+const SANS_FONTS = ['Source Sans 3', 'Playfair Display', 'Helvetica', 'Arial', 'Verdana', 'system-ui'];
 const asOptions = (xs: string[]) => xs.map((x) => ({ value: x, label: x }));
 
 export function DesignSection() {
@@ -48,6 +48,17 @@ export function DesignSection() {
           { value: 4, label: '4' },
         ]}
         onChange={(v) => set('bodyCols', v)}
+      />
+      <SegmentField<NonNullable<Design['bodyAlign']>>
+        label="Rata teks"
+        value={design.bodyAlign ?? 'justify'}
+        options={[
+          { value: 'left', label: 'Kiri' },
+          { value: 'center', label: 'Tengah' },
+          { value: 'right', label: 'Kanan' },
+          { value: 'justify', label: 'Justify' },
+        ]}
+        onChange={(v) => set('bodyAlign', v)}
       />
       <Toggle
         label="Tampilkan highlights"
