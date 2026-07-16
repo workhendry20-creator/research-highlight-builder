@@ -76,18 +76,26 @@ export function PaperPreview() {
   const [zoom, setZoom] = useState<number | 'fit'>('fit');
   const [fitScale, setFitScale] = useState(1);
 
+  // Spread view (magazine only): lay the sheets two-up like an open magazine so
+  // the cover and its facing page read together. View-only — pagination, pt/mm
+  // sizes and the PDF are untouched.
+  const [spread, setSpread] = useState(false);
+  const spreadOn = isMag && spread;
+  const cols = spreadOn ? 2 : 1;
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const measure = () => {
       const avail = el.clientWidth - 40; // .paper-scroll padding (20px each side)
-      setFitScale(clamp(avail / PAGE_W_PX, 0.25, 1)); // cap 1: fit only shrinks
+      const contentW = cols * PAGE_W_PX + (cols - 1) * PAGE_GAP_PX;
+      setFitScale(clamp(avail / contentW, 0.25, 1)); // cap 1: fit only shrinks
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [cols]);
 
   // The two body boxes are sized off --header-h / --footer-h, which we only know
   // after the real header paints. Measure it, feed the measuring hosts the same
@@ -158,9 +166,10 @@ export function PaperPreview() {
   const pct = Math.round(scale * 100);
   // Magazine adds the cover sheet on top of the flowed content pages.
   const nPages = isMag ? 1 + pages.length : Math.max(1, pages.length);
+  const rows = Math.ceil(nPages / cols);
   const frame = {
-    width: PAGE_W_PX * scale,
-    height: nPages * (PAGE_H_PX + PAGE_GAP_PX) * scale,
+    width: (cols * PAGE_W_PX + (cols - 1) * PAGE_GAP_PX) * scale,
+    height: rows * (PAGE_H_PX + PAGE_GAP_PX) * scale,
   };
   const step = (d: number) => setZoom(clamp(Math.round((scale + d) * 100) / 100, 0.25, 2));
 
@@ -189,6 +198,20 @@ export function PaperPreview() {
           ))}
         </div>
         <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
+        {isMag && (
+          <div className="view-bar">
+            <button
+              type="button"
+              className={`view-btn${spread ? ' is-active' : ''}`}
+              onClick={() => setSpread((s) => !s)}
+              title="Tampilkan sebagai spread halaman berdampingan"
+              aria-pressed={spread}
+            >
+              <span className="view-btn-ico" aria-hidden="true">▭▭</span>
+              Spread
+            </button>
+          </div>
+        )}
         <div className="zoom-bar">
           <button
             type="button"
@@ -215,7 +238,10 @@ export function PaperPreview() {
       </div>
 
       <div className="pages-frame" style={frame}>
-        <div className="pages" style={{ transform: `scale(${scale})` }}>
+        <div
+          className={`pages${spreadOn ? ' pages--spread' : ''}`}
+          style={{ transform: `scale(${scale})` }}
+        >
           {isMag ? (
             <>
               <MagazineCover doc={doc} vars={vars} />

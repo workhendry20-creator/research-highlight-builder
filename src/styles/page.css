@@ -412,6 +412,57 @@
   transform-origin: top left;
 }
 
+/* Spread view: sheets two-up, like an open magazine. View-only. */
+.pages--spread {
+  display: grid;
+  /* Fixed A4 width — the per-sheet --page-w var isn't defined on this container. */
+  grid-template-columns: repeat(2, 210mm);
+  gap: 20px;
+  width: auto;
+  /* Page 2 sits flush at the top beside page 1 (never sinks if it's shorter). */
+  align-items: start;
+}
+
+.pages--spread .page {
+  margin: 0;
+}
+
+/* Spread toggle in the preview bar, next to Fit. */
+.view-bar {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font: 11px/1 system-ui, sans-serif;
+  color: #333;
+  cursor: pointer;
+}
+
+.view-btn:hover {
+  background: #eee;
+}
+
+.view-btn.is-active {
+  background: #111418;
+  color: #fff;
+}
+
+.view-btn-ico {
+  font-size: 10px;
+  letter-spacing: -2px;
+}
+
 .measure-root {
   position: fixed;
   top: 0;
