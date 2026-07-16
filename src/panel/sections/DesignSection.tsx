@@ -13,6 +13,8 @@ import {
 
 const SERIF_FONTS = ['Source Serif 4', 'Avenir Next', 'Georgia', 'Times New Roman', 'Palatino'];
 const SANS_FONTS = ['Source Sans 3', 'Playfair Display', 'Helvetica', 'Arial', 'Verdana', 'system-ui'];
+// Per-element font pickers can use any family, serif or sans.
+const ALL_FONTS = [...new Set([...SERIF_FONTS, ...SANS_FONTS])];
 const asOptions = (xs: string[]) => xs.map((x) => ({ value: x, label: x }));
 
 export function DesignSection() {
@@ -95,6 +97,10 @@ export function DesignSection() {
       <p className="group-label">Huruf</p>
       <LabeledSelect label="Display" value={design.fontDisplay} options={asOptions(SERIF_FONTS)} onChange={(v) => set('fontDisplay', v)} />
       <LabeledSelect label="Body" value={design.fontBody} options={asOptions(SANS_FONTS)} onChange={(v) => set('fontBody', v)} />
+      <LabeledSelect label="Kategori" value={design.fontCategory ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontCategory', v)} />
+      <LabeledSelect label="Subjudul" value={design.fontSubtitle ?? design.fontDisplay} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontSubtitle', v)} />
+      <LabeledSelect label="Penulis" value={design.fontAuthor ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAuthor', v)} />
+      <LabeledSelect label="Afiliasi" value={design.fontAffiliation ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAffiliation', v)} />
 
       <p className="group-label">Warna</p>
       <LabeledColor label="Hero" value={design.colors.hero} onChange={setColor('hero')} />

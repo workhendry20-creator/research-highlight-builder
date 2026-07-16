@@ -44,6 +44,18 @@ export function grid(d: Design) {
   };
 }
 
+/** Serif-ish families get a serif fallback; everything else falls back to sans.
+ *  Fallback is cosmetic — the named families are either bundled or web-safe. */
+const SERIF_FAMILIES = new Set([
+  'Source Serif 4',
+  'Georgia',
+  'Times New Roman',
+  'Palatino',
+  'Playfair Display',
+]);
+const fontStack = (name: string) =>
+  `"${name}", ${SERIF_FAMILIES.has(name) ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+
 /** Feed straight into style={{...}} on the page wrapper. */
 export function cssVars(d: Design): Record<string, string> {
   const g = grid(d);
@@ -65,6 +77,12 @@ export function cssVars(d: Design): Record<string, string> {
     '--ink': d.colors.ink,
     '--serif': `"${d.fontDisplay}", Georgia, serif`,
     '--sans': `"${d.fontBody}", system-ui, sans-serif`,
+    // Per-element fonts. Undefined → the family the element used before this
+    // setting existed, so old files render identically.
+    '--font-category': d.fontCategory ? fontStack(d.fontCategory) : 'var(--sans)',
+    '--font-subtitle': d.fontSubtitle ? fontStack(d.fontSubtitle) : 'var(--serif)',
+    '--font-author': d.fontAuthor ? fontStack(d.fontAuthor) : 'var(--sans)',
+    '--font-affil': d.fontAffiliation ? fontStack(d.fontAffiliation) : 'var(--sans)',
     '--fs-body': `${d.sizes.body}pt`,
     '--fs-title': `${d.sizes.title}pt`,
     '--fs-subtitle': `${d.sizes.subtitle}pt`,
