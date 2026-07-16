@@ -47,6 +47,15 @@ export interface Design {
   highlightsPlacement?: 'page1' | 'all' | 'below' | 'page1-flow';
   fontDisplay: string;
   fontBody: string;
+  /**
+   * Per-element font overrides. Absent = inherit the family that element used
+   * before this setting existed (category/author/affiliation → body, subtitle →
+   * display), so v1 files keep their exact look. See cssVars() for the mapping.
+   */
+  fontCategory?: string;
+  fontSubtitle?: string;
+  fontAuthor?: string;
+  fontAffiliation?: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
   /** millimetres */
   margin: number;
