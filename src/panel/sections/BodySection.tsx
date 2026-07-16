@@ -2,6 +2,10 @@ import { useCallback, useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
 import { RowButtons, Section, SegmentField } from '../Field';
+import { TOKEN, wrapSelection, type Mark } from '../../lib/richtext';
+import { setActiveEditor } from '../../lib/activeEditor';
+
+const KEY_TO_MARK: Record<string, Mark> = { b: 'b', i: 'i', u: 'u' };
 
 /** Open a native file picker without a persistent <input> in the tree. */
 function pickImage(onPick: (file: File) => void) {
@@ -157,6 +161,17 @@ export function BodySection() {
               value={b.text}
               rows={2}
               placeholder="Tulis paragraf…"
+              onFocus={(e) =>
+                setActiveEditor({ el: e.currentTarget, setValue: (v) => setText(i, v) })
+              }
+              onKeyDown={(e) => {
+                // Ctrl/⌘ + B / I / U — Word-style inline formatting.
+                if (!(e.metaKey || e.ctrlKey)) return;
+                const mark = KEY_TO_MARK[e.key.toLowerCase()];
+                if (!mark) return;
+                e.preventDefault();
+                wrapSelection(e.currentTarget, TOKEN[mark], (v) => setText(i, v));
+              }}
               onChange={(e) => {
                 setText(i, e.target.value);
                 autosize(e.currentTarget);

@@ -319,6 +319,43 @@
   margin-bottom: 0;
 }
 
+.format-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.format-btn {
+  width: 26px;
+  height: 24px;
+  border: 0;
+  background: none;
+  border-radius: 6px;
+  font: 13px/1 Georgia, serif;
+  color: #333;
+  cursor: pointer;
+}
+
+.format-btn:hover {
+  background: #eee;
+}
+
+.format-btn--b {
+  font-weight: 700;
+}
+
+.format-btn--i {
+  font-style: italic;
+}
+
+.format-btn--u {
+  text-decoration: underline;
+}
+
 .zoom-bar {
   display: inline-flex;
   align-items: center;
