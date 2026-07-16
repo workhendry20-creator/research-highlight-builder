@@ -2,12 +2,20 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDoc } from '../store/useDoc';
 import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
+import { applyMark } from '../lib/activeEditor';
+import type { Mark } from '../lib/richtext';
 import { Page1 } from './Page1';
 import { ContPage } from './ContPage';
 import { HighlightsBody } from './Sidebar';
 import { HIGHLIGHTS_BLOCK_ID } from './Flow';
 
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
+
+const FORMAT_BTNS: { mark: Mark; label: string; title: string }[] = [
+  { mark: 'b', label: 'B', title: 'Tebal (⌘/Ctrl+B)' },
+  { mark: 'i', label: 'I', title: 'Miring (⌘/Ctrl+I)' },
+  { mark: 'u', label: 'U', title: 'Garis bawah (⌘/Ctrl+U)' },
+];
 
 // A4 in CSS px at the reference 96dpi (1mm = 96/25.4 px). Preview-only: used to
 // size the zoom frame, never for layout/pagination (those stay in mm/pt).
@@ -129,6 +137,24 @@ export function PaperPreview() {
       {doc.design.customCss && <style>{doc.design.customCss}</style>}
 
       <div className="preview-bar">
+        {/* Word-style formatting bar. onMouseDown+preventDefault keeps the
+            focused paragraph textarea's selection alive while we apply the mark. */}
+        <div className="format-bar">
+          {FORMAT_BTNS.map((f) => (
+            <button
+              key={f.mark}
+              type="button"
+              className={`format-btn format-btn--${f.mark}`}
+              title={f.title}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                applyMark(f.mark);
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
         <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
         <div className="zoom-bar">
           <button

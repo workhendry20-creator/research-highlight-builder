@@ -1,6 +1,20 @@
+import { Fragment, type ReactNode } from 'react';
 import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
+import { parseRuns } from '../lib/richtext';
 import { HighlightsBody } from './Sidebar';
+
+/** Turn a paragraph string with **bold** / *italic* / __underline__ markers into
+ *  styled inline nodes. React escapes the text, so it's injection-safe. */
+function renderRuns(text: string): ReactNode {
+  return parseRuns(text).map((r, j) => {
+    let node: ReactNode = r.text;
+    if (r.b) node = <strong>{node}</strong>;
+    if (r.i) node = <em>{node}</em>;
+    if (r.u) node = <u>{node}</u>;
+    return <Fragment key={j}>{node}</Fragment>;
+  });
+}
 
 /** Synthetic flow item id: the highlights block when placed below the article.
  *  It rides the atomic full-width figure machinery so paginate() is untouched. */
@@ -38,7 +52,7 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
         }
         return (
           <p key={i} className={pc.cont ? 'cont' : undefined}>
-            {pc.text}
+            {renderRuns(pc.text)}
           </p>
         );
       })}

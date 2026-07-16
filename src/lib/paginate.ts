@@ -8,6 +8,8 @@
  * boundaries) and figures (atomic full-width blocks). A figure never splits —
  * if it straddles the break it moves whole to page 2.
  */
+import { runsToHtml, openMarkers } from './richtext';
+
 export const overflows = (el: HTMLElement) => el.scrollWidth > el.clientWidth + 1;
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
@@ -67,7 +69,9 @@ function paint(el: HTMLElement, items: PaintItem[]) {
     } else {
       const p = document.createElement('p');
       if (it.cont) p.className = 'cont';
-      p.textContent = it.text;
+      // innerHTML (not textContent) so **bold**/*italic*/__underline__ render as
+      // real inline styling — bold is wider, so the break must measure it.
+      p.innerHTML = runsToHtml(it.text);
       el.appendChild(p);
     }
   }
@@ -115,8 +119,16 @@ function fillOne(
       lo = mid + 1;
     } else hi = mid - 1;
   }
-  const head = w.slice(0, best).join(' ');
-  const tail = w.slice(best).join(' ');
+  let head = w.slice(0, best).join(' ');
+  let tail = w.slice(best).join(' ');
+  // Formatting markers open before the break must be closed on the head and
+  // reopened on the tail, or the bold/italic/underline would drop after the
+  // break. Plain text has no open markers, so this is a no-op there.
+  if (head && tail) {
+    const open = openMarkers(head);
+    head += [...open].reverse().join(''); // close inner marker first
+    tail = open.join('') + tail; // reopen in the same nesting order
+  }
   return {
     placed: [...src.slice(0, n), ...(head ? [{ kind: 'text' as const, text: head }] : [])],
     rest: [
