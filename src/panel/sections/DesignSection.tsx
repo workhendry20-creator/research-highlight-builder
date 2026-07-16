@@ -11,7 +11,7 @@ import {
   Toggle,
 } from '../Field';
 
-const SERIF_FONTS = ['Source Serif 4', 'Avenir Next', 'Georgia', 'Times New Roman', 'Palatino'];
+const SERIF_FONTS = ['Source Serif 4', 'Playfair Display', 'Avenir Next', 'Georgia', 'Times New Roman', 'Palatino'];
 const SANS_FONTS = ['Source Sans 3', 'Playfair Display', 'Helvetica', 'Arial', 'Verdana', 'system-ui'];
 // Per-element font pickers can use any family, serif or sans.
 const ALL_FONTS = [...new Set([...SERIF_FONTS, ...SANS_FONTS])];

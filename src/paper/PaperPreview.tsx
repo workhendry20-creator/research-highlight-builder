@@ -4,14 +4,17 @@ import { familyOf } from '../schema/document';
 import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { applyMark } from '../lib/activeEditor';
+import { MAG2_STRIP } from '../lib/magSplit';
 import type { Mark } from '../lib/richtext';
 import { Page1 } from './Page1';
 import { ContPage } from './ContPage';
 import { MagazineCover } from './MagazineCover';
 import { MagazinePage } from './MagazinePage';
 import { MagazineHead } from './MagazineHead';
+import { MagSplitCover, MagPhotoPage } from './MagSplitCover';
+import { MagSplitHead, MagSplitAside } from './MagSplitHead';
 import { HighlightsBody } from './Sidebar';
-import { HIGHLIGHTS_BLOCK_ID } from './Flow';
+import { HIGHLIGHTS_BLOCK_ID, MAG2_ASIDE_ID } from './Flow';
 
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
@@ -50,6 +53,9 @@ export function PaperPreview() {
   );
 
   const isMag = familyOf(doc.templateId) === 'magazine';
+  // magazine-2 runs a different sheet plan: sheet 1 is the article + photo strip,
+  // sheet 2 is that same photo continued, spill goes to sheet 3+.
+  const isSplit = doc.templateId === 'magazine-2';
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
@@ -59,9 +65,13 @@ export function PaperPreview() {
   const magHost1Ref = useRef<HTMLDivElement>(null);
   const magHost2Ref = useRef<HTMLDivElement>(null);
   const magHeadRef = useRef<HTMLDivElement>(null);
+  const splitHost1Ref = useRef<HTMLDivElement>(null);
+  const splitHeadRef = useRef<HTMLDivElement>(null);
+  const splitAsideRef = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
   const [magHeadPx, setMagHeadPx] = useState(0);
+  const [splitHeadPx, setSplitHeadPx] = useState(0);
 
   // Highlights that ride the text flow as the last item: 'below' as a full-width
   // band, 'page1-flow' as a one-column box that lets text fill the gap above it.
@@ -108,6 +118,37 @@ export function PaperPreview() {
     // 2-column box. The first spread reserves room for the pull-quote, so its
     // measuring host (mh1) is shorter than the plain host (mh2) — same two-host
     // trick paper uses for the page-1 header.
+    // magazine-2: sheet 1's body box is narrower (the photo strip takes the right
+    // edge) and shorter (head above, quote + highlights below), so it measures
+    // against its own host. Sheet 2 is photo only — the spill resumes on sheet 3
+    // in the plain full-width box, which is exactly what host2 already models.
+    if (isSplit) {
+      const sh1 = splitHost1Ref.current;
+      const mh2 = magHost2Ref.current;
+      if (!sh1 || !mh2) return;
+      const head = splitHeadRef.current?.offsetHeight ?? 0;
+      setSplitHeadPx(head);
+      const root = sh1.closest<HTMLElement>('.measure-root');
+      if (root) {
+        root.style.setProperty('--footer-h', '10mm');
+        root.style.setProperty('--mag2-head-h', `${head}px`);
+      }
+      // The quote + highlights are the flow's last atom, one column wide, so the
+      // text fills column 1 and the box closes with them at the foot of column 2.
+      // Measured at its real render width, exactly like the paper hl-col box.
+      const aside = splitAsideRef.current;
+      let flow = items;
+      if (aside && (doc.meta.pullQuote || doc.highlights.some((h) => h.trim()))) {
+        const w = aside.offsetWidth || 1;
+        flow = [
+          ...items,
+          { kind: 'figure', id: MAG2_ASIDE_ID, aspect: aside.offsetHeight / w, hasCaption: false, full: false },
+        ];
+      }
+      setPagination(paginate(sh1, mh2, flow));
+      return;
+    }
+
     if (isMag) {
       const mh1 = magHost1Ref.current;
       const mh2 = magHost2Ref.current;
@@ -150,13 +191,15 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit]);
 
   const vars = {
     ...baseVars,
     '--header-h': `${headerPx}px`,
     '--footer-h': '10mm',
     '--mag-head-h': `${magHeadPx}px`,
+    '--mag2-head-h': `${splitHeadPx}px`,
+    '--mag2-strip': `${MAG2_STRIP}mm`,
   } as React.CSSProperties;
 
   const fit = fitMessage(pagination);
@@ -164,8 +207,13 @@ export function PaperPreview() {
 
   const scale = zoom === 'fit' ? fitScale : zoom;
   const pct = Math.round(scale * 100);
-  // Magazine adds the cover sheet on top of the flowed content pages.
-  const nPages = isMag ? 1 + pages.length : Math.max(1, pages.length);
+  // Magazine adds the cover sheet on top of the flowed content pages. magazine-2
+  // instead puts the flow's first page ON sheet 1 and spends sheet 2 on the photo.
+  const nPages = isSplit
+    ? 2 + Math.max(0, pages.length - 1)
+    : isMag
+      ? 1 + pages.length
+      : Math.max(1, pages.length);
   const rows = Math.ceil(nPages / cols);
   const frame = {
     width: (cols * PAGE_W_PX + (cols - 1) * PAGE_GAP_PX) * scale,
@@ -242,7 +290,15 @@ export function PaperPreview() {
           className={`pages${spreadOn ? ' pages--spread' : ''}`}
           style={{ transform: `scale(${scale})` }}
         >
-          {isMag ? (
+          {isSplit ? (
+            <>
+              <MagSplitCover doc={doc} vars={vars} pieces={pages[0] ?? []} />
+              <MagPhotoPage doc={doc} vars={vars} />
+              {pages.slice(1).map((pcs, i) => (
+                <MagazinePage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 3} lead={false} />
+              ))}
+            </>
+          ) : isMag ? (
             <>
               <MagazineCover doc={doc} vars={vars} />
               {pages.map((pcs, i) => (
@@ -269,7 +325,29 @@ export function PaperPreview() {
 
       {/* Hidden measuring rig — same box as the real body columns. */}
       <div className="measure-root" style={vars} aria-hidden>
-        {isMag ? (
+        {isSplit ? (
+          <>
+            {/* Head + foot aside sized first (they set --mag2-head-h/--mag2-aside-h),
+                then sheet 1's narrow host and the full-width sheet-3+ host. Both
+                measure inside a .mag2-inner so they get the real article width. */}
+            <div className="mag2-page">
+              <div className="mag2-inner" style={{ height: 'auto' }}>
+                <div ref={splitHeadRef}>
+                  <MagSplitHead doc={doc} />
+                </div>
+                <div className="mag2-cols mag2-cols--p1" ref={splitHost1Ref} />
+                {/* Measured at one column's width — the width it renders at
+                    inside the flow, so its atom's height is the real one. */}
+                <div style={{ width: 'var(--mag2-col)' }}>
+                  <div ref={splitAsideRef}>
+                    <MagSplitAside doc={doc} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mag-cols mag-cols--p2" ref={magHost2Ref} />
+          </>
+        ) : isMag ? (
           <>
             {/* Header sized first (sets --mag-head-h), then the two 2-col hosts. */}
             <div

@@ -182,8 +182,15 @@ function makeMagazine(m: MagInput): Doc {
     pullQuote: m.pullQuote,
     pullQuoteBy: m.pullQuoteBy,
   };
+  // Design defaults that the Design panel can then tune (columns/align/gutter/
+  // body size/fonts/colors all feed the magazine CSS via CSS vars).
   d.design = {
     ...d.design,
+    bodyCols: 2,
+    gutter: 8,
+    bodyAlign: 'justify',
+    fontDisplay: 'Playfair Display', // serif elements (quote, lede, drop cap)
+    sizes: { ...d.design.sizes, body: 10.5 },
     colors: { hero: '#0b1220', accent: m.accent, accentSoft: m.accentSoft, ink: '#14181f' },
   };
   d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
@@ -221,8 +228,11 @@ const makeMagazine1 = (): Doc =>
     ],
   });
 
-const makeMagazine2 = (): Doc =>
-  makeMagazine({
+/** magazine-2 splits one photo across sheets 1–2, and its sheet 1 carries the
+ *  quote + a highlights box in the foot, so unlike the other magazines it ships
+ *  with highlights filled in. */
+const makeMagazine2 = (): Doc => {
+  const d = makeMagazine({
     id: 'magazine-2',
     photo: PHOTO_COLLIDER,
     accent: '#0891b2',
@@ -239,14 +249,26 @@ const makeMagazine2 = (): Doc =>
     pullQuote:
       'Dalam kilatan sepersekian sepertriliun detik, energi memadat menjadi partikel yang belum pernah kita saksikan.',
     pullQuoteBy: '— DR. SINTA HALIM, MAR 2026',
+    // Sized to the two columns beside the photo strip: the article closes on
+    // sheet 1 so the spread stays two sheets — article + photo — as designed.
     body: [
       'Seratus meter di bawah tanah, dua berkas proton meluncur berlawanan arah di dalam pipa hampa yang lebih kosong daripada ruang antarplanet. Magnet superkonduktor sedingin minus dua ratus tujuh puluh satu derajat membelokkan lintasannya menjadi cincin sempurna.',
       'Ketika kedua berkas beradu, energi tumbukan sesaat memadat menjadi hujan partikel. Di sinilah teori diuji: setiap serpihan yang terlempar direkam oleh detektor setinggi gedung, lapis demi lapis, untuk merekonstruksi apa yang sesungguhnya terjadi.',
       'Sebagian besar tumbukan hanya mengulang hal yang sudah dikenal. Namun sekali dalam miliaran peristiwa, muncul pola langka—jejak partikel berat yang lenyap seketika, meninggalkan petunjuk tentang medan yang memberi massa pada seluruh materi.',
-      'Menganalisisnya bukan pekerjaan satu malam. Perangkat lunak menyaring jutaan tumbukan per detik, membuang yang biasa, menyimpan yang menjanjikan. Dari lautan data itulah, sedikit demi sedikit, peta materi paling mendasar disusun ulang.',
-      'Bagi para fisikawan, mesin ini bukan sekadar akselerator. Ia adalah mikroskop terbesar yang pernah dibangun manusia—diarahkan bukan ke benda kecil, melainkan ke aturan paling dalam yang menyusun alam semesta.',
+      'Menganalisisnya bukan pekerjaan satu malam. Perangkat lunak menyaring jutaan tumbukan per detik, membuang yang biasa, menyimpan yang menjanjikan. Dari lautan data itulah peta materi paling mendasar disusun ulang.',
     ],
   });
+  // The photo strip leaves a narrow text box on sheet 1; left-aligned, since a
+  // column that narrow plus justify is a river of spaces.
+  d.design.bodyAlign = 'left';
+  d.design.sizes = { ...d.design.sizes, title: 34, subtitle: 11 };
+  d.highlights = [
+    'Dua berkas proton diadu pada energi 13 TeV di dalam cincin 27 km.',
+    'Detektor merekam jejak tumbukan lapis demi lapis, jutaan kali per detik.',
+    'Pola langka satu banding miliaran menjadi petunjuk medan pemberi massa.',
+  ];
+  return d;
+};
 
 const makeMagazine3 = (): Doc =>
   makeMagazine({

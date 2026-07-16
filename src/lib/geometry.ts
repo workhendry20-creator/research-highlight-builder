@@ -70,6 +70,9 @@ export function cssVars(d: Design): Record<string, string> {
     '--hero-h': `${d.heroHeight}mm`,
     '--cols-1': String(g.cols1),
     '--cols-2': String(g.cols2),
+    // Raw body column count — the magazine spread reads this directly (it has no
+    // sidebar grid, so the paper cols-1/cols-2 don't apply).
+    '--body-cols': String(d.bodyCols),
     '--body-align': d.bodyAlign ?? 'justify',
     '--hero': d.colors.hero,
     '--accent': d.colors.accent,

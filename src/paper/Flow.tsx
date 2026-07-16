@@ -3,6 +3,7 @@ import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
 import { parseRuns } from '../lib/richtext';
 import { HighlightsBody } from './Sidebar';
+import { MagSplitAside } from './MagSplitHead';
 
 /** Turn a paragraph string with **bold** / *italic* / __underline__ markers into
  *  styled inline nodes. React escapes the text, so it's injection-safe. */
@@ -20,6 +21,10 @@ function renderRuns(text: string): ReactNode {
  *  It rides the atomic full-width figure machinery so paginate() is untouched. */
 export const HIGHLIGHTS_BLOCK_ID = '__highlights__';
 
+/** Same trick for magazine-2's pull-quote + highlights: one atomic one-column
+ *  item at the very end of the flow, so it always closes the last column. */
+export const MAG2_ASIDE_ID = '__mag2_aside__';
+
 /** Renders a page's pieces into the column flow: paragraphs and full-width
  *  figures. Figures resolve their image/caption from the doc by id. */
 export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
@@ -30,6 +35,7 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
     <>
       {pieces.map((pc, i) => {
         if (pc.kind === 'figure') {
+          if (pc.id === MAG2_ASIDE_ID) return <MagSplitAside doc={doc} key={i} />;
           if (pc.id === HIGHLIGHTS_BLOCK_ID) {
             return (
               <aside className={hlClass} key={i}>

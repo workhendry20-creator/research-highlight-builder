@@ -118,7 +118,7 @@
 .mag-lede {
   max-width: 74%;
   margin: 22px 0 0;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--serif);
   font-style: italic;
   font-size: 13pt;
   line-height: 1.45;
@@ -153,7 +153,7 @@
 
 .mag-page {
   font-family: var(--sans);
-  color: var(--mag-ink);
+  color: var(--ink);
 }
 
 /* Spread header: hero photo + location tag + credit + pull-quote. padding-bottom
@@ -203,12 +203,12 @@
 
 .mag-quote-text {
   display: block;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--serif);
   font-style: italic;
   font-weight: 700;
   font-size: 18pt;
   line-height: 1.28;
-  color: var(--mag-dark);
+  color: var(--ink);
 }
 
 .mag-quote-by {
@@ -224,16 +224,19 @@
 }
 
 .mag-cols {
-  column-count: 2;
-  column-gap: 32px;
+  /* Driven by the Design panel: columns, gutter, alignment, body size, font. */
+  column-count: var(--body-cols, 2);
+  column-gap: var(--gutter);
   column-fill: auto;
   width: calc(var(--page-w) - 2 * var(--margin));
   box-sizing: border-box;
   overflow: hidden;
-  text-align: justify;
+  text-align: var(--body-align, justify);
   hyphens: auto;
   -webkit-hyphens: auto;
-  font-size: 10.5pt;
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  color: var(--ink);
   line-height: 1.55;
 }
 
@@ -253,7 +256,7 @@
 /* Big red serif drop cap opening the lead spread. */
 .mag-cols--p1 p:first-child::first-letter {
   float: left;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--serif);
   font-weight: 800;
   font-size: 56pt;
   line-height: 0.7;
@@ -272,4 +275,309 @@
 .mag-footer {
   color: #94a3b8;
   letter-spacing: 0.1em;
+}
+
+/* ---- magazine-2: split-photo spread ---------------------------------------
+   Sheet 1 is the article on white with a photo strip bleeding off its right
+   edge; sheet 2 is the SAME photo continued full-bleed. There is one asset —
+   each sheet paints a different window into it (sizes computed in lib/magSplit,
+   applied inline in mm), so the halves join at the fold like an open book.  */
+
+.mag2-page,
+.mag2-photo {
+  --mag-red: var(--accent, #e11d2e);
+  /* --mag2-strip comes from MAG2_STRIP (lib/magSplit) via the page vars — the
+     photo's crop math and this layout must agree, so the number lives once. */
+  /* The article box: the sheet minus its margins, the photo strip, and one
+     gutter of air before the strip. Two columns, so the quote + highlights atom
+     that closes the flow renders at --mag2-col — the width it's measured at. */
+  --mag2-body-w: calc(var(--page-w) - 2 * var(--margin) - var(--mag2-strip) - var(--gutter));
+  --mag2-col: calc((var(--mag2-body-w) - var(--gutter)) / 2);
+}
+
+.mag2-page {
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+/* The article column stops where the strip begins. */
+.mag2-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: var(--mag2-body-w);
+  box-sizing: border-box;
+}
+
+/* Full-bleed: pulled out of the page padding on three sides, clipped by
+   .page overflow:hidden. Margins are layout, so this survives zoom + print. */
+.mag2-strip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--mag2-strip);
+  background-repeat: no-repeat;
+  background-color: var(--mag-dark);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.mag2-strip-credit {
+  position: absolute;
+  bottom: var(--margin);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Masthead band: black rule with the masthead knocked out on an accent block.
+   padding-bottom (not a child's margin) so the measured offsetHeight includes
+   the gap down to the columns — a trailing margin would collapse out of it. */
+.mag2-head {
+  flex: none;
+  padding-bottom: 6mm;
+}
+
+.mag2-band {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 7mm;
+  /* No negative pull: --mag2-head-h is an offsetHeight, which ignores margins,
+     and the body box is sized off it. Keep the head's box honest. */
+  margin: 0 0 7mm;
+  background: #0b0d12;
+  color: #fff;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.mag2-band-mast {
+  padding: 0 5mm;
+  margin-left: 6mm;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  background: var(--mag-red);
+  font-size: 9pt;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.mag2-band-vol {
+  padding: 0 4mm;
+  font-size: 7pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.mag2-kicker {
+  margin: 0 0 3mm;
+  font-family: var(--font-category);
+  font-size: var(--fs-eyebrow);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag2-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: var(--fs-title);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.mag2-lede {
+  margin: 3mm 0 0;
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  font-size: var(--fs-subtitle);
+  line-height: 1.4;
+  color: #475569;
+}
+
+.mag2-byline {
+  display: flex;
+  align-items: baseline;
+  gap: 6mm;
+  margin: 5mm 0 0;
+  padding-top: 3mm;
+  border-top: 1px solid #cbd5e1;
+}
+
+.mag2-author {
+  font-family: var(--font-author);
+  font-size: var(--fs-author);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.mag2-affil {
+  font-family: var(--font-affil);
+  font-size: var(--fs-affil);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+/* Body box: narrower than .mag-cols by the strip. Fixed at 2 columns — the
+   quote + highlights atom is measured against --mag2-col, which assumes 2. The
+   Design panel's column count still drives sheet 3+ (.mag-cols). */
+.mag2-cols {
+  column-count: 2;
+  column-gap: var(--gutter);
+  column-fill: auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-align: var(--body-align, justify);
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+/* Sheet 1: whatever the head leaves behind. The quote + highlights live inside
+   this box now (last atom of the flow), so they take no height off it. */
+.mag2-cols--p1 {
+  flex: none;
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--mag2-head-h, 0px));
+  /* Containing block for the pinned quote + highlights (see .mag2-aside). */
+  position: relative;
+}
+
+.mag2-cols p {
+  margin: 0 0 0.7em;
+}
+
+.mag2-cols p:first-child::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: 44pt;
+  line-height: 0.7;
+  padding: 5px 8px 0 0;
+  color: var(--mag-red);
+}
+
+/* Closes column 2: pull-quote above the highlights box, always at its foot.
+   paginate() carries it as the flow's last atom, one column wide, so the text
+   can never run past it (the atom moves to the next sheet whole if it stops
+   fitting). The atom's slot in the flow stays an empty reservation and the box
+   paints the real thing pinned bottom-right — i.e. the foot of column 2. */
+.mag2-cols .mag2-aside {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--mag2-col);
+}
+
+.mag2-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+.mag2-quote {
+  margin: 0;
+  padding-top: 3mm;
+  border-top: 3px solid var(--mag-red);
+  text-align: left;
+}
+
+.mag2-quote-text {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 11pt;
+  line-height: 1.32;
+  color: var(--ink);
+}
+
+.mag2-quote-by {
+  display: block;
+  margin-top: 2mm;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag2-hl {
+  box-sizing: border-box;
+  padding: 4mm;
+  background: var(--accent-soft);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.mag2-hl h3 {
+  margin: 0 0 2mm;
+  font-size: 8pt;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag2-hl ul {
+  margin: 0;
+  padding-left: 4mm;
+  font-size: 8pt;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.mag2-hl li {
+  margin-bottom: 1.5mm;
+}
+
+/* Sheet 2: the photo's other half. No padding — the image owns the sheet. */
+.mag2-photo {
+  padding: 0;
+  background-repeat: no-repeat;
+  background-color: var(--mag-dark);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.mag2-photo-tag {
+  position: absolute;
+  right: var(--margin);
+  bottom: var(--margin);
+  padding: 2mm 3mm;
+  background: rgba(11, 18, 32, 0.82);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 8pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }

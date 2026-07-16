@@ -1,8 +1,10 @@
 import { useDoc } from '../../store/useDoc';
-import { LabeledInput, Section } from '../Field';
+import { familyOf } from '../../schema/document';
+import { LabeledInput, LabeledTextarea, Section } from '../Field';
 
 export function MetaSection() {
   const meta = useDoc((s) => s.doc.meta);
+  const isMag = useDoc((s) => familyOf(s.doc.templateId) === 'magazine');
   const update = useDoc((s) => s.update);
 
   const set = (key: keyof typeof meta) => (v: string) =>
@@ -12,11 +14,63 @@ export function MetaSection() {
 
   return (
     <Section title="Judul & Penulis">
-      <LabeledInput label="Kategori" value={meta.categoryLabel} onChange={set('categoryLabel')} placeholder="Research Highlight · Physics" />
+      <LabeledInput
+        label={isMag ? 'Kicker' : 'Kategori'}
+        value={meta.categoryLabel}
+        onChange={set('categoryLabel')}
+        placeholder={isMag ? 'LAPORAN UTAMA' : 'Research Highlight · Physics'}
+      />
       <LabeledInput label="Judul" value={meta.title} onChange={set('title')} placeholder="Judul highlight" />
-      <LabeledInput label="Subjudul" value={meta.subtitle} onChange={set('subtitle')} placeholder="Satu kalimat penjelas" />
+      <LabeledInput
+        label={isMag ? 'Lede (subjudul cover)' : 'Subjudul'}
+        value={meta.subtitle}
+        onChange={set('subtitle')}
+        placeholder="Satu kalimat penjelas"
+      />
       <LabeledInput label="Penulis" value={meta.author} onChange={set('author')} placeholder="A. Rahman, S. Tan" />
-      <LabeledInput label="Afiliasi" value={meta.affiliation} onChange={set('affiliation')} placeholder="School of Physics, USM" />
+      <LabeledInput
+        label={isMag ? 'Afiliasi / Rubrik' : 'Afiliasi'}
+        value={meta.affiliation}
+        onChange={set('affiliation')}
+        placeholder="School of Physics, USM"
+      />
+
+      {isMag && (
+        <>
+          <p className="group-label">Elemen Majalah</p>
+          <LabeledInput label="Masthead" value={meta.masthead ?? ''} onChange={set('masthead')} placeholder="KUANTA" />
+          <LabeledInput
+            label="Volume / Tanggal"
+            value={meta.volume ?? ''}
+            onChange={set('volume')}
+            placeholder="VOL. IX · NO.2 · MARET 2026"
+          />
+          <LabeledInput
+            label="Lokasi (tag foto)"
+            value={meta.location ?? ''}
+            onChange={set('location')}
+            placeholder="OBSERVATORIUM MAUNA · 4.200 MDPL"
+          />
+          <LabeledInput
+            label="Kredit foto"
+            value={meta.photoCredit ?? ''}
+            onChange={set('photoCredit')}
+            placeholder="L. HAKIM"
+          />
+          <LabeledTextarea
+            label="Kutipan (pull-quote)"
+            value={meta.pullQuote ?? ''}
+            onChange={set('pullQuote')}
+            placeholder="Kalimat kutipan besar di tengah spread…"
+          />
+          <LabeledInput
+            label="Atribusi kutipan"
+            value={meta.pullQuoteBy ?? ''}
+            onChange={set('pullQuoteBy')}
+            placeholder="— DR. ARIA PRATAMA, FEB 2026"
+          />
+        </>
+      )}
     </Section>
   );
 }
