@@ -121,6 +121,16 @@
 
 .body-cols p {
   margin: 0 0 0.8em;
+  /* First-line indent ("menjorok") marks each new paragraph. */
+  text-indent: 1.5em;
+}
+
+/* Never indent: the drop-cap first paragraph (indent would shove the cap), nor
+   a `.cont` run — the tail of a paragraph split across a page/column is the same
+   paragraph continuing, not a new one, so its first line stays flush. */
+.body-cols--p1 p:first-child,
+.body-cols p.cont {
+  text-indent: 0;
 }
 
 /* Inline figure: text flows above and below it — never over it. The measuring
