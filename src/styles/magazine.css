@@ -1,0 +1,275 @@
+/* Magazine template (magazine-1). Self-contained — the paper-1 styles in
+   page.css are never touched. A full-bleed photo cover + a 2-column spread that
+   shares the same photo and red accent, so the two pages read as one piece. */
+
+:root {
+  --mag-red: #e11d2e;
+  --mag-ink: #14181f;
+  --mag-dark: #0b1220;
+}
+
+/* Each magazine template recolors from its own accent (design.colors.accent,
+   exposed as --accent on the page/measure vars). --mag-red is the fallback. */
+.mag-cover,
+.mag-page,
+.mag-head,
+.mag-cols {
+  --mag-red: var(--accent, #e11d2e);
+}
+
+/* ---- Page 1: full-bleed photo cover / masthead ---------------------------- */
+
+.mag-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+}
+
+.mag-cover-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6, 10, 25, 0.9) 0%,
+      rgba(6, 10, 25, 0.4) 52%,
+      rgba(6, 10, 25, 0.05) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(6, 10, 25, 0.55) 0%,
+      rgba(6, 10, 25, 0) 30%,
+      rgba(6, 10, 25, 0.82) 100%
+    );
+}
+
+.mag-cover-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--sans);
+}
+
+.mag-cover-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 9pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e5e7eb;
+}
+
+.mag-masthead {
+  font-weight: 800;
+  letter-spacing: 0.42em;
+  font-size: 12pt;
+}
+
+.mag-cover-mid {
+  margin: auto 0;
+}
+
+.mag-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 16px;
+  color: var(--mag-red);
+  font-size: 10pt;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mag-kicker-dash {
+  width: 28px;
+  height: 2px;
+  background: var(--mag-red);
+}
+
+.mag-title {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 44pt;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+.mag-title-word {
+  display: block;
+  color: #fff;
+}
+
+.mag-title-word.is-accent {
+  color: var(--mag-red);
+}
+
+.mag-lede {
+  max-width: 74%;
+  margin: 22px 0 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 13pt;
+  line-height: 1.45;
+  color: #e5e7eb;
+}
+
+.mag-cover-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.mag-cover-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.mag-folio {
+  font-size: 9pt;
+  letter-spacing: 0.1em;
+  color: #cbd5e1;
+}
+
+/* ---- Page 2+: 2-column justified spread ----------------------------------- */
+
+.mag-page {
+  font-family: var(--sans);
+  color: var(--mag-ink);
+}
+
+/* Spread header: hero photo + location tag + credit + pull-quote. padding-bottom
+   (not child margins) so its measured height includes the gap to the columns. */
+.mag-head {
+  padding-bottom: 14px;
+}
+
+.mag-hero {
+  position: relative;
+  margin: 0;
+}
+
+.mag-hero img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+}
+
+.mag-hero-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background: rgba(11, 18, 32, 0.82);
+  color: #fff;
+  font-size: 8pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mag-hero-credit {
+  margin: 7px 0 0;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag-quote {
+  margin: 14px 0 0;
+  padding: 14px 0 0;
+  border-top: 3px solid var(--mag-red);
+}
+
+.mag-quote-text {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18pt;
+  line-height: 1.28;
+  color: var(--mag-dark);
+}
+
+.mag-quote-by {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag-cols {
+  column-count: 2;
+  column-gap: 32px;
+  column-fill: auto;
+  width: calc(var(--page-w) - 2 * var(--margin));
+  box-sizing: border-box;
+  overflow: hidden;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  font-size: 10.5pt;
+  line-height: 1.55;
+}
+
+.mag-cols--p2 {
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--footer-h));
+}
+
+/* Lead spread: shorter by the measured header height. */
+.mag-cols--p1 {
+  height: calc(var(--page-h) - 2 * var(--margin) - var(--footer-h) - var(--mag-head-h, 0px));
+}
+
+.mag-cols p {
+  margin: 0 0 0.7em;
+}
+
+/* Big red serif drop cap opening the lead spread. */
+.mag-cols--p1 p:first-child::first-letter {
+  float: left;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 800;
+  font-size: 56pt;
+  line-height: 0.7;
+  padding: 6px 9px 0 0;
+  color: var(--mag-red);
+}
+
+.mag-cols .flow-fig figcaption {
+  margin-top: 0.3em;
+  font-size: 8.5pt;
+  line-height: 1.3;
+  font-style: italic;
+  color: #64748b;
+}
+
+.mag-footer {
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+}

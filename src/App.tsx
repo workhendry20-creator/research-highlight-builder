@@ -7,6 +7,7 @@ import { PaperPreview } from './paper/PaperPreview';
 import { sampleDoc } from './sample';
 import './styles/fonts.css';
 import './styles/page.css';
+import './styles/magazine.css';
 import './styles/panel.css';
 
 export default function App() {

@@ -1,5 +1,22 @@
 export const SCHEMA_VERSION = 1;
 
+/** Template family = which layout engine renders the document. */
+export type TemplateFamily = 'paper' | 'magazine';
+
+/** A specific template. The family (engine) is the id's prefix; the number picks
+ *  a preset (content + design tokens) within that engine. */
+export type TemplateId =
+  | 'paper-1'
+  | 'paper-2'
+  | 'paper-3'
+  | 'magazine-1'
+  | 'magazine-2'
+  | 'magazine-3';
+
+/** The layout engine a template runs on — derived from the id, never stored. */
+export const familyOf = (id: TemplateId | undefined): TemplateFamily =>
+  id && id.startsWith('magazine') ? 'magazine' : 'paper';
+
 /** A block never knows which page it lands on. Pages are computed, never stored. */
 export type Block =
   | { id: string; type: 'paragraph'; text: string }
@@ -76,12 +93,27 @@ export interface Design {
 
 export interface Doc {
   schemaVersion: number;
+  /** Active layout template. Absent = 'paper-1' (v1 files keep their layout). */
+  templateId?: TemplateId;
   meta: {
     categoryLabel: string;
     title: string;
     subtitle: string;
     author: string;
     affiliation: string;
+    /** Magazine-only fields (ignored by paper-1). All optional for back-compat. */
+    /** Masthead logo/name on the cover + spread header, e.g. "KUANTA". */
+    masthead?: string;
+    /** Volume/date line, e.g. "VOL. IX · NO.2 · MARET 2026". */
+    volume?: string;
+    /** Location tag overlaid on the page-2 hero photo. */
+    location?: string;
+    /** Pull-quote body shown inside the spread. */
+    pullQuote?: string;
+    /** Pull-quote attribution, e.g. "— DR. ARIA PRATAMA, FEB 2026". */
+    pullQuoteBy?: string;
+    /** Credit line under the spread hero photo. */
+    photoCredit?: string;
   };
   blocks: Block[];
   highlights: string[];
@@ -95,7 +127,8 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export const emptyDoc = (): Doc => ({
   schemaVersion: SCHEMA_VERSION,
-  meta: { categoryLabel: '', title: '', subtitle: '', author: '', affiliation: '' },
+  templateId: 'paper-1',
+  meta: { categoryLabel: '', title: '', subtitle: '', author: '', affiliation: '', volume: '' },
   blocks: [{ id: uid(), type: 'paragraph', text: '' }],
   highlights: [''],
   references: [],

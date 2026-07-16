@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 import { temporal } from 'zundo';
-import { emptyDoc, type Doc } from '../schema/document';
+import { emptyDoc, type Doc, type TemplateId } from '../schema/document';
+import { presetFor } from './presets';
 
 interface State {
   doc: Doc;
   /** Mutate a draft. Keep every edit going through here. */
   update: (fn: (d: Doc) => void) => void;
   load: (doc: Doc) => void;
+  /** Switch layout template and load that template's preset content. Undoable. */
+  switchTemplate: (id: TemplateId) => void;
 }
 
 export const useDoc = create<State>()(
@@ -20,6 +23,7 @@ export const useDoc = create<State>()(
           return { doc: next };
         }),
       load: (doc) => set({ doc }),
+      switchTemplate: (id) => set({ doc: presetFor(id) }),
     }),
     {
       // Don't push a history entry on every keystroke.

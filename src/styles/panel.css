@@ -129,6 +129,135 @@
   border-right: 1px solid var(--line);
 }
 
+/* ---- Template switcher (top of sidebar) ----------------------------------- */
+
+.tpl-switch {
+  padding: 14px 20px 12px;
+  background: var(--field);
+  border-bottom: 1px solid var(--line);
+}
+
+.tpl-switch-label {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* Accordion: a section header that expands to reveal its templates. */
+.tpl-section + .tpl-section {
+  margin-top: 6px;
+}
+
+.tpl-section-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 11px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.tpl-section-head:hover {
+  border-color: #dcdfe5;
+  background: var(--field-hover);
+}
+
+.tpl-section.is-open .tpl-section-head {
+  border-color: #dcdfe5;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.tpl-section-head.has-active {
+  border-color: var(--accent);
+}
+
+.tpl-section-ico {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.tpl-section-name {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.tpl-section-blurb {
+  flex: 1;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.tpl-section-chevron {
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.tpl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1.5px solid #dcdfe5;
+  border-top: 0;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  background: var(--field);
+}
+
+.tpl-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 11px;
+  text-align: left;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+
+.tpl-btn:hover {
+  border-color: #dcdfe5;
+  background: var(--field-hover);
+}
+
+.tpl-btn.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.tpl-btn-name {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.tpl-btn.is-active .tpl-btn-name {
+  color: var(--accent-strong);
+}
+
+.tpl-btn-kind {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.tpl-section-head:focus-visible,
+.tpl-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 .panel-head {
   padding: 18px 20px 12px;
 }

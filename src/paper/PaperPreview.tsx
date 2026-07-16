@@ -1,11 +1,15 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDoc } from '../store/useDoc';
+import { familyOf } from '../schema/document';
 import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { applyMark } from '../lib/activeEditor';
 import type { Mark } from '../lib/richtext';
 import { Page1 } from './Page1';
 import { ContPage } from './ContPage';
+import { MagazineCover } from './MagazineCover';
+import { MagazinePage } from './MagazinePage';
+import { MagazineHead } from './MagazineHead';
 import { HighlightsBody } from './Sidebar';
 import { HIGHLIGHTS_BLOCK_ID } from './Flow';
 
@@ -45,13 +49,19 @@ export function PaperPreview() {
     [doc.blocks, doc.assets],
   );
 
+  const isMag = familyOf(doc.templateId) === 'magazine';
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
   const host2Ref = useRef<HTMLDivElement>(null);
   const hlRef = useRef<HTMLDivElement>(null);
   const hlColRef = useRef<HTMLDivElement>(null);
+  const magHost1Ref = useRef<HTMLDivElement>(null);
+  const magHost2Ref = useRef<HTMLDivElement>(null);
+  const magHeadRef = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
+  const [magHeadPx, setMagHeadPx] = useState(0);
 
   // Highlights that ride the text flow as the last item: 'below' as a full-width
   // band, 'page1-flow' as a one-column box that lets text fill the gap above it.
@@ -84,9 +94,30 @@ export function PaperPreview() {
   // box, then break the text once.
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
+    if (!scroll) return;
+
+    // Magazine: page 1 is a cover (no flow). The body flows from page 2 into a
+    // 2-column box. The first spread reserves room for the pull-quote, so its
+    // measuring host (mh1) is shorter than the plain host (mh2) — same two-host
+    // trick paper uses for the page-1 header.
+    if (isMag) {
+      const mh1 = magHost1Ref.current;
+      const mh2 = magHost2Ref.current;
+      if (!mh1 || !mh2) return;
+      const headH = magHeadRef.current?.offsetHeight ?? 0;
+      setMagHeadPx(headH);
+      const root = mh1.closest<HTMLElement>('.measure-root');
+      if (root) {
+        root.style.setProperty('--footer-h', '10mm');
+        root.style.setProperty('--mag-head-h', `${headH}px`);
+      }
+      setPagination(paginate(mh1, mh2, items));
+      return;
+    }
+
     const h1 = host1Ref.current;
     const h2 = host2Ref.current;
-    if (!scroll || !h1 || !h2) return;
+    if (!h1 || !h2) return;
 
     const header = scroll.querySelector<HTMLElement>('.header');
     const headerH = header ? header.offsetHeight : 0;
@@ -111,12 +142,13 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag]);
 
   const vars = {
     ...baseVars,
     '--header-h': `${headerPx}px`,
     '--footer-h': '10mm',
+    '--mag-head-h': `${magHeadPx}px`,
   } as React.CSSProperties;
 
   const fit = fitMessage(pagination);
@@ -124,7 +156,8 @@ export function PaperPreview() {
 
   const scale = zoom === 'fit' ? fitScale : zoom;
   const pct = Math.round(scale * 100);
-  const nPages = Math.max(1, pages.length);
+  // Magazine adds the cover sheet on top of the flowed content pages.
+  const nPages = isMag ? 1 + pages.length : Math.max(1, pages.length);
   const frame = {
     width: PAGE_W_PX * scale,
     height: nPages * (PAGE_H_PX + PAGE_GAP_PX) * scale,
@@ -183,15 +216,47 @@ export function PaperPreview() {
 
       <div className="pages-frame" style={frame}>
         <div className="pages" style={{ transform: `scale(${scale})` }}>
-          <Page1 doc={doc} vars={vars} pieces={pages[0] ?? []} />
-          {pages.slice(1).map((pcs, i) => (
-            <ContPage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 2} />
-          ))}
+          {isMag ? (
+            <>
+              <MagazineCover doc={doc} vars={vars} />
+              {pages.map((pcs, i) => (
+                <MagazinePage
+                  key={i}
+                  doc={doc}
+                  vars={vars}
+                  pieces={pcs}
+                  pageNo={i + 2}
+                  lead={i === 0}
+                />
+              ))}
+            </>
+          ) : (
+            <>
+              <Page1 doc={doc} vars={vars} pieces={pages[0] ?? []} />
+              {pages.slice(1).map((pcs, i) => (
+                <ContPage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 2} />
+              ))}
+            </>
+          )}
         </div>
       </div>
 
       {/* Hidden measuring rig — same box as the real body columns. */}
       <div className="measure-root" style={vars} aria-hidden>
+        {isMag ? (
+          <>
+            {/* Header sized first (sets --mag-head-h), then the two 2-col hosts. */}
+            <div
+              className="mag-head-measure"
+              ref={magHeadRef}
+              style={{ width: 'calc(var(--page-w) - 2 * var(--margin))' }}
+            >
+              <MagazineHead doc={doc} />
+            </div>
+            <div className="mag-cols mag-cols--p1" ref={magHost1Ref} />
+            <div className="mag-cols mag-cols--p2" ref={magHost2Ref} />
+          </>
+        ) : null}
         <div className="page">
           <div className="body-cols body-cols--p1" ref={host1Ref} />
         </div>
