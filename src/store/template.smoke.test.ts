@@ -42,6 +42,7 @@ describe('template registry', () => {
 
     useDoc.getState().switchTemplate('paper-3');
     expect(useDoc.getState().doc.templateId).toBe('paper-3');
-    expect(useDoc.getState().doc.design.bodyCols).toBe(2);
+    // 3 body columns + the highlights rail = the 4-column spread paper-3 draws.
+    expect(useDoc.getState().doc.design.bodyCols).toBe(3);
   });
 });

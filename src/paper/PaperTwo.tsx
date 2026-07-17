@@ -3,6 +3,7 @@ import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
 import { paper2Grid } from '../lib/paper2';
 import { Sidebar } from './Sidebar';
+import { TagBar } from './TagBar';
 import { Flow } from './Flow';
 
 interface Props {
@@ -23,13 +24,7 @@ export function PaperTwoPage({ doc, vars, left, right }: Props) {
 
   return (
     <div className="page page--p2" style={vars}>
-      <div className="p2-bar">
-        <span className="p2-bar-mark" />
-        {/* Hugs its text: a longer tag simply lengthens the block and eats into
-            the rule beside it. */}
-        {meta.masthead && <span className="p2-bar-tag">{meta.masthead}</span>}
-        <span className="p2-bar-fill" />
-      </div>
+      <TagBar doc={doc} />
 
       <div className="p2-cols">
         <div className="p2-left">

@@ -1,0 +1,117 @@
+/* paper-3 only. One hero photo runs across the sheet 1 / sheet 2 fold: a band
+   down sheet 1's right edge, its mirror down sheet 2's left edge. Sheet 1 is
+   recto (rule left, folio left), sheet 2 and everything after it verso. Columns
+   all start at the same height here, so page.css's boxes still do the breaking —
+   only their heights change, because the band eats the top of sheets 1 and 2. */
+
+/* --p3-band-w / --p3-band-h come from PaperPreview so paper3.ts stays the one
+   place the band's size is decided — the photo window is computed from it. */
+
+/* ---- Band + rule row ---------------------------------------------------- */
+
+.p3-top {
+  display: flex;
+  align-items: stretch;
+  /* The row starts below the page's top padding; the band reclaims that padding
+     with a negative margin so it reaches the sheet edge. */
+  height: calc(var(--p3-band-h) - var(--margin));
+}
+
+.p3-rule {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  /* Bleeds to the outer sheet edge — left on recto, right on verso. */
+  margin-left: calc(-1 * var(--margin));
+}
+
+/* As a flex item the bar would shrink to its tag; it has to span the rule. */
+.p3-rule > .tag-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.p3-top--verso .p3-rule {
+  margin-left: 0;
+  margin-right: calc(-1 * var(--margin));
+}
+
+.p3-band {
+  flex: none;
+  width: var(--p3-band-w);
+  margin-top: calc(-1 * var(--margin));
+  margin-right: calc(-1 * var(--margin));
+  background-color: var(--hero);
+  background-repeat: no-repeat;
+}
+
+.p3-top--verso .p3-band {
+  margin-right: 0;
+  margin-left: calc(-1 * var(--margin));
+}
+
+/* ---- Header ------------------------------------------------------------- */
+
+.page--p3 .p3-head {
+  margin-top: var(--gutter);
+  /* Same guard paper-2 needs: a display word wider than its measure would
+     otherwise escape the column. */
+  overflow-wrap: break-word;
+}
+
+/* ---- Body boxes --------------------------------------------------------- */
+
+/* Sheet 1: band + header above, folio below. */
+.page--p3 .body-cols--p1 {
+  height: calc(
+    var(--page-h) - var(--margin) - var(--footer-h) - var(--p3-band-h) - var(--header-h) - 2 *
+      var(--gutter)
+  );
+}
+
+/* Sheet 2: band above, no header. */
+.page--p3 .body-cols--p2.p3-cols--band {
+  height: calc(var(--page-h) - var(--margin) - var(--footer-h) - var(--p3-band-h) - var(--gutter));
+}
+
+/* ---- Folio -------------------------------------------------------------- */
+
+.page--recto .page-footer {
+  left: var(--margin);
+  right: auto;
+}
+
+/* ---- Hidden measuring twins --------------------------------------------- */
+
+/* Sheet 1 and sheet 2 lose different amounts of height to the band, and sheets
+   3+ lose none — three boxes, so paper-3 breaks across three hosts. */
+.p3-host-1 {
+  width: var(--body-1);
+  column-count: var(--cols-1);
+  height: calc(
+    var(--page-h) - var(--margin) - var(--footer-h) - var(--p3-band-h) - var(--header-h) - 2 *
+      var(--gutter)
+  );
+  overflow: hidden;
+}
+
+.p3-host-2 {
+  width: var(--body-2);
+  column-count: var(--cols-2);
+  height: calc(var(--page-h) - var(--margin) - var(--footer-h) - var(--p3-band-h) - var(--gutter));
+  overflow: hidden;
+}
+
+/* The drop cap is wider than a plain letter, so sheet 1's twin must carry it. */
+.p3-host-1 p:first-child {
+  text-indent: 0;
+}
+
+.p3-host-1 p:first-child::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-size: calc(var(--fs-title) * 1.1);
+  line-height: 0.8;
+  padding-right: 6px;
+}

@@ -19,7 +19,7 @@ const asOptions = (xs: string[]) => xs.map((x) => ({ value: x, label: x }));
 
 export function DesignSection() {
   const design = useDoc((s) => s.doc.design);
-  const isP2 = useDoc((s) => s.doc.templateId === 'paper-2');
+  const hasBar = useDoc((s) => s.doc.templateId === 'paper-2' || s.doc.templateId === 'paper-3');
   const update = useDoc((s) => s.update);
 
   const set = <K extends keyof Design>(key: K, value: Design[K]) =>
@@ -109,7 +109,7 @@ export function DesignSection() {
       <LabeledColor label="Aksen lembut" value={design.colors.accentSoft} onChange={setColor('accentSoft')} />
       <LabeledColor label="Tinta (teks)" value={design.colors.ink} onChange={setColor('ink')} />
 
-      {isP2 && (
+      {hasBar && (
         <>
           <p className="group-label">Bar atas</p>
           <LabeledColor label="Garis bar" value={design.barColor ?? '#111418'} onChange={(v) => set('barColor', v)} />

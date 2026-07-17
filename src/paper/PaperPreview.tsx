@@ -6,9 +6,11 @@ import { paginate, paginateHosts, fitMessage, type FlowItem, type Pagination } f
 import { applyMark } from '../lib/activeEditor';
 import { MAG2_STRIP } from '../lib/magSplit';
 import { paper2Grid, paper2Fit } from '../lib/paper2';
+import { P3_BAND_W } from '../lib/paper3';
 import type { Mark } from '../lib/richtext';
 import { Page1 } from './Page1';
 import { PaperTwoPage } from './PaperTwo';
+import { PaperThreePage1, PaperThreePage2, PaperThreeCont } from './PaperThree';
 import { ContPage } from './ContPage';
 import { MagazineCover } from './MagazineCover';
 import { MagazinePage } from './MagazinePage';
@@ -62,6 +64,9 @@ export function PaperPreview() {
   // the hero) that start at different heights, so it breaks across three hosts.
   const isP2 = doc.templateId === 'paper-2';
   const p2 = useMemo(() => paper2Grid(doc.design), [doc.design]);
+  // paper-3: the hero band eats a different slice of sheet 1 (band + header),
+  // sheet 2 (band only) and sheets 3+ (none), so it too breaks across three hosts.
+  const isP3 = doc.templateId === 'paper-3';
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
@@ -76,6 +81,8 @@ export function PaperPreview() {
   const splitAsideRef = useRef<HTMLDivElement>(null);
   const p2HostLRef = useRef<HTMLDivElement>(null);
   const p2HostRRef = useRef<HTMLDivElement>(null);
+  const p3Host1Ref = useRef<HTMLDivElement>(null);
+  const p3Host2Ref = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
   const [magHeadPx, setMagHeadPx] = useState(0);
@@ -210,6 +217,36 @@ export function PaperPreview() {
       return;
     }
 
+    // paper-3: three boxes, because the band costs sheet 1 (band + header),
+    // sheet 2 (band) and sheets 3+ (nothing) different amounts of height.
+    if (isP3) {
+      const ph1 = p3Host1Ref.current;
+      const ph2 = p3Host2Ref.current;
+      const ph3 = host2Ref.current;
+      if (!ph1 || !ph2 || !ph3) return;
+
+      const headH = scroll.querySelector<HTMLElement>('.p3-head')?.offsetHeight ?? 0;
+      setHeaderPx(headH);
+
+      const root = ph1.closest<HTMLElement>('.measure-root');
+      if (root) {
+        root.style.setProperty('--header-h', `${headH}px`);
+        root.style.setProperty('--footer-h', '10mm');
+      }
+
+      let p3flow = items;
+      const p3hl = hlFlow ? hlColRef.current : hlBelow ? hlRef.current : null;
+      if (p3hl) {
+        const w = p3hl.offsetWidth || 1;
+        p3flow = [
+          ...items,
+          { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: p3hl.offsetHeight / w, hasCaption: false, full: hlBelow },
+        ];
+      }
+      setPagination(paginateHosts([ph1, ph2, ph3], p3flow));
+      return;
+    }
+
     const h1 = host1Ref.current;
     const h2 = host2Ref.current;
     if (!h1 || !h2) return;
@@ -237,7 +274,7 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2, isP3]);
 
   const vars = {
     ...baseVars,
@@ -246,7 +283,7 @@ export function PaperPreview() {
     '--mag-head-h': `${magHeadPx}px`,
     '--mag2-head-h': `${splitHeadPx}px`,
     '--mag2-strip': `${MAG2_STRIP}mm`,
-    '--p2-bar-h': '6mm',
+    '--bar-h': '6mm',
     '--p2-head-h': `${p2HeadPx}px`,
     '--p2-heroblock-h': `${p2HeroPx}px`,
     '--p2-left-w': `${p2.leftW}mm`,
@@ -254,6 +291,8 @@ export function PaperPreview() {
     '--p2-right-w': `${p2.rightW}mm`,
     '--p2-cols-left': String(p2.headCols),
     '--p2-cols-right': String(p2.rightCols),
+    '--p3-band-w': `${P3_BAND_W}mm`,
+    '--p3-band-h': `${doc.design.heroHeight}mm`,
     // Absent = the wireframe's black rule with a grey tag block.
     '--bar-color': doc.design.barColor ?? '#111418',
     '--bar-tag': doc.design.barTagColor ?? '#bfbfbf',
@@ -374,6 +413,14 @@ export function PaperPreview() {
                 />
               ))}
             </>
+          ) : isP3 ? (
+            <>
+              <PaperThreePage1 doc={doc} vars={vars} pieces={pages[0] ?? []} />
+              {pages.length > 1 && <PaperThreePage2 doc={doc} vars={vars} pieces={pages[1]} />}
+              {pages.slice(2).map((pcs, i) => (
+                <PaperThreeCont key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 3} />
+              ))}
+            </>
           ) : isP2 ? (
             <>
               <PaperTwoPage doc={doc} vars={vars} left={pages[0] ?? []} right={pages[1] ?? []} />
@@ -436,6 +483,14 @@ export function PaperPreview() {
           <>
             <div className="body-cols p2-host-l" ref={p2HostLRef} />
             <div className="body-cols p2-host-r" ref={p2HostRRef} />
+          </>
+        )}
+        {/* paper-3's sheet 1 (band + header) and sheet 2 (band). Sheets 3+ have
+            no band, which is exactly the plain host2 box below. */}
+        {isP3 && (
+          <>
+            <div className="body-cols p3-host-1" ref={p3Host1Ref} />
+            <div className="body-cols p3-host-2" ref={p3Host2Ref} />
           </>
         )}
         <div className="page">
