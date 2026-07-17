@@ -8,6 +8,7 @@ import { sampleDoc } from './sample';
 import './styles/fonts.css';
 import './styles/page.css';
 import './styles/paper2.css';
+import './styles/paper3.css';
 import './styles/magazine.css';
 import './styles/panel.css';
 

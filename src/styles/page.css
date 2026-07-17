@@ -97,6 +97,46 @@
   opacity: 0.75;
 }
 
+/* Rule with a tag block, drawn by the paper templates that want one. The tag
+   hugs its text; the rule fills whatever is left. Colours are author-controlled
+   (Desain panel) and default to a black rule with a grey tag. */
+.tag-bar {
+  display: flex;
+  align-items: stretch;
+  height: var(--bar-h);
+}
+
+.tag-bar-mark {
+  flex: none;
+  width: var(--bar-h); /* square */
+  background: var(--bar-color);
+}
+
+.tag-bar-tag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.9em;
+  background: var(--bar-tag);
+  color: var(--bar-ink);
+  font-family: var(--font-category);
+  font-size: calc(var(--fs-eyebrow) * 0.85);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tag-bar-fill {
+  flex: 1;
+  min-width: 0;
+  background: var(--bar-color);
+}
+
+/* Verso: the square and tag mirror to the right end of the rule. */
+.tag-bar--flip {
+  flex-direction: row-reverse;
+}
+
 .body-row {
   display: flex;
   align-items: flex-start;

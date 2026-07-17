@@ -6,6 +6,8 @@ export function MetaSection() {
   const meta = useDoc((s) => s.doc.meta);
   const isMag = useDoc((s) => familyOf(s.doc.templateId) === 'magazine');
   const isP2 = useDoc((s) => s.doc.templateId === 'paper-2');
+  // paper-3 draws the same tag bar, and captions its own hero band.
+  const hasBar = useDoc((s) => s.doc.templateId === 'paper-2' || s.doc.templateId === 'paper-3');
   const update = useDoc((s) => s.update);
 
   const set = (key: keyof typeof meta) => (v: string) =>
@@ -36,21 +38,23 @@ export function MetaSection() {
         placeholder="School of Physics, USM"
       />
 
-      {isP2 && (
+      {hasBar && (
         <>
-          <p className="group-label">Elemen Paper 2</p>
+          <p className="group-label">Bar atas</p>
           <LabeledInput
             label="Teks bar atas"
             value={meta.masthead ?? ''}
             onChange={set('masthead')}
             placeholder="School of Physics"
           />
-          <LabeledInput
-            label="Caption hero"
-            value={meta.heroCaption ?? ''}
-            onChange={set('heroCaption')}
-            placeholder="Keterangan gambar hero"
-          />
+          {isP2 && (
+            <LabeledInput
+              label="Caption hero"
+              value={meta.heroCaption ?? ''}
+              onChange={set('heroCaption')}
+              placeholder="Keterangan gambar hero"
+            />
+          )}
         </>
       )}
 

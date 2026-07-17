@@ -175,6 +175,7 @@ function makePaper2(): Doc {
 
 function makePaper3(): Doc {
   const d = emptyDoc();
+  const photoId = uid();
   d.templateId = 'paper-3';
   d.meta = {
     categoryLabel: 'Research Highlight · Quantum Information',
@@ -182,17 +183,41 @@ function makePaper3(): Doc {
     subtitle: 'Removing spinful nuclei extends memory times toward fault-tolerant thresholds',
     author: 'R. Iskandar & T. Nakamura',
     affiliation: 'School of Physics, Universiti Sains Malaysia',
+    masthead: 'Quantum Monograph',
   };
   d.design = {
     ...d.design,
-    bodyCols: 2,
-    bodyAlign: 'justify',
+    // 3 body columns + the highlights rail on sheet 1; sheet 2 spends the rail
+    // column on text, which is the 4 columns the spread is drawn against.
+    bodyCols: 3,
+    // A 43mm column plus justify is a river of spaces.
+    bodyAlign: 'left',
+    sidebar: true,
+    highlightsPlacement: 'page1',
+    margin: 12,
+    // Band height, not a full hero: it only caps the top of sheets 1 and 2.
+    heroHeight: 52,
+    sizes: { ...d.design.sizes, title: 26, subtitle: 11 },
     colors: { hero: '#0b3b3a', accent: '#0f766e', accentSoft: '#d7f0ec', ink: '#111418' },
+    barColor: '#111418',
+    barTagColor: '#bfbfbf',
+    barTagInk: '#111418',
   };
+  d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
+  d.assets = { [photoId]: { src: PHOTO_COLLIDER, naturalWidth: 1600, naturalHeight: 900 } };
   d.blocks = paras([
     'The spin of a single electron trapped in silicon is a natural qubit, but stray magnetic noise from surrounding atomic nuclei scrambles its phase within milliseconds. Purifying the crystal to the spin-zero isotope silicon-28 removes most of that noise at the source.',
     'In a 99.99 per cent enriched device cooled to twenty millikelvin, we measure a Hahn-echo coherence time exceeding one second — four orders of magnitude longer than in natural silicon, and comfortably above the error-correction threshold for surface codes.',
     'Because the qubit is defined lithographically in a material the semiconductor industry already masters, the result charts a manufacturable path from single spins to dense, error-corrected quantum processors.',
+    'Natural silicon is a poor host for a quantum memory. About five per cent of its atoms are silicon-29, the one stable isotope carrying nuclear spin, and each of those spins generates a small magnetic field that wanders as its neighbours flip. An electron sitting in that bath sees a field that drifts unpredictably, and a qubit whose Larmor frequency drifts is a qubit losing its phase.',
+    'Isotopic enrichment attacks the problem at its root rather than compensating for it. Silicon tetrafluoride is run through a centrifuge cascade until the silicon-29 fraction falls below one part in ten thousand, then reduced to silane and grown into an epitaxial layer. What remains is a crystal that is, magnetically speaking, almost empty space.',
+    'The qubit itself is a single electron confined under an aluminium gate about forty nanometres across. A micromagnet beside it sets a field gradient, so a microwave burst delivered down a nearby line rotates the spin without moving the electron. Readout is by spin-dependent tunnelling: a spin-up electron can leave to a reservoir, a spin-down one cannot, and the resulting charge jump is sensed by a neighbouring dot.',
+    'Coherence is measured with a Hahn echo, the same trick nuclear magnetic resonance has used for seventy years. A pulse tips the spin into the plane, a second pulse halfway through reverses its accumulated phase, and whatever slow noise the spin saw cancels out. What survives is the noise that changed within the sequence — and in enriched silicon there is remarkably little of it.',
+    'The decay we measure is close to exponential, which is itself informative. Nuclear-spin baths produce a distinctive non-exponential shape; its absence says the remaining silicon-29 is no longer the limit. What is left looks like charge noise from the oxide interface, a defect that better materials growth can attack.',
+    'One second of coherence is not merely a large number. Surface-code error correction demands that a qubit hold its state for many thousands of gate operations, and a two-qubit gate here takes tens of nanoseconds. The ratio, not the absolute time, is what clears the threshold — and it clears it with room to spare.',
+    'Scaling is where spin qubits earn their claim. A transmon is millimetres across; this device is smaller than a modern transistor was a decade ago, and it is built from aluminium, oxide and silicon on a standard 300mm line. The gap between a laboratory device and a foundry process is narrower here than for any competing modality.',
+    'The obstacles that remain are prosaic rather than fundamental. Each qubit currently needs its own microwave line, and a million of them cannot each have a coaxial cable to a dilution refrigerator. Cryogenic control electronics, multiplexed readout and shared-control architectures are all being pursued, and none of them requires new physics.',
+    'What the second-long measurement really buys is time to be inefficient. Error correction spends coherence to buy reliability, and a long-lived qubit can afford a control stack that is merely good rather than perfect — which is the difference between a demonstration and a machine.',
   ]);
   d.highlights = [
     'Hahn-echo coherence beyond one second at 20 mK.',
