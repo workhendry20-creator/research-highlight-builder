@@ -74,6 +74,15 @@ export interface Design {
   fontAuthor?: string;
   fontAffiliation?: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
+  /**
+   * paper-2's top band. Absent = the defaults below, so v1 files and the other
+   * templates (which never draw the band) are unaffected.
+   * `barColor` = the rule itself, `barTagColor` = the block holding the tag
+   * text, `barTagInk` = that text.
+   */
+  barColor?: string;
+  barTagColor?: string;
+  barTagInk?: string;
   /** millimetres */
   margin: number;
   gutter: number;
@@ -102,8 +111,11 @@ export interface Doc {
     author: string;
     affiliation: string;
     /** Magazine-only fields (ignored by paper-1). All optional for back-compat. */
-    /** Masthead logo/name on the cover + spread header, e.g. "KUANTA". */
+    /** Masthead logo/name on the cover + spread header, e.g. "KUANTA".
+     *  paper-2 reuses it as the tag text inside its top band. */
     masthead?: string;
+    /** Caption under paper-2's top-right hero. */
+    heroCaption?: string;
     /** Volume/date line, e.g. "VOL. IX · NO.2 · MARET 2026". */
     volume?: string;
     /** Location tag overlaid on the page-2 hero photo. */

@@ -2,11 +2,13 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDoc } from '../store/useDoc';
 import { familyOf } from '../schema/document';
 import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
-import { paginate, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
+import { paginate, paginateHosts, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { applyMark } from '../lib/activeEditor';
 import { MAG2_STRIP } from '../lib/magSplit';
+import { paper2Grid, paper2Fit } from '../lib/paper2';
 import type { Mark } from '../lib/richtext';
 import { Page1 } from './Page1';
+import { PaperTwoPage } from './PaperTwo';
 import { ContPage } from './ContPage';
 import { MagazineCover } from './MagazineCover';
 import { MagazinePage } from './MagazinePage';
@@ -56,6 +58,10 @@ export function PaperPreview() {
   // magazine-2 runs a different sheet plan: sheet 1 is the article + photo strip,
   // sheet 2 is that same photo continued, spill goes to sheet 3+.
   const isSplit = doc.templateId === 'magazine-2';
+  // paper-2 splits sheet 1 into two text regions (beside the header, then under
+  // the hero) that start at different heights, so it breaks across three hosts.
+  const isP2 = doc.templateId === 'paper-2';
+  const p2 = useMemo(() => paper2Grid(doc.design), [doc.design]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
@@ -68,10 +74,14 @@ export function PaperPreview() {
   const splitHost1Ref = useRef<HTMLDivElement>(null);
   const splitHeadRef = useRef<HTMLDivElement>(null);
   const splitAsideRef = useRef<HTMLDivElement>(null);
+  const p2HostLRef = useRef<HTMLDivElement>(null);
+  const p2HostRRef = useRef<HTMLDivElement>(null);
   const [pagination, setPagination] = useState<Pagination>(EMPTY);
   const [headerPx, setHeaderPx] = useState(0);
   const [magHeadPx, setMagHeadPx] = useState(0);
   const [splitHeadPx, setSplitHeadPx] = useState(0);
+  const [p2HeadPx, setP2HeadPx] = useState(0);
+  const [p2HeroPx, setP2HeroPx] = useState(0);
 
   // Highlights that ride the text flow as the last item: 'below' as a full-width
   // band, 'page1-flow' as a one-column box that lets text fill the gap above it.
@@ -164,6 +174,42 @@ export function PaperPreview() {
       return;
     }
 
+    // paper-2: the header and the hero block are the two things that push the
+    // regions down, and neither depends on the flow — measure them off the real
+    // sheet, feed the twins, then break the text across [left, right, page 2+].
+    if (isP2) {
+      const hl = p2HostLRef.current;
+      const hr = p2HostRRef.current;
+      const h2p = host2Ref.current;
+      if (!hl || !hr || !h2p) return;
+
+      const headH = scroll.querySelector<HTMLElement>('.p2-head')?.offsetHeight ?? 0;
+      const heroH = scroll.querySelector<HTMLElement>('.p2-heroblock')?.offsetHeight ?? 0;
+      setP2HeadPx(headH);
+      setP2HeroPx(heroH);
+
+      const root = hl.closest<HTMLElement>('.measure-root');
+      if (root) {
+        root.style.setProperty('--p2-head-h', `${headH}px`);
+        root.style.setProperty('--p2-heroblock-h', `${heroH}px`);
+        root.style.setProperty('--footer-h', '10mm');
+      }
+
+      // The in-flow highlights box is measured at the width of whichever region
+      // can hold it — the right one, which is where the article ends.
+      let p2flow = items;
+      const p2hl = hlFlow ? hlColRef.current : hlBelow ? hlRef.current : null;
+      if (p2hl) {
+        const w = p2hl.offsetWidth || 1;
+        p2flow = [
+          ...items,
+          { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: p2hl.offsetHeight / w, hasCaption: false, full: hlBelow },
+        ];
+      }
+      setPagination(paginateHosts([hl, hr, h2p], p2flow));
+      return;
+    }
+
     const h1 = host1Ref.current;
     const h2 = host2Ref.current;
     if (!h1 || !h2) return;
@@ -191,7 +237,7 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2]);
 
   const vars = {
     ...baseVars,
@@ -200,9 +246,23 @@ export function PaperPreview() {
     '--mag-head-h': `${magHeadPx}px`,
     '--mag2-head-h': `${splitHeadPx}px`,
     '--mag2-strip': `${MAG2_STRIP}mm`,
+    '--p2-bar-h': '6mm',
+    '--p2-head-h': `${p2HeadPx}px`,
+    '--p2-heroblock-h': `${p2HeroPx}px`,
+    '--p2-left-w': `${p2.leftW}mm`,
+    '--p2-hero-w': `${p2.heroW}mm`,
+    '--p2-right-w': `${p2.rightW}mm`,
+    '--p2-cols-left': String(p2.headCols),
+    '--p2-cols-right': String(p2.rightCols),
+    // Absent = the wireframe's black rule with a grey tag block.
+    '--bar-color': doc.design.barColor ?? '#111418',
+    '--bar-tag': doc.design.barTagColor ?? '#bfbfbf',
+    '--bar-ink': doc.design.barTagInk ?? '#111418',
   } as React.CSSProperties;
 
-  const fit = fitMessage(pagination);
+  // paper-2 spends two of paginateHosts' regions on sheet 1, so the fit badge
+  // has to count sheets, not regions.
+  const fit = fitMessage(isP2 ? paper2Fit(pagination) : pagination);
   const pages = pagination.pages;
 
   const scale = zoom === 'fit' ? fitScale : zoom;
@@ -213,7 +273,9 @@ export function PaperPreview() {
     ? 2 + Math.max(0, pages.length - 1)
     : isMag
       ? 1 + pages.length
-      : Math.max(1, pages.length);
+      : isP2
+        ? 1 + Math.max(0, pages.length - 2)
+        : Math.max(1, pages.length);
   const rows = Math.ceil(nPages / cols);
   const frame = {
     width: (cols * PAGE_W_PX + (cols - 1) * PAGE_GAP_PX) * scale,
@@ -312,6 +374,13 @@ export function PaperPreview() {
                 />
               ))}
             </>
+          ) : isP2 ? (
+            <>
+              <PaperTwoPage doc={doc} vars={vars} left={pages[0] ?? []} right={pages[1] ?? []} />
+              {pages.slice(2).map((pcs, i) => (
+                <ContPage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 2} />
+              ))}
+            </>
           ) : (
             <>
               <Page1 doc={doc} vars={vars} pieces={pages[0] ?? []} />
@@ -361,6 +430,14 @@ export function PaperPreview() {
             <div className="mag-cols mag-cols--p2" ref={magHost2Ref} />
           </>
         ) : null}
+        {/* paper-2's two sheet-1 regions. Heights come from --p2-head-h /
+            --p2-heroblock-h, set from the real sheet just before the break. */}
+        {isP2 && (
+          <>
+            <div className="body-cols p2-host-l" ref={p2HostLRef} />
+            <div className="body-cols p2-host-r" ref={p2HostRRef} />
+          </>
+        )}
         <div className="page">
           <div className="body-cols body-cols--p1" ref={host1Ref} />
         </div>

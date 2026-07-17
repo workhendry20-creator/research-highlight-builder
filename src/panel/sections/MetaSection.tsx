@@ -5,6 +5,7 @@ import { LabeledInput, LabeledTextarea, Section } from '../Field';
 export function MetaSection() {
   const meta = useDoc((s) => s.doc.meta);
   const isMag = useDoc((s) => familyOf(s.doc.templateId) === 'magazine');
+  const isP2 = useDoc((s) => s.doc.templateId === 'paper-2');
   const update = useDoc((s) => s.update);
 
   const set = (key: keyof typeof meta) => (v: string) =>
@@ -34,6 +35,24 @@ export function MetaSection() {
         onChange={set('affiliation')}
         placeholder="School of Physics, USM"
       />
+
+      {isP2 && (
+        <>
+          <p className="group-label">Elemen Paper 2</p>
+          <LabeledInput
+            label="Teks bar atas"
+            value={meta.masthead ?? ''}
+            onChange={set('masthead')}
+            placeholder="School of Physics"
+          />
+          <LabeledInput
+            label="Caption hero"
+            value={meta.heroCaption ?? ''}
+            onChange={set('heroCaption')}
+            placeholder="Keterangan gambar hero"
+          />
+        </>
+      )}
 
       {isMag && (
         <>

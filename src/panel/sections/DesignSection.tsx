@@ -19,6 +19,7 @@ const asOptions = (xs: string[]) => xs.map((x) => ({ value: x, label: x }));
 
 export function DesignSection() {
   const design = useDoc((s) => s.doc.design);
+  const isP2 = useDoc((s) => s.doc.templateId === 'paper-2');
   const update = useDoc((s) => s.update);
 
   const set = <K extends keyof Design>(key: K, value: Design[K]) =>
@@ -107,6 +108,15 @@ export function DesignSection() {
       <LabeledColor label="Aksen" value={design.colors.accent} onChange={setColor('accent')} />
       <LabeledColor label="Aksen lembut" value={design.colors.accentSoft} onChange={setColor('accentSoft')} />
       <LabeledColor label="Tinta (teks)" value={design.colors.ink} onChange={setColor('ink')} />
+
+      {isP2 && (
+        <>
+          <p className="group-label">Bar atas</p>
+          <LabeledColor label="Garis bar" value={design.barColor ?? '#111418'} onChange={(v) => set('barColor', v)} />
+          <LabeledColor label="Kotak teks" value={design.barTagColor ?? '#bfbfbf'} onChange={(v) => set('barTagColor', v)} />
+          <LabeledColor label="Tinta teks bar" value={design.barTagInk ?? '#111418'} onChange={(v) => set('barTagInk', v)} />
+        </>
+      )}
 
       <p className="group-label">CSS kustom</p>
       <LabeledTextarea
