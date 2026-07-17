@@ -139,25 +139,29 @@ function fillOne(
 }
 
 /**
- * `host1` is the hidden measuring node for page 1 (hero + header eat its top).
- * `host2` is the taller continuation box — reused to measure every page ≥ 2,
- * since they share geometry. Never measure the visible DOM — React will fight you.
+ * Break the flow across a sequence of measuring boxes: `hosts[i]` measures
+ * region `i`, and the last host repeats for everything past it. A "region" is
+ * usually a page, but need not be — paper-2's sheet 1 has two of them (the
+ * columns beside the header, then the column under the hero), because a
+ * multicolumn box cannot start its columns at different heights.
+ *
+ * Never measure the visible DOM — React will fight you.
  */
-export function paginate(
-  host1: HTMLElement,
-  host2: HTMLElement,
+export function paginateHosts(
+  hosts: HTMLElement[],
   items: FlowItem[],
   isOverflowing: (el: HTMLElement) => boolean = overflows,
 ): Pagination {
   const src: PaintItem[] = items.filter((it) => it.kind === 'figure' || it.text.trim() !== '');
   if (!src.length) return { pages: [], fill: 0, spill: 0 };
 
+  const hostAt = (i: number) => hosts[Math.min(i, hosts.length - 1)];
+
   const pages: PaintItem[][] = [];
   let rest = src;
-  let host = host1; // page 1 first, then the continuation box for the rest
 
   while (rest.length) {
-    let { placed, rest: next } = fillOne(host, rest, isOverflowing);
+    let { placed, rest: next } = fillOne(hostAt(pages.length), rest, isOverflowing);
     // Progress guard: a single item taller than a whole page fits nowhere.
     // Force it onto its own page (clipped by overflow:hidden) rather than loop.
     if (placed.length === 0) {
@@ -166,12 +170,11 @@ export function paginate(
     }
     pages.push(placed);
     rest = next;
-    host = host2;
   }
 
   // Re-measure the last page to report how full it is + its word count.
   const last = pages[pages.length - 1];
-  const lastHost = pages.length === 1 ? host1 : host2;
+  const lastHost = hostAt(pages.length - 1);
   paint(lastHost, last);
   lastHost.insertAdjacentHTML(
     'beforeend',
@@ -188,6 +191,20 @@ export function paginate(
     fill: fillOf(lastHost),
     spill,
   };
+}
+
+/**
+ * `host1` is the hidden measuring node for page 1 (hero + header eat its top).
+ * `host2` is the taller continuation box — reused to measure every page ≥ 2,
+ * since they share geometry.
+ */
+export function paginate(
+  host1: HTMLElement,
+  host2: HTMLElement,
+  items: FlowItem[],
+  isOverflowing: (el: HTMLElement) => boolean = overflows,
+): Pagination {
+  return paginateHosts([host1, host2], items, isOverflowing);
 }
 
 /** Where did the last atom of text land? Column index + drop tells us fullness. */

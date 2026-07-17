@@ -73,6 +73,41 @@ const PHOTO_BLACKHOLE = svg(
    </g>`,
 );
 
+/** Diamond-anvil cell squeezing a hydrogen cage — paper-2's hero. */
+const PHOTO_LATTICE = svg(
+  `<defs><linearGradient id="l" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0f1030"/><stop offset="1" stop-color="#2b1e5c"/></linearGradient></defs>
+   <rect width="1600" height="900" fill="url(#l)"/>
+   <g stroke="#8b9cf7" stroke-width="2" opacity="0.45">
+     ${[0, 1, 2, 3, 4]
+       .flatMap((r) =>
+         [0, 1, 2, 3, 4, 5, 6, 7].map((c) => {
+           const x = 220 + c * 165 + (r % 2) * 82;
+           const y = 150 + r * 150;
+           return `<line x1="${x}" y1="${y}" x2="${x + 165}" y2="${y}"/><line x1="${x}" y1="${y}" x2="${x + 82}" y2="${y + 150}"/>`;
+         }),
+       )
+       .join('')}
+   </g>
+   <g fill="#c7d2fe">
+     ${[0, 1, 2, 3, 4]
+       .flatMap((r) =>
+         [0, 1, 2, 3, 4, 5, 6, 7].map((c) => {
+           const x = 220 + c * 165 + (r % 2) * 82;
+           const y = 150 + r * 150;
+           return `<circle cx="${x}" cy="${y}" r="9"/>`;
+         }),
+       )
+       .join('')}
+   </g>
+   <g transform="translate(800 450)">
+     <polygon points="-300,-420 300,-420 90,-70 -90,-70" fill="#e0e7ff" opacity="0.16"/>
+     <polygon points="-300,420 300,420 90,70 -90,70" fill="#e0e7ff" opacity="0.16"/>
+     <circle r="86" fill="#fbbf24" opacity="0.22"/>
+     <circle r="34" fill="#fde68a"/>
+   </g>`,
+);
+
 const paras = (texts: string[]): Doc['blocks'] =>
   texts.map((text) => ({ id: uid(), type: 'paragraph' as const, text }));
 
@@ -84,6 +119,7 @@ function makePaper1(): Doc {
 
 function makePaper2(): Doc {
   const d = emptyDoc();
+  const photoId = uid();
   d.templateId = 'paper-2';
   d.meta = {
     categoryLabel: 'Research Highlight · Condensed Matter',
@@ -91,16 +127,40 @@ function makePaper2(): Doc {
     subtitle: 'A pressure-stabilised Im-3m phase carries current without resistance close to 294 K',
     author: 'N. Farid, L. Chandra & P. M. Wong',
     affiliation: 'School of Physics, Universiti Sains Malaysia',
+    masthead: 'School of Physics',
+    heroCaption: 'The hydrogen cage at 180 GPa, resolved by synchrotron diffraction.',
   };
   d.design = {
     ...d.design,
-    bodyCols: 4,
+    // 3 body columns + the highlights rail = the 4-column grid the sheet-1 split
+    // is drawn against: header on 1–2, hero on 3–4.
+    bodyCols: 3,
+    // A 43mm column plus justify is a river of spaces.
+    bodyAlign: 'left',
+    sidebar: true,
+    highlightsPlacement: 'page1',
+    margin: 12,
+    heroHeight: 112,
+    // The header is two columns (~90mm), not the full sheet: 30pt puts a word
+    // like "Superconductivity" wider than the measure, and Chrome won't
+    // hyphenate that one, so it sails under the hero.
+    sizes: { ...d.design.sizes, title: 24, subtitle: 11 },
     colors: { hero: '#1e1b4b', accent: '#4338ca', accentSoft: '#e5e4fb', ink: '#111418' },
+    barColor: '#111418',
+    barTagColor: '#bfbfbf',
+    barTagInk: '#111418',
   };
+  d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
+  d.assets = { [photoId]: { src: PHOTO_LATTICE, naturalWidth: 1600, naturalHeight: 900 } };
   d.blocks = paras([
     'A superconductor expels magnetic fields and carries current with zero resistance, but until recently only far below room temperature. Compressed hydrogen-rich compounds change the picture: light hydrogen atoms vibrate fast, coupling strongly to electrons and driving pairing at unprecedented temperatures.',
     'Our sample is a rare-earth polyhydride squeezed to 180 gigapascals in a diamond anvil cell. X-ray diffraction confirms a body-centred cubic hydrogen cage, and a sharp resistance drop marks a transition at 294 kelvin — a degree below a warm room.',
     'The Meissner effect and the shift of the transition under an applied field together rule out artefacts, pointing to genuine phonon-mediated superconductivity. The remaining challenge is pressure: recovering the phase at ambient conditions would turn a laboratory marvel into a technology.',
+    'Pressure is generated between two brilliant-cut diamonds whose tips are polished to a flat some thirty micrometres across. The sample sits in a rhenium gasket no thicker than a sheet of paper, together with a ruby chip whose fluorescence reads out the pressure to within a few gigapascals.',
+    'Measuring resistance through that assembly is its own craft. Four electrodes are sputtered directly onto the diamond culet and insulated from the gasket, so the current path runs through the sample and nothing else. A false contact would mimic exactly the signal the experiment is looking for, which is why every run is repeated on a fresh loading.',
+    'What makes the hydride family compelling is that the pairing needs no exotic mechanism. Hydrogen is the lightest element, its lattice vibrations are the fastest available, and conventional electron-phonon theory predicts the transition temperatures we observe without adjustment. The physics is textbook; the pressure is not.',
+    'Densities of states computed for the Im-3m phase place the Fermi level on a broad hydrogen-derived peak, and the calculated coupling constant reproduces the measured onset within a few kelvin. That agreement is the strongest argument that the cage, and not some surface artefact, carries the current.',
+    'Ambient-pressure recovery remains the open problem. Chemical pre-compression — substituting a larger rare-earth ion to squeeze the hydrogen sublattice without an anvil — is the most promising route, and the one the group is now pursuing.',
   ]);
   d.highlights = [
     'Zero-resistance transition observed at 294 K under 180 GPa pressure.',

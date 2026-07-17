@@ -1,0 +1,190 @@
+/* paper-2 only. Sheet 1 splits its top: header on the leading columns, hero on
+   the last two — so the text beside the header starts higher than the text under
+   the hero. Two separate multicolumn boxes, because one box cannot start its
+   columns at different heights. Sheets 2+ reuse page.css untouched. */
+
+.page--p2,
+.measure-root {
+  /* Height of everything below the band. The two region boxes and their hidden
+     measuring twins subtract from this same number, so the break is measured
+     against the box the text really lands in. */
+  --p2-body-h: calc(var(--page-h) - 2 * var(--margin) - var(--p2-bar-h) - var(--gutter));
+}
+
+/* ---- Top band ------------------------------------------------------------ */
+
+.p2-bar {
+  display: flex;
+  align-items: stretch;
+  height: var(--p2-bar-h);
+  /* Full-bleed sideways, but not to the top edge: the page's top padding stays. */
+  margin: 0 calc(-1 * var(--margin));
+}
+
+.p2-bar-mark {
+  flex: none;
+  width: var(--p2-bar-h); /* square */
+  background: var(--bar-color);
+}
+
+.p2-bar-tag {
+  flex: none; /* hugs the text: a longer tag lengthens the block */
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.9em;
+  background: var(--bar-tag);
+  color: var(--bar-ink);
+  font-family: var(--font-category);
+  font-size: calc(var(--fs-eyebrow) * 0.85);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.p2-bar-fill {
+  flex: 1;
+  min-width: 0;
+  background: var(--bar-color);
+}
+
+/* ---- Header / hero split ------------------------------------------------- */
+
+.p2-cols {
+  display: flex;
+  align-items: stretch;
+  gap: var(--gutter);
+  margin-top: var(--gutter);
+  height: var(--p2-body-h);
+}
+
+.p2-left,
+.p2-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.p2-left {
+  width: var(--p2-left-w);
+  flex: none;
+}
+
+.p2-right {
+  width: var(--p2-hero-w);
+  flex: none;
+}
+
+/* padding, not margin, so offsetHeight carries the gap the flow box subtracts. */
+.p2-left .p2-head {
+  flex: none;
+  margin-top: 0;
+  padding-bottom: var(--gutter);
+  /* The header is only a couple of columns wide here, not the full sheet, so a
+     display-size word can be wider than its measure and would otherwise sail out
+     of the box and under the hero. Containment beats a pretty break: `hyphens:
+     auto` reads better but Chrome stops hyphenating as soon as break-word is in
+     play, and it alone does not contain an over-wide word. At the preset's own
+     sizes nothing needs breaking; this only bites once the measure is squeezed. */
+  overflow-wrap: break-word;
+}
+
+.p2-heroblock {
+  flex: none;
+}
+
+.p2-hero {
+  position: relative;
+  height: var(--hero-h);
+  background: var(--hero);
+  overflow: hidden;
+}
+
+.p2-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.p2-hero-cap {
+  margin: 0.35em 0 0;
+  font-size: calc(var(--fs-body) * 0.85);
+  line-height: 1.3;
+  color: var(--ink);
+  opacity: 0.7;
+  text-align: right;
+}
+
+.p2-right-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--gutter);
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--gutter);
+}
+
+/* ---- The two text regions ------------------------------------------------ */
+
+.p2-flow-l,
+.p2-flow-r {
+  overflow: hidden;
+}
+
+.p2-flow-l {
+  flex: 1;
+  min-height: 0;
+  column-count: var(--p2-cols-left);
+}
+
+.p2-flow-r {
+  flex: none;
+  width: var(--p2-right-w);
+  column-count: var(--p2-cols-right);
+}
+
+/* Drop cap opens the article, so it belongs to the left region's first
+   paragraph — the same role .body-cols--p1 plays on the other papers. */
+.p2-flow-l p:first-child {
+  text-indent: 0;
+}
+
+.p2-flow-l p:first-child::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-size: calc(var(--fs-title) * 1.1);
+  line-height: 0.8;
+  padding-right: 6px;
+  color: var(--ink);
+}
+
+/* ---- Hidden measuring twins --------------------------------------------- */
+
+.p2-host-l {
+  width: var(--p2-left-w);
+  column-count: var(--p2-cols-left);
+  height: calc(var(--p2-body-h) - var(--p2-head-h));
+  overflow: hidden;
+}
+
+.p2-host-r {
+  width: var(--p2-right-w);
+  column-count: var(--p2-cols-right);
+  height: calc(var(--p2-body-h) - var(--p2-heroblock-h) - var(--gutter));
+  overflow: hidden;
+}
+
+/* The measuring twin of the left region carries the drop cap too — it is wider
+   than a plain letter, so the break must be measured with it in place. */
+.p2-host-l p:first-child {
+  text-indent: 0;
+}
+
+.p2-host-l p:first-child::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-size: calc(var(--fs-title) * 1.1);
+  line-height: 0.8;
+  padding-right: 6px;
+}
