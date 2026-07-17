@@ -37,7 +37,7 @@ export function Page1({ doc, vars, pieces }: Props) {
         </p>
       </header>
       <div className="body-row">
-        <div className="body-cols body-cols--p1">
+        <div className={`body-cols body-cols--p1${rail ? ' body-cols--railed' : ''}`}>
           <Flow pieces={pieces} doc={doc} />
         </div>
         {rail && <Sidebar doc={doc} />}

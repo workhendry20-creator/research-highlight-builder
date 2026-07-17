@@ -25,8 +25,12 @@ export type Block =
       type: 'figure';
       assetId: string;
       caption: string;
-      /** 1 = one column wide, 'body' = full body width. No free dragging. */
-      span: 1 | 'body';
+      /**
+       * 1 = one column wide, 'body' = full body width, 'bleed' = full body width
+       * carried out past the page margin to the sheet edge. No free dragging —
+       * every one of these still anchors to its paragraph in the flow.
+       */
+      span: 1 | 'body' | 'bleed';
       /** Caption text alignment. Absent = left (back-compat with v1 files). */
       align?: 'left' | 'center' | 'right';
     };

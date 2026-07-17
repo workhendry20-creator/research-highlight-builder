@@ -51,7 +51,7 @@ export function BodySection() {
       if (b.type === 'figure') b.caption = caption;
     });
 
-  const setSpan = (i: number, span: 1 | 'body') =>
+  const setSpan = (i: number, span: 1 | 'body' | 'bleed') =>
     update((d) => {
       const b = d.blocks[i];
       if (b.type === 'figure') b.span = span;
@@ -202,12 +202,13 @@ export function BodySection() {
                 ]}
                 onChange={(v) => setAlign(i, v)}
               />
-              <SegmentField<1 | 'body'>
+              <SegmentField<1 | 'body' | 'bleed'>
                 label="Ukuran"
                 value={b.span}
                 options={[
                   { value: 1, label: '1 kolom' },
                   { value: 'body', label: 'Selebar' },
+                  { value: 'bleed', label: 'Tepi kertas' },
                 ]}
                 onChange={(v) => setSpan(i, v)}
               />

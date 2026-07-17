@@ -18,7 +18,7 @@ interface Props {
 export function ContPage({ doc, vars, pieces, pageNo }: Props) {
   const { railEvery } = grid(doc.design);
   const body = (
-    <div className="body-cols body-cols--p2">
+    <div className={`body-cols body-cols--p2${railEvery ? ' body-cols--railed' : ''}`}>
       <Flow pieces={pieces} doc={doc} />
     </div>
   );

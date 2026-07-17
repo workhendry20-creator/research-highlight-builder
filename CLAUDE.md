@@ -9,7 +9,11 @@ Bukan editor paper akademik. Bukan Word.
   Halaman 1: 3 kolom body + 1 kolom sidebar. Halaman 2: 4 kolom body.
   JANGAN set `column-count` berbeda per halaman.
 - Deteksi overflow multikolom pakai `scrollWidth > clientWidth`.
-  `scrollHeight` SELALU false di kotak multikolom bertinggi tetap.
+  `scrollHeight` false di kotak multikolom bertinggi tetap — KECUALI ada
+  elemen `column-span: all` (gambar span `body`/`bleed`) di dalamnya. Spanner
+  memecah kotak jadi baris-baris kolom yang ditumpuk, jadi luapannya turun ke
+  bawah, bukan menyamping: `scrollWidth` buta, cuma `scrollHeight` yang lihat.
+  Karena itu `overflows()` membaca KEDUA sumbu. Jangan buang salah satunya.
 - `Doc.blocks` linear. Halaman dihitung, tidak pernah disimpan.
 - Gambar di-anchor ke paragraf, tidak pernah ke koordinat.
 - `paper/` tidak boleh mengimpor apa pun dari `panel/`.

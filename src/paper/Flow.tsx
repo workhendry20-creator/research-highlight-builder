@@ -47,8 +47,10 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
           if (!block || block.type !== 'figure') return null;
           const asset = doc.assets[block.assetId];
           if (!asset) return null;
+          const spanClass =
+            block.span === 'bleed' ? 'flow-fig--bleed' : block.span === 'body' ? 'flow-fig--full' : 'flow-fig--col';
           return (
-            <figure className={`flow-fig ${block.span === 'body' ? 'flow-fig--full' : 'flow-fig--col'}`} key={i}>
+            <figure className={`flow-fig ${spanClass}`} key={i}>
               <img src={asset.src} alt="" />
               {block.caption.trim() && (
                 <figcaption style={{ textAlign: block.align ?? 'left' }}>{block.caption}</figcaption>
