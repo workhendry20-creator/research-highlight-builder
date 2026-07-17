@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDoc } from '../store/useDoc';
 import { familyOf } from '../schema/document';
-import { cssVars, PAGE_W, PAGE_H } from '../lib/geometry';
+import { cssVars, grid, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, paginateHosts, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
 import { applyMark } from '../lib/activeEditor';
 import { MAG2_STRIP } from '../lib/magSplit';
@@ -50,7 +50,8 @@ export function PaperPreview() {
           id: b.id,
           aspect: asset ? asset.naturalHeight / asset.naturalWidth : 0.6,
           hasCaption: b.caption.trim() !== '',
-          full: b.span === 'body',
+          full: b.span === 'body' || b.span === 'bleed',
+          bleed: b.span === 'bleed',
         };
       }),
     [doc.blocks, doc.assets],
@@ -67,6 +68,12 @@ export function PaperPreview() {
   // paper-3: the hero band eats a different slice of sheet 1 (band + header),
   // sheet 2 (band only) and sheets 3+ (none), so it too breaks across three hosts.
   const isP3 = doc.templateId === 'paper-3';
+  // A bleeding figure can only bleed towards a free edge, so how wide it ends up
+  // depends on whether a rail sits beside the box. The measuring twins must carry
+  // the same flag as the real sheets or they would model the wrong width.
+  const g = useMemo(() => grid(doc.design), [doc.design]);
+  const railed = g.rail ? ' body-cols--railed' : '';
+  const railedEvery = g.railEvery ? ' body-cols--railed' : '';
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const host1Ref = useRef<HTMLDivElement>(null);
@@ -482,22 +489,22 @@ export function PaperPreview() {
         {isP2 && (
           <>
             <div className="body-cols p2-host-l" ref={p2HostLRef} />
-            <div className="body-cols p2-host-r" ref={p2HostRRef} />
+            <div className={`body-cols p2-host-r${railed}`} ref={p2HostRRef} />
           </>
         )}
         {/* paper-3's sheet 1 (band + header) and sheet 2 (band). Sheets 3+ have
             no band, which is exactly the plain host2 box below. */}
         {isP3 && (
           <>
-            <div className="body-cols p3-host-1" ref={p3Host1Ref} />
-            <div className="body-cols p3-host-2" ref={p3Host2Ref} />
+            <div className={`body-cols p3-host-1${railed}`} ref={p3Host1Ref} />
+            <div className={`body-cols p3-host-2${railedEvery}`} ref={p3Host2Ref} />
           </>
         )}
         <div className="page">
-          <div className="body-cols body-cols--p1" ref={host1Ref} />
+          <div className={`body-cols body-cols--p1${railed}`} ref={host1Ref} />
         </div>
         <div className="page">
-          <div className="body-cols body-cols--p2" ref={host2Ref} />
+          <div className={`body-cols body-cols--p2${railedEvery}`} ref={host2Ref} />
         </div>
         {/* Below-article highlights: measured at body width to size its atom. */}
         {hlBelow && (

@@ -58,7 +58,7 @@ export function PaperTwoPage({ doc, vars, left, right }: Props) {
             {meta.heroCaption && <p className="p2-hero-cap">{meta.heroCaption}</p>}
           </div>
           <div className="p2-right-row">
-            <div className="body-cols p2-flow-r">
+            <div className={`body-cols p2-flow-r${rail ? ' body-cols--railed' : ''}`}>
               <Flow pieces={right} doc={doc} />
             </div>
             {rail && <Sidebar doc={doc} />}

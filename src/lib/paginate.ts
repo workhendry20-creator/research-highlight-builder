@@ -1,8 +1,14 @@
 /**
  * One break point. Not a general pagination engine.
  *
- * The gotcha: in a fixed-height multicolumn box, overflow does NOT grow
+ * The gotcha: in a fixed-height multicolumn box, overflow normally does NOT grow
  * scrollHeight — the browser spills a new column sideways. So we measure width.
+ *
+ * The exception, and it is the reason this reads both axes: a `column-span: all`
+ * element (a full-width or bleeding figure) splits the box into column rows and
+ * stacks them. Past the last row the box grows DOWN, not sideways, so scrollWidth
+ * stays flush and only scrollHeight moves. Measured, not assumed — with a spanner
+ * present, width caught nothing and height caught every case.
  *
  * The flow is a linear list of items: paragraphs (splittable at word
  * boundaries) and figures (atomic full-width blocks). A figure never splits —
@@ -10,20 +16,24 @@
  */
 import { runsToHtml, openMarkers } from './richtext';
 
-export const overflows = (el: HTMLElement) => el.scrollWidth > el.clientWidth + 1;
+export const overflows = (el: HTMLElement) =>
+  el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
 
 /** Input item. Figures carry the geometry needed to measure their block.
- *  `full` = spans all columns (body width); otherwise one column wide. */
+ *  `full` = spans all columns (body width); otherwise one column wide.
+ *  `bleed` = full width AND carried past the margin to the sheet edge, so it is
+ *  wider than the box and therefore taller — the CSS decides how much wider, so
+ *  paint() measures it rather than doing the arithmetic here. */
 export type FlowItem =
   | { kind: 'text'; text: string }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
 
 /** Working item during the search — a text run may be flagged as a continuation. */
 type PaintItem =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
 
 /** Output piece. Pages are rendered from these; figures resolve by id. */
 export type Piece =
@@ -56,16 +66,33 @@ function paint(el: HTMLElement, items: PaintItem[]) {
   const gap = parseFloat(cs.columnGap) || 0;
   const count = parseInt(cs.columnCount) || 1;
   const colW = count > 1 ? (el.clientWidth - (count - 1) * gap) / count : el.clientWidth;
+  // How wide a bleeding figure ends up depends on the box it lands in — a railed
+  // page-1 body can only bleed one way — so ask the DOM once rather than
+  // duplicating that CSS rule here. Only the width is wanted: it decides the
+  // figure's height, which is the only thing the break actually cares about.
+  let bleedW = 0;
+  if (items.some((it) => it.kind === 'figure' && it.bleed)) {
+    const probe = document.createElement('div');
+    probe.className = 'flow-fig flow-fig--bleed';
+    probe.style.height = '0';
+    el.appendChild(probe);
+    bleedW = probe.offsetWidth;
+    probe.remove();
+  }
   for (const it of items) {
     if (it.kind === 'figure') {
       const d = document.createElement('div');
       // Full-width figures span all columns; one-column figures displace only a
-      // single column's worth of height.
+      // single column's worth of height. A bleeding figure is painted WITHOUT its
+      // negative margins: they would hang past the box's right edge and register
+      // as sideways spill on every single measurement, so the box would look
+      // permanently overflowing and every figure would be forced onto its own
+      // page. Its height already carries the extra width.
       d.className = it.full ? 'flow-fig flow-fig--full' : 'flow-fig flow-fig--col';
-      const w = it.full ? el.clientWidth : colW;
+      el.appendChild(d);
+      const w = it.bleed ? bleedW : it.full ? el.clientWidth : colW;
       const capPx = it.hasCaption ? Math.max(16, w * 0.06) : 0;
       d.style.height = `${w * it.aspect + capPx}px`;
-      el.appendChild(d);
     } else {
       const p = document.createElement('p');
       if (it.cont) p.className = 'cont';

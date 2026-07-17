@@ -189,6 +189,33 @@
   column-span: none;
 }
 
+/* Bleed: full width carried out past the page margin to the sheet edge. It
+   spans all columns, so it can never sit beside a column and shove it. */
+.flow-fig--bleed {
+  column-span: all;
+  margin-left: calc(-1 * var(--margin));
+  margin-right: calc(-1 * var(--margin));
+}
+
+/* Except where the rail owns the outer column: bleeding right would run the
+   band under the highlights box, so on a railed body the figure only bleeds
+   towards the free edge. paint() measures the result rather than assuming it. */
+.body-cols--railed .flow-fig--bleed {
+  margin-right: 0;
+}
+
+/* The body box clips its columns, which would also clip the bleed. `clip` plus
+   a clip-margin keeps the column spill hidden while letting a figure reach the
+   sheet edge — and `.page` still clips anything past that. Rendered sheets only:
+   the measuring twins in .measure-root keep `overflow: hidden`, because that is
+   what makes scrollWidth report the sideways spill the break depends on.
+   Browsers without `overflow: clip` fall back to the hidden above: no bleed,
+   nothing broken. */
+.pages .body-cols {
+  overflow: clip;
+  overflow-clip-margin: var(--margin);
+}
+
 .flow-fig img {
   display: block;
   width: 100%;

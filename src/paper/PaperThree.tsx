@@ -61,7 +61,7 @@ export function PaperThreePage1({ doc, vars, pieces }: PageProps) {
         </p>
       </header>
       <div className="body-row">
-        <div className="body-cols body-cols--p1">
+        <div className={`body-cols body-cols--p1${rail ? ' body-cols--railed' : ''}`}>
           <Flow pieces={pieces} doc={doc} />
         </div>
         {rail && <Sidebar doc={doc} />}
@@ -78,7 +78,7 @@ export function PaperThreePage2({ doc, vars, pieces }: PageProps) {
     <div className="page page--p3 page--verso" style={vars}>
       <BandRow doc={doc} verso />
       <div className="body-row">
-        <div className="body-cols body-cols--p2 p3-cols--band">
+        <div className={`body-cols body-cols--p2 p3-cols--band${railEvery ? ' body-cols--railed' : ''}`}>
           <Flow pieces={pieces} doc={doc} />
         </div>
         {railEvery && <Sidebar doc={doc} />}
@@ -95,7 +95,7 @@ export function PaperThreeCont({ doc, vars, pieces, pageNo }: PageProps & { page
   return (
     <div className="page page--p3 page--verso" style={vars}>
       <div className="body-row">
-        <div className="body-cols body-cols--p2">
+        <div className={`body-cols body-cols--p2${railEvery ? ' body-cols--railed' : ''}`}>
           <Flow pieces={pieces} doc={doc} />
         </div>
         {railEvery && <Sidebar doc={doc} />}
