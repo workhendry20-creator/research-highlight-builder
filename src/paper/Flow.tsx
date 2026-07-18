@@ -1,9 +1,27 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react';
 import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
 import { parseRuns, renderTex } from '../lib/richtext';
+import { fitEquation } from '../lib/mathfit';
 import { HighlightsBody } from './Sidebar';
 import { MagSplitAside } from './MagSplitHead';
+
+/** A display equation: one column wide, flowing with the text. KaTeX can't wrap
+ *  math, so a too-long formula is scaled down to fit the column rather than
+ *  running off the edge — re-fit after every render (covers latex edits and any
+ *  column-width change from the Design panel). */
+function DisplayEquation({ latex, number }: { latex: string; number?: number }) {
+  const texRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (texRef.current) fitEquation(texRef.current);
+  });
+  return (
+    <div className="flow-eq">
+      <span ref={texRef} className="flow-eq-tex" dangerouslySetInnerHTML={{ __html: renderTex(latex, true) }} />
+      {number != null && <span className="flow-eq-num">({number})</span>}
+    </div>
+  );
+}
 
 /** Turn a paragraph string with **bold** / *italic* / __underline__ markers and
  *  `$…$` inline math into styled inline nodes. React escapes plain text, so it's
@@ -45,12 +63,7 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
     <>
       {pieces.map((pc, i) => {
         if (pc.kind === 'equation') {
-          return (
-            <div className="flow-eq" key={i}>
-              <span className="flow-eq-tex" dangerouslySetInnerHTML={{ __html: renderTex(pc.latex, true) }} />
-              {pc.number != null && <span className="flow-eq-num">({pc.number})</span>}
-            </div>
-          );
+          return <DisplayEquation key={i} latex={pc.latex} number={pc.number} />;
         }
         if (pc.kind === 'figure') {
           if (pc.id === MAG2_ASIDE_ID) return <MagSplitAside doc={doc} key={i} />;

@@ -216,21 +216,24 @@
   overflow-clip-margin: var(--margin);
 }
 
-/* Display equation: a body-spanning centered block, like a full-width figure.
-   column-span: all keeps it out of the columns and lets paginate() measure its
-   height on scrollHeight. The optional (n) rides the right edge. */
+/* Display equation: one column wide, flowing with the text (not spanning all
+   columns). KaTeX can't wrap math, so a long formula is scaled down to fit the
+   column by fitEquation() rather than running off the edge. The optional (n)
+   rides the right edge; the formula centers in the space that's left. */
 .flow-eq {
-  column-span: all;
   display: flex;
   align-items: baseline;
-  justify-content: center;
-  gap: 0.8em;
+  gap: 0.5em;
   margin: 0.5em 0 0.9em;
   break-inside: avoid;
 }
 
 .flow-eq-tex {
-  overflow-x: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  /* fitEquation shrinks font-size to fit; hide any sub-pixel remainder so the
+     column never reports a sideways spill from the formula. */
+  overflow: hidden;
 }
 
 .flow-eq .katex-display {
@@ -239,7 +242,6 @@
 
 .flow-eq-num {
   flex: 0 0 auto;
-  margin-left: auto;
   font-size: var(--fs-body);
   color: var(--ink);
 }

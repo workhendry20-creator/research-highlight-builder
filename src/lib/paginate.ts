@@ -15,6 +15,7 @@
  * if it straddles the break it moves whole to page 2.
  */
 import { runsToHtml, openMarkers, renderTex } from './richtext';
+import { fitEquation } from './mathfit';
 
 export const overflows = (el: HTMLElement) =>
   el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
@@ -87,14 +88,24 @@ function paint(el: HTMLElement, items: PaintItem[]) {
   }
   for (const it of items) {
     if (it.kind === 'equation') {
-      // A display equation spans all columns (its CSS carries column-span: all),
-      // so — like a spanning figure — it stacks the box into column rows and its
-      // height registers on scrollHeight, which overflows() reads. Natural height:
-      // KaTeX sizes the formula, no arithmetic here.
+      // One-column display equation. Same inner structure and shrink-to-fit as
+      // the real render (see Flow.DisplayEquation), so the measured height is the
+      // height the page will actually show. A too-tall column spills sideways,
+      // which overflows() catches on scrollWidth like any other column content.
       const d = document.createElement('div');
       d.className = 'flow-eq';
-      d.innerHTML = renderTex(it.latex, true);
+      const tex = document.createElement('span');
+      tex.className = 'flow-eq-tex';
+      tex.innerHTML = renderTex(it.latex, true);
+      d.appendChild(tex);
+      if (it.number != null) {
+        const num = document.createElement('span');
+        num.className = 'flow-eq-num';
+        num.textContent = `(${it.number})`;
+        d.appendChild(num);
+      }
       el.appendChild(d);
+      fitEquation(tex);
       continue;
     }
     if (it.kind === 'figure') {
