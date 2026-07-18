@@ -40,22 +40,24 @@ export function PaperPreview() {
   const doc = useDoc((s) => s.doc);
 
   const baseVars = useMemo(() => cssVars(doc.design), [doc.design]);
-  const items = useMemo<FlowItem[]>(
-    () =>
-      doc.blocks.map((b) => {
-        if (b.type === 'paragraph') return { kind: 'text', text: b.text };
-        const asset = doc.assets[b.assetId];
-        return {
-          kind: 'figure',
-          id: b.id,
-          aspect: asset ? asset.naturalHeight / asset.naturalWidth : 0.6,
-          hasCaption: b.caption.trim() !== '',
-          full: b.span === 'body' || b.span === 'bleed',
-          bleed: b.span === 'bleed',
-        };
-      }),
-    [doc.blocks, doc.assets],
-  );
+  const items = useMemo<FlowItem[]>(() => {
+    let eqNum = 0; // running count of numbered equations, in document order
+    return doc.blocks.map((b): FlowItem => {
+      if (b.type === 'paragraph') return { kind: 'text', text: b.text };
+      if (b.type === 'equation') {
+        return { kind: 'equation', id: b.id, latex: b.latex, number: b.numbered ? ++eqNum : undefined };
+      }
+      const asset = doc.assets[b.assetId];
+      return {
+        kind: 'figure',
+        id: b.id,
+        aspect: asset ? asset.naturalHeight / asset.naturalWidth : 0.6,
+        hasCaption: b.caption.trim() !== '',
+        full: b.span === 'body' || b.span === 'bleed',
+        bleed: b.span === 'bleed',
+      };
+    });
+  }, [doc.blocks, doc.assets]);
 
   const isMag = familyOf(doc.templateId) === 'magazine';
   // magazine-2 runs a different sheet plan: sheet 1 is the article + photo strip,

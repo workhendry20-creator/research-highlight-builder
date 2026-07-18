@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Template family = which layout engine renders the document. */
 export type TemplateFamily = 'paper' | 'magazine';
@@ -20,6 +20,15 @@ export const familyOf = (id: TemplateId | undefined): TemplateFamily =>
 /** A block never knows which page it lands on. Pages are computed, never stored. */
 export type Block =
   | { id: string; type: 'paragraph'; text: string }
+  | {
+      id: string;
+      type: 'equation';
+      /** Raw LaTeX rendered as a centered, body-spanning display formula. */
+      latex: string;
+      /** Show a right-aligned (n) tag. Numbers are the running count of numbered
+       *  equations in document order — computed at render, never stored. */
+      numbered?: boolean;
+    }
   | {
       id: string;
       type: 'figure';
@@ -175,6 +184,11 @@ export const emptyDoc = (): Doc => ({
 
 /** Bump this function, never the reader. Old files must keep opening. */
 export function migrate(raw: any): Doc {
-  if (raw.schemaVersion === SCHEMA_VERSION) return raw as Doc;
+  let d = raw;
+  // v1 → v2: 'equation' blocks are purely additive — paragraph/figure blocks
+  // and every other field are unchanged, so an old file just adopts the new
+  // version number and opens as-is.
+  if (d.schemaVersion === 1) d = { ...d, schemaVersion: 2 };
+  if (d.schemaVersion === SCHEMA_VERSION) return d as Doc;
   throw new Error(`Unsupported file version: ${raw.schemaVersion}`);
 }

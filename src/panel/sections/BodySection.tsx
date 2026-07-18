@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
-import { RowButtons, Section, SegmentField } from '../Field';
-import { TOKEN, wrapSelection, type Mark } from '../../lib/richtext';
+import { RowButtons, Section, SegmentField, Toggle } from '../Field';
+import { TOKEN, wrapSelection, renderTex, type Mark } from '../../lib/richtext';
 import { setActiveEditor } from '../../lib/activeEditor';
 
 const KEY_TO_MARK: Record<string, Mark> = { b: 'b', i: 'i', u: 'u' };
@@ -85,6 +85,23 @@ export function BodySection() {
   const addParagraph = () =>
     update((d) => {
       d.blocks.push({ id: uid(), type: 'paragraph', text: '' });
+    });
+
+  const addEquation = () =>
+    update((d) => {
+      d.blocks.push({ id: uid(), type: 'equation', latex: '', numbered: false });
+    });
+
+  const setLatex = (i: number, latex: string) =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'equation') b.latex = latex;
+    });
+
+  const setNumbered = (i: number, numbered: boolean) =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'equation') b.numbered = numbered;
     });
 
   const readAsset = (file: File, then: (aid: string, d: Doc) => void) => {
@@ -183,6 +200,26 @@ export function BodySection() {
                 autosize(e.currentTarget);
               }}
             />
+          ) : b.type === 'equation' ? (
+            <div className="equation-edit">
+              <textarea
+                ref={autosize}
+                className="field-input field-textarea field-textarea--grow field-mono"
+                value={b.latex}
+                rows={2}
+                placeholder="LaTeX, mis. \hbar\omega = \frac{p^2}{2m}"
+                onChange={(e) => {
+                  setLatex(i, e.target.value);
+                  autosize(e.currentTarget);
+                }}
+              />
+              <div
+                className="equation-preview"
+                aria-hidden="true"
+                dangerouslySetInnerHTML={{ __html: renderTex(b.latex || '\\;', true) }}
+              />
+              <Toggle label="Beri nomor" checked={b.numbered ?? false} onChange={(v) => setNumbered(i, v)} />
+            </div>
           ) : (
             <div className="figure-edit">
               <div className="figure-thumb">
@@ -241,11 +278,15 @@ export function BodySection() {
         <button type="button" className="add-btn" onClick={addImage}>
           + Gambar
         </button>
+        <button type="button" className="add-btn" onClick={addEquation}>
+          + Rumus
+        </button>
       </div>
 
       <p className="hint">
-        Rumus: bungkus LaTeX dengan <code>$…$</code> — mis. <code>$E = mc^2$</code>,{' '}
-        <code>{'$\\hbar\\omega$'}</code>. Pilih teks lalu ⌘/Ctrl+M.
+        Rumus dalam kalimat: bungkus LaTeX dengan <code>$…$</code> — mis.{' '}
+        <code>$E = mc^2$</code> (pilih teks lalu ⌘/Ctrl+M). Rumus baris sendiri:{' '}
+        <strong>+ Rumus</strong>.
       </p>
     </Section>
   );

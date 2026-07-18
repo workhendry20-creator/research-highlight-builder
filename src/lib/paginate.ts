@@ -14,7 +14,7 @@
  * boundaries) and figures (atomic full-width blocks). A figure never splits —
  * if it straddles the break it moves whole to page 2.
  */
-import { runsToHtml, openMarkers } from './richtext';
+import { runsToHtml, openMarkers, renderTex } from './richtext';
 
 export const overflows = (el: HTMLElement) =>
   el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
@@ -28,17 +28,21 @@ const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
  *  paint() measures it rather than doing the arithmetic here. */
 export type FlowItem =
   | { kind: 'text'; text: string }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean }
+  | { kind: 'equation'; id: string; latex: string; number?: number };
 
 /** Working item during the search — a text run may be flagged as a continuation. */
 type PaintItem =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean }
+  | { kind: 'equation'; id: string; latex: string; number?: number };
 
-/** Output piece. Pages are rendered from these; figures resolve by id. */
+/** Output piece. Pages are rendered from these; figures resolve by id, equations
+ *  carry their own TeX so the render is a direct KaTeX call. */
 export type Piece =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string };
+  | { kind: 'figure'; id: string }
+  | { kind: 'equation'; id: string; latex: string; number?: number };
 
 export interface Pagination {
   /** pages[0] = page-1 geometry (hero + header). pages[1..] = continuation pages,
@@ -51,9 +55,11 @@ export interface Pagination {
 }
 
 const toPieces = (items: PaintItem[]): Piece[] =>
-  items.map((it) =>
-    it.kind === 'figure' ? { kind: 'figure', id: it.id } : { kind: 'text', text: it.text, cont: it.cont },
-  );
+  items.map((it): Piece => {
+    if (it.kind === 'figure') return { kind: 'figure', id: it.id };
+    if (it.kind === 'equation') return { kind: 'equation', id: it.id, latex: it.latex, number: it.number };
+    return { kind: 'text', text: it.text, cont: it.cont };
+  });
 
 /**
  * Render items into a measuring host. A figure becomes a full-width placeholder
@@ -80,6 +86,17 @@ function paint(el: HTMLElement, items: PaintItem[]) {
     probe.remove();
   }
   for (const it of items) {
+    if (it.kind === 'equation') {
+      // A display equation spans all columns (its CSS carries column-span: all),
+      // so — like a spanning figure — it stacks the box into column rows and its
+      // height registers on scrollHeight, which overflows() reads. Natural height:
+      // KaTeX sizes the formula, no arithmetic here.
+      const d = document.createElement('div');
+      d.className = 'flow-eq';
+      d.innerHTML = renderTex(it.latex, true);
+      el.appendChild(d);
+      continue;
+    }
     if (it.kind === 'figure') {
       const d = document.createElement('div');
       // Full-width figures span all columns; one-column figures displace only a
@@ -127,8 +144,8 @@ function fillOne(
 
   const straddle = src[n];
 
-  if (straddle.kind === 'figure') {
-    // Atomic: the figure can't split, so it starts the next page.
+  if (straddle.kind !== 'text') {
+    // Atomic: a figure or display equation can't split, so it starts the next page.
     return { placed: src.slice(0, n), rest: src.slice(n) };
   }
 
@@ -179,7 +196,7 @@ export function paginateHosts(
   items: FlowItem[],
   isOverflowing: (el: HTMLElement) => boolean = overflows,
 ): Pagination {
-  const src: PaintItem[] = items.filter((it) => it.kind === 'figure' || it.text.trim() !== '');
+  const src: PaintItem[] = items.filter((it) => it.kind !== 'text' || it.text.trim() !== '');
   if (!src.length) return { pages: [], fill: 0, spill: 0 };
 
   const hostAt = (i: number) => hosts[Math.min(i, hosts.length - 1)];

@@ -44,6 +44,14 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
   return (
     <>
       {pieces.map((pc, i) => {
+        if (pc.kind === 'equation') {
+          return (
+            <div className="flow-eq" key={i}>
+              <span className="flow-eq-tex" dangerouslySetInnerHTML={{ __html: renderTex(pc.latex, true) }} />
+              {pc.number != null && <span className="flow-eq-num">({pc.number})</span>}
+            </div>
+          );
+        }
         if (pc.kind === 'figure') {
           if (pc.id === MAG2_ASIDE_ID) return <MagSplitAside doc={doc} key={i} />;
           if (pc.id === HIGHLIGHTS_BLOCK_ID) {

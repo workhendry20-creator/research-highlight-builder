@@ -216,6 +216,34 @@
   overflow-clip-margin: var(--margin);
 }
 
+/* Display equation: a body-spanning centered block, like a full-width figure.
+   column-span: all keeps it out of the columns and lets paginate() measure its
+   height on scrollHeight. The optional (n) rides the right edge. */
+.flow-eq {
+  column-span: all;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.8em;
+  margin: 0.5em 0 0.9em;
+  break-inside: avoid;
+}
+
+.flow-eq-tex {
+  overflow-x: auto;
+}
+
+.flow-eq .katex-display {
+  margin: 0;
+}
+
+.flow-eq-num {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--fs-body);
+  color: var(--ink);
+}
+
 .flow-fig img {
   display: block;
   width: 100%;

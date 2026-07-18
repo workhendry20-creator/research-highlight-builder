@@ -59,6 +59,28 @@ describe('paginate', () => {
     expect(result.pages[1].some((p) => p.kind === 'figure' && p.id === 'fig-1')).toBe(true);
   });
 
+  it('never splits a display equation — it moves whole to page 2 and keeps its number', () => {
+    const items: FlowItem[] = [
+      text('Alpha bravo charlie delta echo foxtrot.'),
+      { kind: 'equation', id: 'eq-1', latex: 'E = mc^2', number: 3 },
+      text('Golf hotel india juliet kilo lima.'),
+    ];
+
+    // Same trick as the figure test: model the equation's height by counting the
+    // .flow-eq blocks paint() renders, so it can't share page 1 with the text.
+    const isOverflowing = (el: HTMLElement) =>
+      (el.textContent?.length ?? 0) + el.querySelectorAll('.flow-eq').length * 1000 > 500;
+
+    const host1 = document.createElement('div');
+    const host2 = document.createElement('div');
+    const result = paginate(host1, host2, items, isOverflowing);
+
+    const eqs = result.pages.flat().filter((p) => p.kind === 'equation');
+    expect(eqs).toEqual([{ kind: 'equation', id: 'eq-1', latex: 'E = mc^2', number: 3 }]);
+    expect(result.pages[0].some((p) => p.kind === 'equation')).toBe(false);
+    expect(result.pages[1].some((p) => p.kind === 'equation')).toBe(true);
+  });
+
   it('spills onto a third page (and beyond) without losing any words', () => {
     // Twelve paragraphs against a tight budget force at least three pages.
     const paragraphs = Array.from(

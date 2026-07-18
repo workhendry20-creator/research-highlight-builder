@@ -20,10 +20,11 @@ import katex from 'katex';
 
 export type Mark = 'b' | 'i' | 'u';
 
-/** Render one TeX fragment to an HTML string. Never throws — a syntax error
- *  shows as KaTeX's red inline error instead of breaking the whole page. */
-export const renderTex = (tex: string): string =>
-  katex.renderToString(tex, { throwOnError: false });
+/** Render one TeX fragment to an HTML string. `display` picks block (centered,
+ *  full-size) vs inline math. Never throws — a syntax error shows as KaTeX's red
+ *  inline error instead of breaking the whole page. */
+export const renderTex = (tex: string, display = false): string =>
+  katex.renderToString(tex, { throwOnError: false, displayMode: display });
 
 /** Longest tokens first so `**` wins over `*`, `__` over a lone `_`. */
 export const DELIMS: { tok: string; mark: Mark }[] = [
