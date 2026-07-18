@@ -433,6 +433,18 @@
   text-decoration: underline;
 }
 
+.format-btn--math {
+  width: auto;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+/* Inline KaTeX sits on the text baseline; keep it at the body's own size rather
+   than KaTeX's default 1.21× so formulas don't tower over the prose. */
+.math-inline .katex {
+  font-size: 1.05em;
+}
+
 .zoom-bar {
   display: inline-flex;
   align-items: center;

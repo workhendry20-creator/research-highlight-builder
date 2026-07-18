@@ -28,3 +28,9 @@ export function applyMark(mark: Mark): void {
   if (!active) return;
   wrapSelection(active.el, TOKEN[mark], active.setValue);
 }
+
+/** Wrap the active editor's selection in `$…$` for inline LaTeX math. */
+export function wrapMath(): void {
+  if (!active) return;
+  wrapSelection(active.el, '$', active.setValue);
+}

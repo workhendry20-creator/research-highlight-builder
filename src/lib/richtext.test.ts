@@ -79,6 +79,42 @@ describe('openMarkers', () => {
   });
 });
 
+describe('inline math ($…$)', () => {
+  it('captures a $…$ span as a verbatim TeX run', () => {
+    expect(parseRuns('a $E=mc^2$ b')).toEqual([
+      { text: 'a ', b: false, i: false, u: false },
+      { text: 'E=mc^2', b: false, i: false, u: false, math: true },
+      { text: ' b', b: false, i: false, u: false },
+    ]);
+  });
+
+  it('does not parse B/I/U markers inside a formula', () => {
+    // `*` and `__` here are TeX, not italic/underline.
+    expect(parseRuns('$a*b__c$')).toEqual([
+      { text: 'a*b__c', b: false, i: false, u: false, math: true },
+    ]);
+  });
+
+  it('treats a lone unmatched $ as literal text', () => {
+    expect(parseRuns('costs $5 today')).toEqual([
+      { text: 'costs $5 today', b: false, i: false, u: false },
+    ]);
+  });
+
+  it('renders a formula through KaTeX in runsToHtml', () => {
+    const html = runsToHtml('$E=mc^2$');
+    expect(html).toContain('katex');
+    expect(html).not.toContain('$');
+  });
+
+  it('reports an open $ so a break inside a formula can be rebalanced', () => {
+    expect(openMarkers('a $x + ')).toEqual(['$']);
+    expect(openMarkers('a $x = y$ b')).toEqual([]);
+    // B/I/U markers inside an open formula are ignored, not counted as open.
+    expect(openMarkers('$a**b')).toEqual(['$']);
+  });
+});
+
 describe('pagination preserves formatting across a break', () => {
   it('re-balances markers so bold does not leak or drop after the split', () => {
     // One long bold paragraph forced to straddle the page break.

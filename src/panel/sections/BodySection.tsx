@@ -165,9 +165,15 @@ export function BodySection() {
                 setActiveEditor({ el: e.currentTarget, setValue: (v) => setText(i, v) })
               }
               onKeyDown={(e) => {
-                // Ctrl/⌘ + B / I / U — Word-style inline formatting.
+                // Ctrl/⌘ + B / I / U — Word-style inline formatting; +M — $…$ math.
                 if (!(e.metaKey || e.ctrlKey)) return;
-                const mark = KEY_TO_MARK[e.key.toLowerCase()];
+                const key = e.key.toLowerCase();
+                if (key === 'm') {
+                  e.preventDefault();
+                  wrapSelection(e.currentTarget, '$', (v) => setText(i, v));
+                  return;
+                }
+                const mark = KEY_TO_MARK[key];
                 if (!mark) return;
                 e.preventDefault();
                 wrapSelection(e.currentTarget, TOKEN[mark], (v) => setText(i, v));
@@ -236,6 +242,11 @@ export function BodySection() {
           + Gambar
         </button>
       </div>
+
+      <p className="hint">
+        Rumus: bungkus LaTeX dengan <code>$…$</code> — mis. <code>$E = mc^2$</code>,{' '}
+        <code>{'$\\hbar\\omega$'}</code>. Pilih teks lalu ⌘/Ctrl+M.
+      </p>
     </Section>
   );
 }

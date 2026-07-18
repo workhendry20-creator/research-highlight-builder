@@ -5,6 +5,9 @@ import { Toolbar } from './panel/Toolbar';
 import { Panel } from './panel/Panel';
 import { PaperPreview } from './paper/PaperPreview';
 import { sampleDoc } from './sample';
+// KaTeX stylesheet — Vite fingerprints and bundles its woff2/ttf math fonts into
+// dist, so inline formulas stay self-contained (no CDN, works offline).
+import 'katex/dist/katex.min.css';
 import './styles/fonts.css';
 import './styles/page.css';
 import './styles/paper2.css';

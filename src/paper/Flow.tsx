@@ -1,14 +1,24 @@
 import { Fragment, type ReactNode } from 'react';
 import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
-import { parseRuns } from '../lib/richtext';
+import { parseRuns, renderTex } from '../lib/richtext';
 import { HighlightsBody } from './Sidebar';
 import { MagSplitAside } from './MagSplitHead';
 
-/** Turn a paragraph string with **bold** / *italic* / __underline__ markers into
- *  styled inline nodes. React escapes the text, so it's injection-safe. */
+/** Turn a paragraph string with **bold** / *italic* / __underline__ markers and
+ *  `$…$` inline math into styled inline nodes. React escapes plain text, so it's
+ *  injection-safe; math runs carry KaTeX's own generated (trusted) HTML. */
 function renderRuns(text: string): ReactNode {
   return parseRuns(text).map((r, j) => {
+    if (r.math) {
+      return (
+        <span
+          key={j}
+          className="math-inline"
+          dangerouslySetInnerHTML={{ __html: renderTex(r.text) }}
+        />
+      );
+    }
     let node: ReactNode = r.text;
     if (r.b) node = <strong>{node}</strong>;
     if (r.i) node = <em>{node}</em>;

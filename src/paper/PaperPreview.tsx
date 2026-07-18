@@ -3,7 +3,7 @@ import { useDoc } from '../store/useDoc';
 import { familyOf } from '../schema/document';
 import { cssVars, grid, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, paginateHosts, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
-import { applyMark } from '../lib/activeEditor';
+import { applyMark, wrapMath } from '../lib/activeEditor';
 import { MAG2_STRIP } from '../lib/magSplit';
 import { paper2Grid, paper2Fit } from '../lib/paper2';
 import { P3_BAND_W } from '../lib/paper3';
@@ -352,6 +352,17 @@ export function PaperPreview() {
               {f.label}
             </button>
           ))}
+          <button
+            type="button"
+            className="format-btn format-btn--math"
+            title="Rumus LaTeX ($…$, ⌘/Ctrl+M)"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              wrapMath();
+            }}
+          >
+            √x̄
+          </button>
         </div>
         <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
         {isMag && (
