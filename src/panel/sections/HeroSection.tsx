@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid } from '../../schema/document';
+import { loadImage, ImageLoadError } from '../../lib/loadImage';
 import { LabeledNumber, LabeledRange, Section } from '../Field';
 
 export function HeroSection() {
@@ -9,24 +10,23 @@ export function HeroSection() {
   const heroHeight = useDoc((s) => s.doc.design.heroHeight);
   const update = useDoc((s) => s.update);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const onFile = (file: File | undefined) => {
+  const onFile = async (file: File | undefined) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const src = reader.result as string;
-      const img = new Image();
-      img.onload = () =>
-        update((d) => {
-          const prev = d.hero.assetId;
-          const id = uid();
-          d.assets[id] = { src, naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight };
-          d.hero = { assetId: id, offsetX: 0, offsetY: 0, scale: 1 };
-          if (prev && prev !== id) delete d.assets[prev];
-        });
-      img.src = src;
-    };
-    reader.readAsDataURL(file);
+    setError(null);
+    try {
+      const { src, naturalWidth, naturalHeight } = await loadImage(file);
+      update((d) => {
+        const prev = d.hero.assetId;
+        const id = uid();
+        d.assets[id] = { src, naturalWidth, naturalHeight };
+        d.hero = { assetId: id, offsetX: 0, offsetY: 0, scale: 1 };
+        if (prev && prev !== id) delete d.assets[prev];
+      });
+    } catch (e) {
+      setError(e instanceof ImageLoadError ? e.message : 'Gagal memuat gambar.');
+    }
   };
 
   const removeImage = () =>
@@ -80,6 +80,12 @@ export function HeroSection() {
         <button type="button" className="add-btn hero-upload" onClick={() => fileRef.current?.click()}>
           + Unggah gambar hero
         </button>
+      )}
+
+      {error && (
+        <p className="hint hint--warn" role="alert">
+          {error}
+        </p>
       )}
 
       <LabeledNumber
