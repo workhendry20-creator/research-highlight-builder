@@ -36,7 +36,7 @@ export function HighlightsSection() {
         </div>
       ))}
       <button type="button" className="add-btn" onClick={add}>
-        + Tambah highlight
+        + Add highlight
       </button>
     </Section>
   );

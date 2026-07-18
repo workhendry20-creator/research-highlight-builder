@@ -40,7 +40,7 @@ function open() {
       try {
         useDoc.getState().load(migrate(JSON.parse(reader.result as string)));
       } catch {
-        alert('File tidak valid atau versinya tidak didukung.');
+        alert('Invalid file or unsupported version.');
       }
     };
     reader.readAsText(file);
@@ -77,19 +77,19 @@ export function Toolbar() {
       <span className="toolbar-brand">Research Highlight Builder</span>
       <div className="toolbar-spacer" />
       <div className="toolbar-group">
-        <button className="tool-btn" onClick={undo} disabled={!canUndo} title="Urungkan (⌘Z)">
+        <button className="tool-btn" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)">
           ↶ Undo
         </button>
-        <button className="tool-btn" onClick={redo} disabled={!canRedo} title="Ulangi (⌘⇧Z)">
+        <button className="tool-btn" onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)">
           ↷ Redo
         </button>
       </div>
       <div className="toolbar-group">
-        <button className="tool-btn" onClick={open} title="Buka file .json">
-          Buka…
+        <button className="tool-btn" onClick={open} title="Open .json file">
+          Open…
         </button>
-        <button className="tool-btn" onClick={save} title="Simpan sebagai .json (⌘S)">
-          Simpan
+        <button className="tool-btn" onClick={save} title="Save as .json (⌘S)">
+          Save
         </button>
         <button className="tool-btn tool-btn--primary" onClick={() => window.print()} title="Export PDF (⌘P)">
           Export PDF

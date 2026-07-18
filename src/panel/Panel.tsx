@@ -44,7 +44,7 @@ export function Panel() {
   return (
     <aside className="panel">
       <div className="tpl-switch">
-        <p className="tpl-switch-label">Pilih Template</p>
+        <p className="tpl-switch-label">Choose Template</p>
         {SECTIONS.map((s) => {
           const open = openSection === s.family;
           const items = TEMPLATE_META.filter((t) => t.family === s.family);
@@ -92,7 +92,7 @@ export function Panel() {
         <p className="panel-sub">USM School of Physics</p>
       </header>
 
-      <nav className="panel-tabs" role="tablist" aria-label="Bagian editor">
+      <nav className="panel-tabs" role="tablist" aria-label="Editor sections">
         {TABS.map((t) => (
           <button
             key={t.id}

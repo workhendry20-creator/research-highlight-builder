@@ -23,9 +23,9 @@ import { HIGHLIGHTS_BLOCK_ID, MAG2_ASIDE_ID } from './Flow';
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
 const FORMAT_BTNS: { mark: Mark; label: string; title: string }[] = [
-  { mark: 'b', label: 'B', title: 'Tebal (⌘/Ctrl+B)' },
-  { mark: 'i', label: 'I', title: 'Miring (⌘/Ctrl+I)' },
-  { mark: 'u', label: 'U', title: 'Garis bawah (⌘/Ctrl+U)' },
+  { mark: 'b', label: 'B', title: 'Bold (⌘/Ctrl+B)' },
+  { mark: 'i', label: 'I', title: 'Italic (⌘/Ctrl+I)' },
+  { mark: 'u', label: 'U', title: 'Underline (⌘/Ctrl+U)' },
 ];
 
 // A4 in CSS px at the reference 96dpi (1mm = 96/25.4 px). Preview-only: used to
@@ -360,7 +360,7 @@ export function PaperPreview() {
               type="button"
               className={`view-btn${spread ? ' is-active' : ''}`}
               onClick={() => setSpread((s) => !s)}
-              title="Tampilkan sebagai spread halaman berdampingan"
+              title="Show as a side-by-side page spread"
               aria-pressed={spread}
             >
               <span className="view-btn-ico" aria-hidden="true">▭▭</span>
@@ -376,11 +376,11 @@ export function PaperPreview() {
           >
             Fit
           </button>
-          <button type="button" className="zoom-btn" onClick={() => step(-0.1)} title="Perkecil">
+          <button type="button" className="zoom-btn" onClick={() => step(-0.1)} title="Zoom out">
             −
           </button>
           <span className="zoom-val">{pct}%</span>
-          <button type="button" className="zoom-btn" onClick={() => step(0.1)} title="Perbesar">
+          <button type="button" className="zoom-btn" onClick={() => step(0.1)} title="Zoom in">
             +
           </button>
           <button
