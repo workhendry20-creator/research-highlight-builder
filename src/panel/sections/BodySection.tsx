@@ -4,6 +4,7 @@ import { uid, type Doc } from '../../schema/document';
 import { RowButtons, Section, SegmentField } from '../Field';
 import { TOKEN, wrapSelection, type Mark } from '../../lib/richtext';
 import { setActiveEditor } from '../../lib/activeEditor';
+import { loadImage, ImageLoadError } from '../../lib/loadImage';
 
 const KEY_TO_MARK: Record<string, Mark> = { b: 'b', i: 'i', u: 'u' };
 
@@ -30,6 +31,7 @@ export function BodySection() {
   // without waiting for a re-render between dragstart and drop.
   const dragFrom = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
+  const [imgError, setImgError] = useState<string | null>(null);
 
   // Grow the writing box to its content so paragraphs never type into a small
   // inner-scrolling area. Stable identity: runs on mount (initial + tab switch).
@@ -87,20 +89,18 @@ export function BodySection() {
       d.blocks.push({ id: uid(), type: 'paragraph', text: '' });
     });
 
-  const readAsset = (file: File, then: (aid: string, d: Doc) => void) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const src = reader.result as string;
-      const img = new Image();
-      img.onload = () =>
-        update((d) => {
-          const aid = uid();
-          d.assets[aid] = { src, naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight };
-          then(aid, d);
-        });
-      img.src = src;
-    };
-    reader.readAsDataURL(file);
+  const readAsset = async (file: File, then: (aid: string, d: Doc) => void) => {
+    setImgError(null);
+    try {
+      const { src, naturalWidth, naturalHeight } = await loadImage(file);
+      update((d) => {
+        const aid = uid();
+        d.assets[aid] = { src, naturalWidth, naturalHeight };
+        then(aid, d);
+      });
+    } catch (e) {
+      setImgError(e instanceof ImageLoadError ? e.message : 'Gagal memuat gambar.');
+    }
   };
 
   const addImage = () =>
@@ -236,6 +236,12 @@ export function BodySection() {
           + Gambar
         </button>
       </div>
+
+      {imgError && (
+        <p className="hint hint--warn" role="alert">
+          {imgError}
+        </p>
+      )}
     </Section>
   );
 }
