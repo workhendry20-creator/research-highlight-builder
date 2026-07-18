@@ -207,7 +207,7 @@ export function BodySection() {
                 className="field-input field-textarea field-textarea--grow field-mono"
                 value={b.latex}
                 rows={2}
-                placeholder="LaTeX, mis. \hbar\omega = \frac{p^2}{2m}"
+                placeholder="LaTeX, e.g. \hbar\omega = \frac{p^2}{2m}"
                 onChange={(e) => {
                   setLatex(i, e.target.value);
                   autosize(e.currentTarget);
@@ -218,7 +218,7 @@ export function BodySection() {
                 aria-hidden="true"
                 dangerouslySetInnerHTML={{ __html: renderTex(b.latex || '\\;', true) }}
               />
-              <Toggle label="Beri nomor" checked={b.numbered ?? false} onChange={(v) => setNumbered(i, v)} />
+              <Toggle label="Number it" checked={b.numbered ?? false} onChange={(v) => setNumbered(i, v)} />
             </div>
           ) : (
             <div className="figure-edit">
@@ -279,14 +279,14 @@ export function BodySection() {
           + Gambar
         </button>
         <button type="button" className="add-btn" onClick={addEquation}>
-          + Rumus
+          + Formula
         </button>
       </div>
 
       <p className="hint">
-        Rumus dalam kalimat: bungkus LaTeX dengan <code>$…$</code> — mis.{' '}
-        <code>$E = mc^2$</code> (pilih teks lalu ⌘/Ctrl+M). Rumus baris sendiri:{' '}
-        <strong>+ Rumus</strong>.
+        Inline formula: wrap LaTeX in <code>$…$</code> — e.g.{' '}
+        <code>$E = mc^2$</code> (select text then ⌘/Ctrl+M). Standalone formula:{' '}
+        <strong>+ Formula</strong>.
       </p>
     </Section>
   );

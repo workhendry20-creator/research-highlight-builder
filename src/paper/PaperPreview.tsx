@@ -357,7 +357,7 @@ export function PaperPreview() {
           <button
             type="button"
             className="format-btn format-btn--math"
-            title="Rumus LaTeX ($…$, ⌘/Ctrl+M)"
+            title="LaTeX formula ($…$, ⌘/Ctrl+M)"
             onMouseDown={(e) => {
               e.preventDefault();
               wrapMath();
