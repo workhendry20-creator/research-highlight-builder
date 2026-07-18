@@ -203,11 +203,9 @@ function makePaper3(): Doc {
     barTagColor: '#bfbfbf',
     barTagInk: '#111418',
   };
-  const figId = uid();
   d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
   d.assets = {
     [photoId]: { src: PHOTO_COLLIDER, naturalWidth: 1600, naturalHeight: 900 },
-    [figId]: { src: PHOTO_LATTICE, naturalWidth: 1600, naturalHeight: 900 },
   };
   d.blocks = paras([
     'The spin of a single electron trapped in silicon is a natural qubit, but stray magnetic noise from surrounding atomic nuclei scrambles its phase within milliseconds. Purifying the crystal to the spin-zero isotope silicon-28 removes most of that noise at the source.',
@@ -223,16 +221,6 @@ function makePaper3(): Doc {
     'The obstacles that remain are prosaic rather than fundamental. Each qubit currently needs its own microwave line, and a million of them cannot each have a coaxial cable to a dilution refrigerator. Cryogenic control electronics, multiplexed readout and shared-control architectures are all being pursued, and none of them requires new physics.',
     'What the second-long measurement really buys is time to be inefficient. Error correction spends coherence to buy reliability, and a long-lived qubit can afford a control stack that is merely good rather than perfect — which is the difference between a demonstration and a machine.',
   ]);
-  // A bleeding figure anchored partway through the article — it rides the flow
-  // like any other, and lands wherever the text puts it.
-  d.blocks.splice(6, 0, {
-    id: figId,
-    type: 'figure',
-    assetId: figId,
-    caption: 'The enriched silicon-28 lattice: almost no nuclear spin left to dephase the qubit.',
-    span: 'bleed',
-    align: 'left',
-  });
   d.highlights = [
     'Hahn-echo coherence beyond one second at 20 mK.',
     'Isotopic purification to 99.99% silicon-28 suppresses nuclear-spin noise.',
