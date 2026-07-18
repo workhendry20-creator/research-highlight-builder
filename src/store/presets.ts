@@ -369,8 +369,8 @@ const makeMagazine2 = (): Doc => {
   return d;
 };
 
-const makeMagazine3 = (): Doc =>
-  makeMagazine({
+const makeMagazine3 = (): Doc => {
+  const d = makeMagazine({
     id: 'magazine-3',
     photo: PHOTO_BLACKHOLE,
     accent: '#d97706',
@@ -390,11 +390,23 @@ const makeMagazine3 = (): Doc =>
     body: [
       'Satu koma tiga miliar tahun lalu, di sudut jauh alam semesta, dua lubang hitam saling mengejar dalam tarian maut. Masing-masing sepuluh kali lebih berat dari Matahari, mereka berpilin makin cepat hingga akhirnya melebur dalam sepersekian detik.',
       'Peristiwa itu melepaskan energi lebih besar daripada seluruh cahaya bintang di kosmos digabungkan—namun tak sekeping pun berupa cahaya. Semuanya mengalir sebagai gelombang gravitasi: riak pada jalinan ruang-waktu itu sendiri.',
-      'Gelombang itu mengembara selama lebih dari satu miliar tahun, meregang dan memampat setiap galaksi yang dilewatinya sedikit demi sedikit. Ketika akhirnya menyapu Bumi, ia menggeser cermin detektor sejauh seperseribu lebar sebuah proton.',
+      'Ukuran cakrawala peristiwa tiap lubang hitam ditentukan jari-jari Schwarzschild, dan regangan yang sampai ke Bumi hanyalah $h \\sim 10^{-21}$—seperseribu lebar sebuah proton.',
+      'Gelombang itu mengembara selama lebih dari satu miliar tahun, meregang dan memampat setiap galaksi yang dilewatinya sedikit demi sedikit. Ketika akhirnya menyapu Bumi, ia menggeser cermin detektor sejauh jarak sekecil itu.',
       'Menangkap pergeseran sekecil itu menuntut ketelitian yang nyaris mustahil: dua lengan laser sepanjang empat kilometer, terisolasi dari getaran lalu lintas, gempa, bahkan debur ombak di pantai yang jauh.',
       'Sinyalnya berlangsung kurang dari seperlima detik—sebuah dengung yang meninggi lalu senyap. Namun dalam dengung itu terekam kelahiran sebuah ilmu baru: astronomi yang mendengarkan, bukan sekadar menatap, denyut alam semesta.',
     ],
   });
+  // Seed a numbered display equation (Schwarzschild radius) after the paragraph
+  // that introduces it, so switching to a magazine template shows the math
+  // feature — inline $…$ and block equations — working in the editorial layout.
+  d.blocks.splice(3, 0, {
+    id: uid(),
+    type: 'equation',
+    latex: 'r_s = \\frac{2GM}{c^2}',
+    numbered: true,
+  });
+  return d;
+};
 
 // ---- Registry --------------------------------------------------------------
 
