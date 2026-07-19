@@ -110,28 +110,41 @@ export function HeroSection() {
   const heroHeight = useDoc((s) => s.doc.design.heroHeight);
   const update = useDoc((s) => s.update);
 
-  // magazine-1/-3 split the cover (page 1) from the hero (page 2, top).
-  const hasCover = templateId === 'magazine-1' || templateId === 'magazine-3';
+  // magazine-3 is a gatefold: one cover photo split across both cover sheets, and
+  // no article hero — so it shows only the cover picker.
+  const isGate = templateId === 'magazine-3';
+  // magazine-1 splits the cover (page 1) from the hero (page 2, top).
+  const hasCover = templateId === 'magazine-1' || isGate;
 
   return (
     <>
-      {hasCover && <ImagePicker slot="cover" title="Cover Image" blurb="Page 1 · full-bleed cover" />}
-      <ImagePicker slot="hero" title="Hero Image" blurb={hasCover ? 'Page 2 · photo above the article' : undefined} />
-      <Section title="Hero height">
-        <LabeledNumber
-          label="Height"
-          unit="mm"
-          value={heroHeight}
-          min={0}
-          max={160}
-          step={1}
-          onChange={(v) =>
-            update((d) => {
-              d.design.heroHeight = v;
-            })
-          }
+      {hasCover && (
+        <ImagePicker
+          slot="cover"
+          title={isGate ? 'Gatefold Photo' : 'Cover Image'}
+          blurb={isGate ? 'Split across both cover sheets (use a wide photo)' : 'Page 1 · full-bleed cover'}
         />
-      </Section>
+      )}
+      {!isGate && (
+        <>
+          <ImagePicker slot="hero" title="Hero Image" blurb={hasCover ? 'Page 2 · photo above the article' : undefined} />
+          <Section title="Hero height">
+            <LabeledNumber
+              label="Height"
+              unit="mm"
+              value={heroHeight}
+              min={0}
+              max={160}
+              step={1}
+              onChange={(v) =>
+                update((d) => {
+                  d.design.heroHeight = v;
+                })
+              }
+            />
+          </Section>
+        </>
+      )}
     </>
   );
 }

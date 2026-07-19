@@ -12,14 +12,17 @@ interface Props {
   pageNo: number;
   /** The first content sheet carries the hero photo + pull-quote header. */
   lead: boolean;
+  /** Draw the hero header on the lead sheet. False for magazine-3, whose gatefold
+   *  cover already carries the photo — the lead sheet is columns + drop cap only. */
+  head?: boolean;
 }
 
 /** Magazine page 2+: a 2-column justified spread. The lead sheet opens with the
  *  hero photo, location tag and pull-quote; later sheets are columns only. */
-export function MagazinePage({ doc, vars, pieces, pageNo, lead }: Props) {
+export function MagazinePage({ doc, vars, pieces, pageNo, lead, head = true }: Props) {
   return (
     <div className="page mag-page" style={vars}>
-      {lead && <MagazineHead doc={doc} />}
+      {lead && head && <MagazineHead doc={doc} />}
       <div className={`mag-cols ${lead ? 'mag-cols--p1' : 'mag-cols--p2'}`}>
         <Flow pieces={pieces} doc={doc} />
       </div>

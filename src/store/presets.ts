@@ -109,6 +109,33 @@ const PHOTO_LATTICE = svg(
    </g>`,
 );
 
+/** Wide canvas (2400×1700 ≈ gatefold spread) for magazine-3, whose cover photo is
+ *  split across two facing sheets. */
+const svgWide = (inner: string) =>
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1700">${inner}</svg>`,
+  );
+
+/** Black hole + accretion ring on a starfield, drawn wide for the gatefold. */
+const PHOTO_COSMOS_WIDE = svgWide(
+  `<defs><radialGradient id="cw" cx="50%" cy="46%" r="62%">
+    <stop offset="0" stop-color="#241634"/><stop offset="0.6" stop-color="#0a0a1a"/><stop offset="1" stop-color="#03040a"/></radialGradient></defs>
+   <rect width="2400" height="1700" fill="url(#cw)"/>
+   ${stars([
+     [180, 200, 2.4], [520, 140, 1.8], [900, 240, 2.2], [1500, 160, 2], [1980, 220, 2.6],
+     [2260, 380, 1.7], [140, 700, 1.6], [420, 1200, 2], [860, 1500, 1.8], [1360, 1440, 2.2],
+     [1820, 1300, 1.6], [2180, 1120, 2], [2320, 760, 1.5], [700, 900, 1.3], [1700, 980, 1.4],
+   ])}
+   <g transform="translate(1200 850)">
+     <ellipse rx="520" ry="150" fill="none" stroke="#f59e0b" stroke-width="34" opacity="0.28"/>
+     <ellipse rx="470" ry="128" fill="none" stroke="#fbbf24" stroke-width="18" opacity="0.55"/>
+     <ellipse rx="430" ry="110" fill="none" stroke="#fde68a" stroke-width="8" opacity="0.9"/>
+     <circle r="230" fill="#03040a"/>
+     <circle r="230" fill="none" stroke="#fcd34d" stroke-width="4" opacity="0.5"/>
+   </g>`,
+);
+
 const paras = (texts: string[]): Doc['blocks'] =>
   texts.map((text) => ({ id: uid(), type: 'paragraph' as const, text }));
 
@@ -374,8 +401,8 @@ const makeMagazine2 = (): Doc => {
   return d;
 };
 
-const makeMagazine3 = (): Doc =>
-  makeMagazine({
+const makeMagazine3 = (): Doc => {
+  const d = makeMagazine({
     id: 'magazine-3',
     photo: PHOTO_BLACKHOLE,
     accent: '#d97706',
@@ -400,6 +427,12 @@ const makeMagazine3 = (): Doc =>
       'Sinyalnya berlangsung kurang dari seperlima detik—sebuah dengung yang meninggi lalu senyap. Namun dalam dengung itu terekam kelahiran sebuah ilmu baru: astronomi yang mendengarkan, bukan sekadar menatap, denyut alam semesta.',
     ],
   });
+  // Gatefold: the cover photo is split across the two facing sheets, so it wants
+  // a wide image rather than the 16:9 hero.
+  const coverId = d.cover?.assetId;
+  if (coverId) d.assets[coverId] = { src: PHOTO_COSMOS_WIDE, naturalWidth: 2400, naturalHeight: 1700 };
+  return d;
+};
 
 // ---- Registry --------------------------------------------------------------
 
@@ -409,7 +442,7 @@ export const TEMPLATES: (TemplateMeta & { make: () => Doc })[] = [
   { id: 'paper-3', family: 'paper', name: 'Paper 3', kind: 'Quantum Monograph', make: makePaper3 },
   { id: 'magazine-1', family: 'magazine', name: 'Magazine 1', kind: 'Modern Editorial', make: makeMagazine1 },
   { id: 'magazine-2', family: 'magazine', name: 'Magazine 2', kind: 'Particle Feature', make: makeMagazine2 },
-  { id: 'magazine-3', family: 'magazine', name: 'Magazine 3', kind: 'Cosmos Spread', make: makeMagazine3 },
+  { id: 'magazine-3', family: 'magazine', name: 'Magazine 3', kind: 'Cosmos Gatefold', make: makeMagazine3 },
   { id: 'gallery-1', family: 'gallery', name: 'Gallery 1', kind: 'Photo Spread', make: makeGallery1 },
   { id: 'gallery-2', family: 'gallery', name: 'Gallery 2', kind: 'Centre Fold', make: makeGallery2 },
   { id: 'gallery-3', family: 'gallery', name: 'Gallery 3', kind: 'Mosaic Band', make: makeGallery3 },
