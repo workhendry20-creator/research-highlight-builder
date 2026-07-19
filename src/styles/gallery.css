@@ -24,7 +24,9 @@
 .g-head-bar {
   flex: 1;
   height: 7mm;
-  background: var(--paper-ink, #111418);
+  /* The masthead rule follows the Bar color control (design.colors.accent).
+     Presets seed it to read on their sheet (dark on light paper, light on dark). */
+  background: var(--accent, #111418);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -179,4 +181,28 @@
     'fold   img-5'
     'fold   card-3'
     'card-4 img-6';
+}
+
+/* ---- gallery-3: a horizontal fold BAND across the middle of the spread. The
+   fold spans the full width of each page (bleeding to the fold on the inner
+   edge), with a mosaic of tiles above and below and two cards per page. */
+.gallery3--p1 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1.05fr 0.85fr 0.85fr;
+  grid-template-areas:
+    'head   head'
+    'img-1  img-2'
+    'fold   fold'
+    'img-3  card-1'
+    'card-2 img-4';
+}
+.gallery3--p2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1.05fr 0.85fr 0.85fr;
+  grid-template-areas:
+    'head   head'
+    'img-5  img-6'
+    'fold   fold'
+    'card-3 img-7'
+    'card-4 img-7';
 }

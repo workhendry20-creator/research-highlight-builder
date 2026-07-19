@@ -31,6 +31,19 @@ const LAYOUTS: Record<string, Layout> = {
       { label: 'Image 7', hint: 'Page 2 · bottom-right' },
     ],
   },
+  'gallery-3': {
+    fold: 0,
+    slots: [
+      { label: 'Image 1', hint: 'Fold · horizontal band, spans page 1 → page 2' },
+      { label: 'Image 2', hint: 'Page 1 · top-left' },
+      { label: 'Image 3', hint: 'Page 1 · top-right' },
+      { label: 'Image 4', hint: 'Page 1 · lower-left' },
+      { label: 'Image 5', hint: 'Page 1 · lower-right' },
+      { label: 'Image 6', hint: 'Page 2 · top-left' },
+      { label: 'Image 7', hint: 'Page 2 · top-right' },
+      { label: 'Image 8', hint: 'Page 2 · right (tall)' },
+    ],
+  },
 };
 
 /** Caption is stored as "**Title**\nDescription"; expose it as two fields. */

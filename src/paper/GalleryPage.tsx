@@ -105,6 +105,7 @@ function Head({ doc }: { doc: Doc }) {
  */
 export function GalleryPage({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
   if (doc.templateId === 'gallery-2') return <GalleryTwo doc={doc} vars={vars} />;
+  if (doc.templateId === 'gallery-3') return <GalleryThree doc={doc} vars={vars} />;
 
   const figures = doc.blocks.filter((b) => b.type === 'figure');
   const cards = doc.blocks.filter((b) => b.type === 'paragraph');
@@ -161,6 +162,43 @@ function GalleryTwo({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
         <ImageCell doc={doc} block={figures[4]} area="img-4" />
         <ImageCell doc={doc} block={figures[5]} area="img-5" />
         <ImageCell doc={doc} block={figures[6]} area="img-6" />
+        <CardCell block={cards[2]} area="card-3" />
+        <CardCell block={cards[3]} area="card-4" />
+      </div>
+    </>
+  );
+}
+
+/**
+ * gallery-3: the fold image is a horizontal BAND across the middle of the spread
+ * — fig[0] spans the full width of page 1 (bleeding right to the fold) and
+ * continues across the full width of page 2 (bleeding left), so it reads as one
+ * wide frame cut by the fold. A mosaic of tiles sits above and below the band on
+ * each page, with two text cards per page. fig[1..7] fill the tiles in order.
+ */
+function GalleryThree({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
+  const figures = doc.blocks.filter((b) => b.type === 'figure');
+  const cards = doc.blocks.filter((b) => b.type === 'paragraph');
+
+  return (
+    <>
+      <div className="page gallery gallery--p1 gallery3--p1" style={vars}>
+        <Head doc={doc} />
+        <ImageCell doc={doc} block={figures[1]} area="img-1" />
+        <ImageCell doc={doc} block={figures[2]} area="img-2" />
+        <FoldCell doc={doc} block={figures[0]} area="fold" half="left" />
+        <ImageCell doc={doc} block={figures[3]} area="img-3" />
+        <ImageCell doc={doc} block={figures[4]} area="img-4" />
+        <CardCell block={cards[0]} area="card-1" />
+        <CardCell block={cards[1]} area="card-2" />
+      </div>
+
+      <div className="page gallery gallery--p2 gallery3--p2" style={vars}>
+        <Head doc={doc} />
+        <ImageCell doc={doc} block={figures[5]} area="img-5" />
+        <ImageCell doc={doc} block={figures[6]} area="img-6" />
+        <FoldCell doc={doc} block={figures[0]} area="fold" half="right" />
+        <ImageCell doc={doc} block={figures[7]} area="img-7" />
         <CardCell block={cards[2]} area="card-3" />
         <CardCell block={cards[3]} area="card-4" />
       </div>
