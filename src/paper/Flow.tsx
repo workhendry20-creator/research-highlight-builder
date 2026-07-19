@@ -37,9 +37,10 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
         if (pc.kind === 'figure') {
           if (pc.id === MAG2_ASIDE_ID) return <MagSplitAside doc={doc} key={i} />;
           if (pc.id === HIGHLIGHTS_BLOCK_ID) {
+            // magazine-1's band is highlights-only — no references.
             return (
               <aside className={hlClass} key={i}>
-                <HighlightsBody doc={doc} />
+                <HighlightsBody doc={doc} hideRefs={doc.templateId === 'magazine-1'} />
               </aside>
             );
           }

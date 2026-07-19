@@ -128,7 +128,7 @@ export function BodySection() {
   };
 
   return (
-    <Section title="Isi (paragraf & gambar)">
+    <Section title="Content (paragraphs & images)">
       {blocks.map((b, i) => (
         <div
           key={b.id}
@@ -143,7 +143,7 @@ export function BodySection() {
         >
           <span
             className="drag-handle"
-            title="Seret untuk mengurut"
+            title="Drag to reorder"
             draggable
             onDragStart={() => (dragFrom.current = i)}
             onDragEnd={() => {
@@ -160,7 +160,7 @@ export function BodySection() {
               className="field-input field-textarea field-textarea--grow"
               value={b.text}
               rows={2}
-              placeholder="Tulis paragraf…"
+              placeholder="Write a paragraph…"
               onFocus={(e) =>
                 setActiveEditor({ el: e.currentTarget, setValue: (v) => setText(i, v) })
               }
@@ -183,37 +183,37 @@ export function BodySection() {
                 {assets[b.assetId] ? (
                   <img src={assets[b.assetId].src} alt="" />
                 ) : (
-                  <span className="figure-missing">Gambar hilang</span>
+                  <span className="figure-missing">Image missing</span>
                 )}
               </div>
               <input
                 className="field-input"
                 value={b.caption}
-                placeholder="Keterangan gambar (caption)…"
+                placeholder="Image caption…"
                 onChange={(e) => setCaption(i, e.target.value)}
               />
               <SegmentField<'left' | 'center' | 'right'>
-                label="Rata caption"
+                label="Caption align"
                 value={b.align ?? 'left'}
                 options={[
-                  { value: 'left', label: 'Kiri' },
-                  { value: 'center', label: 'Tengah' },
-                  { value: 'right', label: 'Kanan' },
+                  { value: 'left', label: 'Left' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'right', label: 'Right' },
                 ]}
                 onChange={(v) => setAlign(i, v)}
               />
               <SegmentField<1 | 'body' | 'bleed'>
-                label="Ukuran"
+                label="Size"
                 value={b.span}
                 options={[
-                  { value: 1, label: '1 kolom' },
-                  { value: 'body', label: 'Selebar' },
-                  { value: 'bleed', label: 'Tepi kertas' },
+                  { value: 1, label: '1 column' },
+                  { value: 'body', label: 'Full width' },
+                  { value: 'bleed', label: 'Page edge' },
                 ]}
                 onChange={(v) => setSpan(i, v)}
               />
               <button type="button" className="add-btn" onClick={() => replaceImage(i)}>
-                Ganti gambar
+                Replace image
               </button>
             </div>
           )}
@@ -230,10 +230,10 @@ export function BodySection() {
 
       <div className="add-row">
         <button type="button" className="add-btn" onClick={addParagraph}>
-          + Paragraf
+          + Paragraph
         </button>
         <button type="button" className="add-btn" onClick={addImage}>
-          + Gambar
+          + Image
         </button>
       </div>
 

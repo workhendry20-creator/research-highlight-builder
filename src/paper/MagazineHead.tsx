@@ -6,6 +6,8 @@ import type { Doc } from '../schema/document';
 export function MagazineHead({ doc }: { doc: Doc }) {
   const { meta, hero, assets } = doc;
   const photo = hero.assetId ? assets[hero.assetId] : null;
+  // magazine-1 drops the "FOTO —" label and prints the credit as-is.
+  const mag1 = doc.templateId === 'magazine-1';
   return (
     <div className="mag-head">
       {photo && (
@@ -14,7 +16,9 @@ export function MagazineHead({ doc }: { doc: Doc }) {
           {meta.location && <figcaption className="mag-hero-tag">{meta.location}</figcaption>}
         </figure>
       )}
-      {meta.photoCredit && <p className="mag-hero-credit">FOTO — {meta.photoCredit}</p>}
+      {meta.photoCredit && (
+        <p className="mag-hero-credit">{mag1 ? meta.photoCredit : `FOTO — ${meta.photoCredit}`}</p>
+      )}
       {meta.pullQuote && (
         <blockquote className="mag-quote">
           <span className="mag-quote-text">{meta.pullQuote}</span>

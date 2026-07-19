@@ -29,15 +29,15 @@ export function ReferencesSection() {
             <span className="list-item-num">[{i + 1}]</span>
             <RowButtons onRemove={() => remove(i)} />
           </div>
-          <LabeledInput label="Penulis" value={r.authors} onChange={set(i, 'authors')} placeholder="Rahman, A. et al." />
-          <LabeledInput label="Judul" value={r.title} onChange={set(i, 'title')} />
-          <LabeledInput label="Jurnal" value={r.journal} onChange={set(i, 'journal')} placeholder="Nature Photonics" />
-          <LabeledInput label="Tahun" value={r.year} onChange={set(i, 'year')} placeholder="2025" />
+          <LabeledInput label="Authors" value={r.authors} onChange={set(i, 'authors')} placeholder="Rahman, A. et al." />
+          <LabeledInput label="Title" value={r.title} onChange={set(i, 'title')} />
+          <LabeledInput label="Journal" value={r.journal} onChange={set(i, 'journal')} placeholder="Nature Photonics" />
+          <LabeledInput label="Year" value={r.year} onChange={set(i, 'year')} placeholder="2025" />
           <LabeledInput label="DOI" value={r.doi} onChange={set(i, 'doi')} placeholder="10.1038/…" />
         </div>
       ))}
       <button type="button" className="add-btn" onClick={add}>
-        + Tambah referensi
+        + Add reference
       </button>
     </Section>
   );

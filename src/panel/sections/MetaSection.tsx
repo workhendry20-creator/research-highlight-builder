@@ -16,23 +16,23 @@ export function MetaSection() {
     });
 
   return (
-    <Section title="Judul & Penulis">
+    <Section title="Title & Author">
       <LabeledInput
-        label={isMag ? 'Kicker' : 'Kategori'}
+        label={isMag ? 'Kicker' : 'Category'}
         value={meta.categoryLabel}
         onChange={set('categoryLabel')}
-        placeholder={isMag ? 'LAPORAN UTAMA' : 'Research Highlight · Physics'}
+        placeholder={isMag ? 'COVER STORY' : 'Research Highlight · Physics'}
       />
-      <LabeledInput label="Judul" value={meta.title} onChange={set('title')} placeholder="Judul highlight" />
+      <LabeledInput label="Title" value={meta.title} onChange={set('title')} placeholder="Highlight title" />
       <LabeledInput
-        label={isMag ? 'Lede (subjudul cover)' : 'Subjudul'}
+        label={isMag ? 'Lede (cover subtitle)' : 'Subtitle'}
         value={meta.subtitle}
         onChange={set('subtitle')}
-        placeholder="Satu kalimat penjelas"
+        placeholder="One explanatory sentence"
       />
-      <LabeledInput label="Penulis" value={meta.author} onChange={set('author')} placeholder="A. Rahman, S. Tan" />
+      <LabeledInput label="Author" value={meta.author} onChange={set('author')} placeholder="A. Rahman, S. Tan" />
       <LabeledInput
-        label={isMag ? 'Afiliasi / Rubrik' : 'Afiliasi'}
+        label={isMag ? 'Affiliation / Section' : 'Affiliation'}
         value={meta.affiliation}
         onChange={set('affiliation')}
         placeholder="School of Physics, USM"
@@ -40,19 +40,19 @@ export function MetaSection() {
 
       {hasBar && (
         <>
-          <p className="group-label">Bar atas</p>
+          <p className="group-label">Top bar</p>
           <LabeledInput
-            label="Teks bar atas"
+            label="Top bar text"
             value={meta.masthead ?? ''}
             onChange={set('masthead')}
             placeholder="School of Physics"
           />
           {isP2 && (
             <LabeledInput
-              label="Caption hero"
+              label="Hero caption"
               value={meta.heroCaption ?? ''}
               onChange={set('heroCaption')}
-              placeholder="Keterangan gambar hero"
+              placeholder="Hero image caption"
             />
           )}
         </>
@@ -60,34 +60,34 @@ export function MetaSection() {
 
       {isMag && (
         <>
-          <p className="group-label">Elemen Majalah</p>
+          <p className="group-label">Magazine elements</p>
           <LabeledInput label="Masthead" value={meta.masthead ?? ''} onChange={set('masthead')} placeholder="KUANTA" />
           <LabeledInput
-            label="Volume / Tanggal"
+            label="Volume / Date"
             value={meta.volume ?? ''}
             onChange={set('volume')}
             placeholder="VOL. IX · NO.2 · MARET 2026"
           />
           <LabeledInput
-            label="Lokasi (tag foto)"
+            label="Location (photo tag)"
             value={meta.location ?? ''}
             onChange={set('location')}
             placeholder="OBSERVATORIUM MAUNA · 4.200 MDPL"
           />
           <LabeledInput
-            label="Kredit foto"
+            label="Photo credit"
             value={meta.photoCredit ?? ''}
             onChange={set('photoCredit')}
             placeholder="L. HAKIM"
           />
           <LabeledTextarea
-            label="Kutipan (pull-quote)"
+            label="Pull-quote"
             value={meta.pullQuote ?? ''}
             onChange={set('pullQuote')}
-            placeholder="Kalimat kutipan besar di tengah spread…"
+            placeholder="Large quote shown across the spread…"
           />
           <LabeledInput
-            label="Atribusi kutipan"
+            label="Quote attribution"
             value={meta.pullQuoteBy ?? ''}
             onChange={set('pullQuoteBy')}
             placeholder="— DR. ARIA PRATAMA, FEB 2026"

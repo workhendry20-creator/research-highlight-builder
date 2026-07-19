@@ -42,7 +42,7 @@ export function HeroSection() {
     });
 
   return (
-    <Section title="Gambar Hero">
+    <Section title="Hero Image">
       <input
         ref={fileRef}
         type="file"
@@ -65,20 +65,20 @@ export function HeroSection() {
           </div>
           <div className="hero-actions">
             <button type="button" className="add-btn" onClick={() => fileRef.current?.click()}>
-              Ganti gambar
+              Replace image
             </button>
-            <button type="button" className="icon-btn icon-btn--danger" title="Hapus gambar" onClick={removeImage}>
+            <button type="button" className="icon-btn icon-btn--danger" title="Remove image" onClick={removeImage}>
               ✕
             </button>
           </div>
 
-          <LabeledRange label="Geser mendatar" value={hero.offsetX} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setHero('offsetX')} />
-          <LabeledRange label="Geser tegak" value={hero.offsetY} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setHero('offsetY')} />
-          <LabeledRange label="Perbesar" value={hero.scale} min={1} max={3} step={0.05} format={(v) => `${v.toFixed(2)}×`} onChange={setHero('scale')} />
+          <LabeledRange label="Shift horizontally" value={hero.offsetX} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setHero('offsetX')} />
+          <LabeledRange label="Shift vertically" value={hero.offsetY} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setHero('offsetY')} />
+          <LabeledRange label="Zoom" value={hero.scale} min={1} max={3} step={0.05} format={(v) => `${v.toFixed(2)}×`} onChange={setHero('scale')} />
         </>
       ) : (
         <button type="button" className="add-btn hero-upload" onClick={() => fileRef.current?.click()}>
-          + Unggah gambar hero
+          + Upload hero image
         </button>
       )}
 
@@ -89,7 +89,7 @@ export function HeroSection() {
       )}
 
       <LabeledNumber
-        label="Tinggi hero"
+        label="Hero height"
         unit="mm"
         value={heroHeight}
         min={0}

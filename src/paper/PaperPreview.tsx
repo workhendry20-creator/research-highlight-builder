@@ -23,9 +23,9 @@ import { HIGHLIGHTS_BLOCK_ID, MAG2_ASIDE_ID } from './Flow';
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
 const FORMAT_BTNS: { mark: Mark; label: string; title: string }[] = [
-  { mark: 'b', label: 'B', title: 'Tebal (⌘/Ctrl+B)' },
-  { mark: 'i', label: 'I', title: 'Miring (⌘/Ctrl+I)' },
-  { mark: 'u', label: 'U', title: 'Garis bawah (⌘/Ctrl+U)' },
+  { mark: 'b', label: 'B', title: 'Bold (⌘/Ctrl+B)' },
+  { mark: 'i', label: 'I', title: 'Italic (⌘/Ctrl+I)' },
+  { mark: 'u', label: 'U', title: 'Underline (⌘/Ctrl+U)' },
 ];
 
 // A4 in CSS px at the reference 96dpi (1mm = 96/25.4 px). Preview-only: used to
@@ -184,7 +184,18 @@ export function PaperPreview() {
         root.style.setProperty('--footer-h', '10mm');
         root.style.setProperty('--mag-head-h', `${headH}px`);
       }
-      setPagination(paginate(mh1, mh2, items));
+      // Highlights close the article as a full-width band, riding the flow's tail
+      // as one atomic full-span item — same trick paper uses for 'below'.
+      let magFlow = items;
+      const magHl = hlBelow ? hlRef.current : null;
+      if (magHl) {
+        const w = magHl.offsetWidth || 1;
+        magFlow = [
+          ...items,
+          { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: magHl.offsetHeight / w, hasCaption: false, full: true },
+        ];
+      }
+      setPagination(paginate(mh1, mh2, magFlow));
       return;
     }
 
@@ -360,7 +371,7 @@ export function PaperPreview() {
               type="button"
               className={`view-btn${spread ? ' is-active' : ''}`}
               onClick={() => setSpread((s) => !s)}
-              title="Tampilkan sebagai spread halaman berdampingan"
+              title="Show as a side-by-side page spread"
               aria-pressed={spread}
             >
               <span className="view-btn-ico" aria-hidden="true">▭▭</span>
@@ -376,11 +387,11 @@ export function PaperPreview() {
           >
             Fit
           </button>
-          <button type="button" className="zoom-btn" onClick={() => step(-0.1)} title="Perkecil">
+          <button type="button" className="zoom-btn" onClick={() => step(-0.1)} title="Zoom out">
             −
           </button>
           <span className="zoom-val">{pct}%</span>
-          <button type="button" className="zoom-btn" onClick={() => step(0.1)} title="Perbesar">
+          <button type="button" className="zoom-btn" onClick={() => step(0.1)} title="Zoom in">
             +
           </button>
           <button
@@ -506,11 +517,12 @@ export function PaperPreview() {
         <div className="page">
           <div className={`body-cols body-cols--p2${railedEvery}`} ref={host2Ref} />
         </div>
-        {/* Below-article highlights: measured at body width to size its atom. */}
+        {/* Below-article highlights: measured at body width to size its atom.
+            Magazine's band spans its own content width, not the paper --body-1. */}
         {hlBelow && (
-          <div style={{ width: 'var(--body-1)' }}>
+          <div style={{ width: isMag ? 'calc(var(--page-w) - 2 * var(--margin))' : 'var(--body-1)' }}>
             <aside className="hl-below" ref={hlRef}>
-              <HighlightsBody doc={doc} />
+              <HighlightsBody doc={doc} hideRefs={doc.templateId === 'magazine-1'} />
             </aside>
           </div>
         )}

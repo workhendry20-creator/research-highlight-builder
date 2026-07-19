@@ -40,10 +40,10 @@ export function DesignSection() {
   const cpl = cplWarning(design);
 
   return (
-    <Section title="Desain">
-      <p className="group-label">Tata letak</p>
+    <Section title="Design">
+      <p className="group-label">Layout</p>
       <SegmentField<Design['bodyCols']>
-        label="Kolom body"
+        label="Body columns"
         value={design.bodyCols}
         options={[
           { value: 2, label: '2' },
@@ -53,74 +53,74 @@ export function DesignSection() {
         onChange={(v) => set('bodyCols', v)}
       />
       <SegmentField<NonNullable<Design['bodyAlign']>>
-        label="Rata teks"
+        label="Text align"
         value={design.bodyAlign ?? 'justify'}
         options={[
-          { value: 'left', label: 'Kiri' },
-          { value: 'center', label: 'Tengah' },
-          { value: 'right', label: 'Kanan' },
+          { value: 'left', label: 'Left' },
+          { value: 'center', label: 'Center' },
+          { value: 'right', label: 'Right' },
           { value: 'justify', label: 'Justify' },
         ]}
         onChange={(v) => set('bodyAlign', v)}
       />
       <Toggle
-        label="Tampilkan highlights"
+        label="Show highlights"
         checked={design.sidebar}
         onChange={(v) => set('sidebar', v)}
       />
       {design.sidebar && (
         <LabeledSelect
-          label="Posisi highlights"
+          label="Highlights position"
           value={design.highlightsPlacement ?? 'page1'}
           options={[
-            { value: 'page1', label: 'Sidebar kanan (hal. 1)' },
-            { value: 'page1-flow', label: 'Sidebar kanan + teks isi celah (hal. 1)' },
-            { value: 'all', label: 'Sidebar kanan (tiap hal.)' },
-            { value: 'below', label: 'Di bawah teks (akhir)' },
+            { value: 'page1', label: 'Right sidebar (page 1)' },
+            { value: 'page1-flow', label: 'Right sidebar + text fills the gap (page 1)' },
+            { value: 'all', label: 'Right sidebar (every page)' },
+            { value: 'below', label: 'Below the text (end)' },
           ]}
           onChange={(v) => set('highlightsPlacement', v as Design['highlightsPlacement'])}
         />
       )}
       {cpl && <p className="hint hint--warn">{cpl}</p>}
 
-      <p className="group-label">Spasi (mm)</p>
+      <p className="group-label">Spacing (mm)</p>
       <LabeledNumber label="Margin" unit="mm" value={design.margin} min={8} max={30} step={1} onChange={(v) => set('margin', v)} />
       <LabeledNumber label="Gutter" unit="mm" value={design.gutter} min={2} max={12} step={0.5} onChange={(v) => set('gutter', v)} />
 
-      <p className="group-label">Ukuran huruf (pt)</p>
-      <LabeledNumber label="Judul" unit="pt" value={design.sizes.title} min={16} max={48} step={0.5} onChange={setSize('title')} />
-      <LabeledNumber label="Subjudul" unit="pt" value={design.sizes.subtitle} min={8} max={18} step={0.5} onChange={setSize('subtitle')} />
+      <p className="group-label">Font sizes (pt)</p>
+      <LabeledNumber label="Title" unit="pt" value={design.sizes.title} min={16} max={48} step={0.5} onChange={setSize('title')} />
+      <LabeledNumber label="Subtitle" unit="pt" value={design.sizes.subtitle} min={8} max={18} step={0.5} onChange={setSize('subtitle')} />
       <LabeledNumber label="Body" unit="pt" value={design.sizes.body} min={7} max={12} step={0.1} onChange={setSize('body')} />
-      <LabeledNumber label="Kategori" unit="pt" value={design.sizes.categoryLabel} min={6} max={12} step={0.5} onChange={setSize('categoryLabel')} />
-      <LabeledNumber label="Penulis" unit="pt" value={design.sizes.author} min={7} max={12} step={0.5} onChange={setSize('author')} />
-      <LabeledNumber label="Afiliasi" unit="pt" value={design.sizes.affiliation} min={7} max={12} step={0.5} onChange={setSize('affiliation')} />
+      <LabeledNumber label="Category" unit="pt" value={design.sizes.categoryLabel} min={6} max={12} step={0.5} onChange={setSize('categoryLabel')} />
+      <LabeledNumber label="Author" unit="pt" value={design.sizes.author} min={7} max={12} step={0.5} onChange={setSize('author')} />
+      <LabeledNumber label="Affiliation" unit="pt" value={design.sizes.affiliation} min={7} max={12} step={0.5} onChange={setSize('affiliation')} />
 
-      <p className="group-label">Huruf</p>
+      <p className="group-label">Fonts</p>
       <LabeledSelect label="Display" value={design.fontDisplay} options={asOptions(SERIF_FONTS)} onChange={(v) => set('fontDisplay', v)} />
       <LabeledSelect label="Body" value={design.fontBody} options={asOptions(SANS_FONTS)} onChange={(v) => set('fontBody', v)} />
-      <LabeledSelect label="Kategori" value={design.fontCategory ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontCategory', v)} />
-      <LabeledSelect label="Subjudul" value={design.fontSubtitle ?? design.fontDisplay} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontSubtitle', v)} />
-      <LabeledSelect label="Penulis" value={design.fontAuthor ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAuthor', v)} />
-      <LabeledSelect label="Afiliasi" value={design.fontAffiliation ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAffiliation', v)} />
+      <LabeledSelect label="Category" value={design.fontCategory ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontCategory', v)} />
+      <LabeledSelect label="Subtitle" value={design.fontSubtitle ?? design.fontDisplay} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontSubtitle', v)} />
+      <LabeledSelect label="Author" value={design.fontAuthor ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAuthor', v)} />
+      <LabeledSelect label="Affiliation" value={design.fontAffiliation ?? design.fontBody} options={asOptions(ALL_FONTS)} onChange={(v) => set('fontAffiliation', v)} />
 
-      <p className="group-label">Warna</p>
+      <p className="group-label">Colors</p>
       <LabeledColor label="Hero" value={design.colors.hero} onChange={setColor('hero')} />
-      <LabeledColor label="Aksen" value={design.colors.accent} onChange={setColor('accent')} />
-      <LabeledColor label="Aksen lembut" value={design.colors.accentSoft} onChange={setColor('accentSoft')} />
-      <LabeledColor label="Tinta (teks)" value={design.colors.ink} onChange={setColor('ink')} />
+      <LabeledColor label="Accent" value={design.colors.accent} onChange={setColor('accent')} />
+      <LabeledColor label="Accent soft" value={design.colors.accentSoft} onChange={setColor('accentSoft')} />
+      <LabeledColor label="Ink (text)" value={design.colors.ink} onChange={setColor('ink')} />
 
       {hasBar && (
         <>
-          <p className="group-label">Bar atas</p>
-          <LabeledColor label="Garis bar" value={design.barColor ?? '#111418'} onChange={(v) => set('barColor', v)} />
-          <LabeledColor label="Kotak teks" value={design.barTagColor ?? '#bfbfbf'} onChange={(v) => set('barTagColor', v)} />
-          <LabeledColor label="Tinta teks bar" value={design.barTagInk ?? '#111418'} onChange={(v) => set('barTagInk', v)} />
+          <p className="group-label">Top bar</p>
+          <LabeledColor label="Bar rule" value={design.barColor ?? '#111418'} onChange={(v) => set('barColor', v)} />
+          <LabeledColor label="Tag box" value={design.barTagColor ?? '#bfbfbf'} onChange={(v) => set('barTagColor', v)} />
+          <LabeledColor label="Bar text ink" value={design.barTagInk ?? '#111418'} onChange={(v) => set('barTagInk', v)} />
         </>
       )}
 
-      <p className="group-label">CSS kustom</p>
+      <p className="group-label">Custom CSS</p>
       <LabeledTextarea
-        label="Disuntik ke preview apa adanya"
+        label="Injected into the preview as-is"
         value={design.customCss}
         onChange={(v) => set('customCss', v)}
         placeholder=".title { letter-spacing: -0.02em; }"

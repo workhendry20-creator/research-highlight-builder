@@ -210,7 +210,7 @@ export function RowButtons({
   return (
     <div className="row-buttons">
       {onUp && (
-        <button type="button" className="icon-btn" onClick={onUp} disabled={disableUp} title="Naik">
+        <button type="button" className="icon-btn" onClick={onUp} disabled={disableUp} title="Move up">
           ↑
         </button>
       )}
@@ -220,12 +220,12 @@ export function RowButtons({
           className="icon-btn"
           onClick={onDown}
           disabled={disableDown}
-          title="Turun"
+          title="Move down"
         >
           ↓
         </button>
       )}
-      <button type="button" className="icon-btn icon-btn--danger" onClick={onRemove} title="Hapus">
+      <button type="button" className="icon-btn icon-btn--danger" onClick={onRemove} title="Remove">
         ✕
       </button>
     </div>
