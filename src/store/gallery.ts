@@ -67,6 +67,8 @@ export function makeGallery1(): Doc {
   };
   d.design = {
     ...d.design,
+    // Narrow collage columns → left, not the global justify default.
+    bodyAlign: 'left',
     fontDisplay: 'Source Sans 3',
     colors: { hero: '#0f172a', accent: '#111418', accentSoft: '#f1f5f9', ink: '#111418' },
     margin: 12,

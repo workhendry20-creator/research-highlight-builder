@@ -89,6 +89,8 @@
   padding: 2.5mm 3mm;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
   color: #fff;
+  /* Captions ride the author's Body alignment, same as the cards. */
+  text-align: var(--body-align, left);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -101,12 +103,15 @@
   font-size: 7.5pt;
 }
 
-/* Text card: bold title + description, no image. */
+/* Text card: bold title + description, no image. Alignment is author-controlled
+   (Design panel → Body alignment); gallery columns are narrow so it defaults to
+   left, not the global justify. */
 .g-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 1mm 0;
+  text-align: var(--body-align, left);
 }
 .g-title {
   margin: 0 0 1mm;
