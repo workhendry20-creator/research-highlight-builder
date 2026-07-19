@@ -41,11 +41,17 @@ describe('hydrate', () => {
     expect(useDoc.getState().doc).toBe(before);
   });
 
-  it('degrades to empty when the reader throws', async () => {
+  it('reports error (not empty) when the reader throws, leaving the store untouched', async () => {
+    // A read failure must be distinguishable from a clean first run: the caller
+    // seeds a sample on 'empty' but must NOT on 'error', or an unreadable-but-real
+    // doc gets clobbered by the next autosave.
+    const before = useDoc.getState().doc;
+
     const result = await hydrate(async () => {
       throw new Error('storage unavailable');
     });
 
-    expect(result).toBe('empty');
+    expect(result).toBe('error');
+    expect(useDoc.getState().doc).toBe(before);
   });
 });

@@ -798,6 +798,30 @@
   color: #94660a;
 }
 
+/* ---- Autosave status + load-failure banner -------------------------------- */
+
+.save-status {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.save-status--error {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.app-banner {
+  flex: 0 0 auto;
+  padding: 9px 18px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #7a1420;
+  background: #fde7ea;
+  border-bottom: 1px solid #f4c3cb;
+}
+
 /* ---- Print: panel disappears, only the paper prints ----------------------- */
 
 @media print {
@@ -809,7 +833,8 @@
   }
 
   .panel,
-  .toolbar {
+  .toolbar,
+  .app-banner {
     display: none;
   }
 }

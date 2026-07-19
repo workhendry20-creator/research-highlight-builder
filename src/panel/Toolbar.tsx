@@ -2,6 +2,14 @@ import { useEffect } from 'react';
 import { useStore } from 'zustand';
 import { useDoc } from '../store/useDoc';
 import { migrate } from '../schema/document';
+import { useSaveStatus, type SaveState } from '../store/saveStatus';
+
+const SAVE_LABEL: Record<SaveState, string> = {
+  idle: '',
+  saving: 'Menyimpan…',
+  saved: 'Tersimpan',
+  error: 'Gagal menyimpan',
+};
 
 function pickFile(onPick: (file: File) => void) {
   const input = document.createElement('input');
@@ -50,6 +58,7 @@ function open() {
 export function Toolbar() {
   const canUndo = useStore(useDoc.temporal, (s) => s.pastStates.length > 0);
   const canRedo = useStore(useDoc.temporal, (s) => s.futureStates.length > 0);
+  const saveState = useSaveStatus((s) => s.status);
 
   // Keyboard: ⌘/Ctrl+Z undo, +Shift redo (or ⌘Y), ⌘S save.
   useEffect(() => {
@@ -75,6 +84,15 @@ export function Toolbar() {
   return (
     <header className="toolbar">
       <span className="toolbar-brand">Research Highlight Builder</span>
+      {saveState !== 'idle' && (
+        <span
+          className={`save-status${saveState === 'error' ? ' save-status--error' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          {SAVE_LABEL[saveState]}
+        </span>
+      )}
       <div className="toolbar-spacer" />
       <div className="toolbar-group">
         <button className="tool-btn" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)">

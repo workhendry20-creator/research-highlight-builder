@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
+import { loadImage, ImageLoadError } from '../../lib/loadImage';
 import { LabeledNumber, LabeledRange, Section } from '../Field';
 
 type Frame = { assetId: string | null; offsetX: number; offsetY: number; scale: number };
@@ -15,29 +16,28 @@ function ImagePicker({ slot, title, blurb }: { slot: 'hero' | 'cover'; title: st
   });
   const update = useDoc((s) => s.update);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const setFrame = (d: Doc, f: Frame) => {
     if (slot === 'hero') d.hero = f;
     else d.cover = f;
   };
 
-  const onFile = (file: File | undefined) => {
+  const onFile = async (file: File | undefined) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const src = reader.result as string;
-      const img = new Image();
-      img.onload = () =>
-        update((d) => {
-          const prev = (d[slot] as Frame | undefined)?.assetId ?? null;
-          const id = uid();
-          d.assets[id] = { src, naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight };
-          setFrame(d, { assetId: id, offsetX: 0, offsetY: 0, scale: 1 });
-          if (prev && prev !== id) delete d.assets[prev];
-        });
-      img.src = src;
-    };
-    reader.readAsDataURL(file);
+    setError(null);
+    try {
+      const { src, naturalWidth, naturalHeight } = await loadImage(file);
+      update((d) => {
+        const prev = (d[slot] as Frame | undefined)?.assetId ?? null;
+        const id = uid();
+        d.assets[id] = { src, naturalWidth, naturalHeight };
+        setFrame(d, { assetId: id, offsetX: 0, offsetY: 0, scale: 1 });
+        if (prev && prev !== id) delete d.assets[prev];
+      });
+    } catch (e) {
+      setError(e instanceof ImageLoadError ? e.message : 'Gagal memuat gambar.');
+    }
   };
 
   const removeImage = () =>
@@ -94,6 +94,12 @@ function ImagePicker({ slot, title, blurb }: { slot: 'hero' | 'cover'; title: st
         <button type="button" className="add-btn hero-upload" onClick={() => fileRef.current?.click()}>
           + Upload image
         </button>
+      )}
+
+      {error && (
+        <p className="hint hint--warn" role="alert">
+          {error}
+        </p>
       )}
     </Section>
   );
