@@ -12,7 +12,8 @@ export type TemplateId =
   | 'magazine-1'
   | 'magazine-2'
   | 'magazine-3'
-  | 'gallery-1';
+  | 'gallery-1'
+  | 'gallery-2';
 
 /** The layout engine a template runs on — derived from the id, never stored. */
 export const familyOf = (id: TemplateId | undefined): TemplateFamily =>

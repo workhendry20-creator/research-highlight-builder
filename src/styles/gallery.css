@@ -155,3 +155,28 @@
     'img-5 card-4'
     'img-5 card-5';
 }
+
+/* ---- gallery-2: a vertical centre fold. The fold column runs full height on
+   the inner edge of each page (right on page 1, left on page 2) and bleeds to
+   the fold, so its two halves join down the middle of the open spread. These
+   override the gallery-1 grids above (same specificity, later in the file). */
+.gallery2--p1 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr 1fr 1.05fr;
+  grid-template-areas:
+    'head   head'
+    'img-1  fold'
+    'img-2  fold'
+    'card-1 fold'
+    'img-3  card-2';
+}
+.gallery2--p2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr 1fr 1.05fr;
+  grid-template-areas:
+    'head   head'
+    'fold   img-4'
+    'fold   img-5'
+    'fold   card-3'
+    'card-4 img-6';
+}
