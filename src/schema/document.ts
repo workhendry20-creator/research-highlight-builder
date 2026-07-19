@@ -86,6 +86,12 @@ export interface Design {
   fontAffiliation?: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
   /**
+   * Gallery sheet background. Absent = white. The gallery reads it as `--paper-bg`
+   * and derives a readable text colour (`--paper-ink`, black on light / white on
+   * dark) from its luminance, so titles/labels stay legible on any colour.
+   */
+  paperBg?: string;
+  /**
    * paper-2's top band. Absent = the defaults below, so v1 files and the other
    * templates (which never draw the band) are unaffected.
    * `barColor` = the rule itself, `barTagColor` = the block holding the tag

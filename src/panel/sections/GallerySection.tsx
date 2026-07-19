@@ -1,6 +1,6 @@
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
-import { LabeledRange, Section } from '../Field';
+import { LabeledColor, LabeledRange, Section } from '../Field';
 
 /** Slot index of the fold image (spans both pages) — framing is fixed for it so
  *  the two halves stay joined at the fold. */
@@ -45,7 +45,13 @@ function pickImage(onPick: (file: File) => void) {
 export function GallerySection() {
   const blocks = useDoc((s) => s.doc.blocks);
   const assets = useDoc((s) => s.doc.assets);
+  const paperBg = useDoc((s) => s.doc.design.paperBg ?? '#ffffff');
   const update = useDoc((s) => s.update);
+
+  const setPaperBg = (v: string) =>
+    update((d) => {
+      d.design.paperBg = v;
+    });
 
   // The block index of each figure, in order → figIndex[n] is slot n's block.
   const figIndex = blocks.reduce<number[]>((acc, b, i) => {
@@ -104,6 +110,8 @@ export function GallerySection() {
 
   return (
     <Section title="Gallery images">
+      <LabeledColor label="Paper background" value={paperBg} onChange={setPaperBg} />
+      <p className="gallery-slot-hint">Text flips to black on light sheets, white on dark.</p>
       {SLOTS.map((s, n) => {
         const bi = figIndex[n];
         const block = bi === undefined ? undefined : blocks[bi];

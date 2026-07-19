@@ -57,9 +57,29 @@ const fontStack = (name: string) =>
   `"${name}", ${SERIF_FAMILIES.has(name) ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
 
 /** Feed straight into style={{...}} on the page wrapper. */
+/** Black or white ink, whichever reads on `hex`. WCAG relative luminance;
+ *  threshold ~0.4 puts the flip near mid-grey. Bad input → dark ink. */
+function readableInk(hex: string): string {
+  const h = hex.trim().replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  if (full.length !== 6 || Number.isNaN(n)) return '#111418';
+  const chan = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  const L = 0.2126 * chan((n >> 16) & 255) + 0.7152 * chan((n >> 8) & 255) + 0.0722 * chan(n & 255);
+  return L > 0.4 ? '#111418' : '#f8fafc';
+}
+
 export function cssVars(d: Design): Record<string, string> {
   const g = grid(d);
+  const paperBg = d.paperBg ?? '#ffffff';
   return {
+    // Gallery sheet colour + a text colour that reads on it (soft tone derived
+    // from these two via color-mix in gallery.css).
+    '--paper-bg': paperBg,
+    '--paper-ink': readableInk(paperBg),
     '--page-w': `${PAGE_W}mm`,
     '--page-h': `${PAGE_H}mm`,
     '--margin': `${d.margin}mm`,

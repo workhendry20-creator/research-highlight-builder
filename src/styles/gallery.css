@@ -7,7 +7,11 @@
   display: grid;
   gap: 6mm;
   align-content: stretch;
-  background: #fff;
+  background: var(--paper-bg, #fff);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  /* Muted text tone that holds on any sheet colour: ink pulled toward the bg. */
+  --paper-ink-soft: color-mix(in srgb, var(--paper-ink, #111418) 62%, var(--paper-bg, #fff));
 }
 
 /* Masthead band: a black rule with the section label, echoing the wireframe. */
@@ -20,7 +24,7 @@
 .g-head-bar {
   flex: 1;
   height: 7mm;
-  background: var(--accent, #111418);
+  background: var(--paper-ink, #111418);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -31,7 +35,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 11pt;
-  color: var(--ink, #111418);
+  color: var(--paper-ink, #111418);
 }
 /* Page 1 pins the label left, page 2 pins it right — they mirror at the fold. */
 .gallery--p1 .g-head-label {
@@ -112,14 +116,14 @@
   text-transform: uppercase;
   font-size: 12pt;
   line-height: 1.2;
-  color: var(--ink, #111418);
+  color: var(--paper-ink, #111418);
 }
 .g-desc {
   margin: 0;
   font-family: var(--sans);
   font-size: 10pt;
   line-height: 1.45;
-  color: #334155;
+  color: var(--paper-ink-soft, #334155);
 }
 
 /* ---- Page 1: two heroes up top (right one is the fold); text pair + tall image below */
