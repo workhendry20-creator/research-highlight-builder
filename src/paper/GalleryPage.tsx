@@ -45,19 +45,30 @@ function ImageCell({ doc, block, area }: { doc: Doc; block?: Block; area: string
   );
 }
 
-/** One half of the fold image. Both facing cells paint the same asset scaled to
- *  twice the cell width; `half` picks which side shows, so they meet at the fold. */
+/** One half of the fold image. The <img> is twice the cell width and anchored at
+ *  the fold edge; both halves share the figure's `frame`, and the zoom scales from
+ *  the fold (transform-origin), so the two sides stay locked together across the
+ *  fold no matter how the user zooms or shifts it. Cell widths are kept equal on
+ *  both pages (see gallery.css) so the seam matches. */
 function FoldCell({ doc, block, area, half }: { doc: Doc; block?: Block; area: string; half: 'left' | 'right' }) {
   const asset = block && block.type === 'figure' ? doc.assets[block.assetId] : undefined;
   const caption = block && block.type === 'figure' ? block.caption : '';
-  const style: CSSProperties = {
-    gridArea: area,
-    ...(asset
-      ? { backgroundImage: `url("${asset.src}")`, backgroundSize: '200% 100%', backgroundPosition: `${half} center` }
-      : null),
+  const fr = (block && block.type === 'figure' && block.frame) || { scale: 1, offsetX: 0, offsetY: 0 };
+  const imgStyle: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    height: '100%',
+    width: '200%',
+    left: half === 'left' ? 0 : '-100%',
+    objectFit: 'cover',
+    // Both halves share one frame and one transform, with the scale origin on the
+    // fold, so zoom AND pan move the two sides identically — the seam holds.
+    transform: `translate(${fr.offsetX}%, ${fr.offsetY}%) scale(${fr.scale})`,
+    transformOrigin: half === 'left' ? 'right center' : 'left center',
   };
   return (
-    <figure className={`g-img g-fold${asset ? '' : ' is-empty'}`} style={style}>
+    <figure className={`g-img g-fold${asset ? '' : ' is-empty'}`} style={{ gridArea: area }}>
+      {asset && <img src={asset.src} alt="" style={imgStyle} />}
       {/* Caption only on the left half (page 1) so it isn't printed twice. */}
       {half === 'left' && caption.trim() && (
         <figcaption><TileText text={caption} className="g-cap" /></figcaption>

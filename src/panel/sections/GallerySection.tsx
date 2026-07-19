@@ -111,7 +111,8 @@ export function GallerySection() {
         const caption = block && block.type === 'figure' ? block.caption : '';
         const { title, desc } = splitCaption(caption);
         const frame = (block && block.type === 'figure' && block.frame) || DEFAULT_FRAME;
-        const canFrame = bi !== undefined && n !== FOLD_SLOT;
+        const canFrame = bi !== undefined;
+        const isFold = n === FOLD_SLOT;
         return (
           <div className="gallery-slot" key={s.label}>
             <div className="gallery-slot-head">
@@ -156,8 +157,8 @@ export function GallerySection() {
                 <LabeledRange label="Shift vertically" value={frame.offsetY} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setFrame(bi, 'offsetY')} />
               </>
             )}
-            {bi !== undefined && n === FOLD_SLOT && (
-              <p className="gallery-slot-hint">Spans the fold — framing fixed so the halves stay aligned.</p>
+            {isFold && (
+              <p className="gallery-slot-hint">Zoom &amp; shift stay in sync across the fold.</p>
             )}
           </div>
         );

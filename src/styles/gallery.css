@@ -58,15 +58,18 @@
   object-fit: cover;
   display: block;
 }
-/* Fold image: painted from CSS background (200% wide, side chosen inline) so the
-   two facing cells meet exactly at the fold. */
-.g-fold {
-  background-repeat: no-repeat;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
-}
+/* Fold image: an <img> twice the cell width, anchored at the fold (see
+   GalleryPage.FoldCell). Both facing cells are the same width so the halves match. */
 .g-fold.is-empty {
   background: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 10px, #eef1f4 10px, #eef1f4 20px);
+}
+/* Bleed the fold image to the sheet edge on the fold side (right on page 1,
+   left on page 2) so the two halves meet with no white gutter between them. */
+.gallery--p1 .g-fold {
+  margin-right: calc(-1 * var(--margin));
+}
+.gallery--p2 .g-fold {
+  margin-left: calc(-1 * var(--margin));
 }
 .g-img-empty {
   display: block;
@@ -130,9 +133,11 @@
     'card-2 img-3';
 }
 
-/* ---- Page 2: fold image continues top-left; asymmetric grid of images + cards */
+/* ---- Page 2: fold image continues top-left; grid of images + cards.
+   Columns are 1fr 1fr so the fold cell matches page 1's fold cell width and the
+   two halves line up exactly at the seam. */
 .gallery--p2 {
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: auto 1fr 1fr 1fr 1fr;
   grid-template-areas:
     'head  head'
