@@ -592,6 +592,36 @@
   color: var(--faint);
 }
 
+/* ---- Gallery image slots -------------------------------------------------- */
+
+.gallery-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.gallery-slot:first-child {
+  border-top: none;
+}
+.gallery-slot-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.gallery-slot-label {
+  font-weight: 700;
+  font-size: 13px;
+}
+.gallery-slot-hint {
+  font-size: 11px;
+  color: var(--faint);
+}
+.gallery-slot-thumb {
+  max-height: 96px;
+}
+
 .add-row {
   display: flex;
   gap: 8px;

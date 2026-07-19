@@ -10,6 +10,7 @@ import './styles/page.css';
 import './styles/paper2.css';
 import './styles/paper3.css';
 import './styles/magazine.css';
+import './styles/gallery.css';
 import './styles/panel.css';
 
 export default function App() {

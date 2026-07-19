@@ -1,10 +1,12 @@
 import { useDoc } from '../../store/useDoc';
 import { familyOf } from '../../schema/document';
-import { LabeledInput, LabeledTextarea, Section } from '../Field';
+import { LabeledColor, LabeledInput, LabeledTextarea, Section } from '../Field';
 
 export function MetaSection() {
   const meta = useDoc((s) => s.doc.meta);
   const isMag = useDoc((s) => familyOf(s.doc.templateId) === 'magazine');
+  const isGallery = useDoc((s) => familyOf(s.doc.templateId) === 'gallery');
+  const barColor = useDoc((s) => s.doc.design.colors.accent);
   const isP2 = useDoc((s) => s.doc.templateId === 'paper-2');
   // paper-3 draws the same tag bar, and captions its own hero band.
   const hasBar = useDoc((s) => s.doc.templateId === 'paper-2' || s.doc.templateId === 'paper-3');
@@ -15,28 +17,47 @@ export function MetaSection() {
       d.meta[key] = v;
     });
 
+  const setBarColor = (v: string) =>
+    update((d) => {
+      d.design.colors.accent = v;
+    });
+
   return (
-    <Section title="Title & Author">
-      <LabeledInput
-        label={isMag ? 'Kicker' : 'Category'}
-        value={meta.categoryLabel}
-        onChange={set('categoryLabel')}
-        placeholder={isMag ? 'COVER STORY' : 'Research Highlight · Physics'}
-      />
-      <LabeledInput label="Title" value={meta.title} onChange={set('title')} placeholder="Highlight title" />
-      <LabeledInput
-        label={isMag ? 'Lede (cover subtitle)' : 'Subtitle'}
-        value={meta.subtitle}
-        onChange={set('subtitle')}
-        placeholder="One explanatory sentence"
-      />
-      <LabeledInput label="Author" value={meta.author} onChange={set('author')} placeholder="A. Rahman, S. Tan" />
-      <LabeledInput
-        label={isMag ? 'Affiliation / Section' : 'Affiliation'}
-        value={meta.affiliation}
-        onChange={set('affiliation')}
-        placeholder="School of Physics, USM"
-      />
+    <Section title={isGallery ? 'Header' : 'Title & Author'}>
+      {isGallery ? (
+        <>
+          <LabeledInput
+            label="Header text"
+            value={meta.masthead ?? ''}
+            onChange={set('masthead')}
+            placeholder="PHYSICS GALLERY"
+          />
+          <LabeledColor label="Bar color" value={barColor} onChange={setBarColor} />
+        </>
+      ) : (
+        <>
+          <LabeledInput
+            label={isMag ? 'Kicker' : 'Category'}
+            value={meta.categoryLabel}
+            onChange={set('categoryLabel')}
+            placeholder={isMag ? 'COVER STORY' : 'Research Highlight · Physics'}
+          />
+          <LabeledInput label="Title" value={meta.title} onChange={set('title')} placeholder="Highlight title" />
+          <LabeledInput
+            label={isMag ? 'Lede (cover subtitle)' : 'Subtitle'}
+            value={meta.subtitle}
+            onChange={set('subtitle')}
+            placeholder="One explanatory sentence"
+          />
+          <LabeledInput label="Author" value={meta.author} onChange={set('author')} placeholder="A. Rahman, S. Tan" />
+          <LabeledInput
+            label={isMag ? 'Affiliation / Section' : 'Affiliation'}
+            value={meta.affiliation}
+            onChange={set('affiliation')}
+            placeholder="School of Physics, USM"
+          />
+        </>
+      )}
 
       {hasBar && (
         <>

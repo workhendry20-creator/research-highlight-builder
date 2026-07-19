@@ -1,7 +1,7 @@
 export const SCHEMA_VERSION = 1;
 
 /** Template family = which layout engine renders the document. */
-export type TemplateFamily = 'paper' | 'magazine';
+export type TemplateFamily = 'paper' | 'magazine' | 'gallery';
 
 /** A specific template. The family (engine) is the id's prefix; the number picks
  *  a preset (content + design tokens) within that engine. */
@@ -11,11 +11,12 @@ export type TemplateId =
   | 'paper-3'
   | 'magazine-1'
   | 'magazine-2'
-  | 'magazine-3';
+  | 'magazine-3'
+  | 'gallery-1';
 
 /** The layout engine a template runs on — derived from the id, never stored. */
 export const familyOf = (id: TemplateId | undefined): TemplateFamily =>
-  id && id.startsWith('magazine') ? 'magazine' : 'paper';
+  id?.startsWith('gallery') ? 'gallery' : id?.startsWith('magazine') ? 'magazine' : 'paper';
 
 /** A block never knows which page it lands on. Pages are computed, never stored. */
 export type Block =
@@ -33,6 +34,12 @@ export type Block =
       span: 1 | 'body' | 'bleed';
       /** Caption text alignment. Absent = left (back-compat with v1 files). */
       align?: 'left' | 'center' | 'right';
+      /**
+       * Zoom/pan of the image inside its box, used by the gallery tiles to
+       * reframe a photo without changing the tile size. Absent = fill (scale 1,
+       * no shift). scale ≥ 1; offsets are percent of the box.
+       */
+      frame?: { scale: number; offsetX: number; offsetY: number };
     };
 
 export interface Asset {

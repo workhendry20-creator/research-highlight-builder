@@ -4,6 +4,7 @@ import { familyOf, type TemplateFamily } from '../schema/document';
 import { TEMPLATE_META } from '../store/presets';
 import { MetaSection } from './sections/MetaSection';
 import { HeroSection } from './sections/HeroSection';
+import { GallerySection } from './sections/GallerySection';
 import { BodySection } from './sections/BodySection';
 import { HighlightsSection } from './sections/HighlightsSection';
 import { ReferencesSection } from './sections/ReferencesSection';
@@ -21,6 +22,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 const SECTIONS: { family: TemplateFamily; label: string; icon: string; blurb: string }[] = [
   { family: 'paper', label: 'Paper', icon: '📄', blurb: 'Academic' },
   { family: 'magazine', label: 'Magazine', icon: '📰', blurb: 'Editorial' },
+  { family: 'gallery', label: 'Gallery', icon: '🖼️', blurb: 'Photo' },
 ];
 
 /**
@@ -36,6 +38,7 @@ export function Panel() {
   );
   const templateId = useDoc((s) => s.doc.templateId ?? 'paper-1');
   const switchTemplate = useDoc((s) => s.switchTemplate);
+  const isGallery = familyOf(templateId) === 'gallery';
 
   // Which section is expanded. Defaults to the active template's family; clicking
   // a section header toggles it open/closed.
@@ -118,7 +121,7 @@ export function Panel() {
             <BodySection />
           </>
         )}
-        {tab === 'images' && <HeroSection />}
+        {tab === 'images' && (isGallery ? <GallerySection /> : <HeroSection />)}
         {tab === 'highlights' && (
           <>
             <HighlightsSection />
