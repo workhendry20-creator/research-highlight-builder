@@ -44,6 +44,16 @@ const LAYOUTS: Record<string, Layout> = {
       { label: 'Image 8', hint: 'Page 2 · right (tall)' },
     ],
   },
+  'gallery-4': {
+    fold: 0,
+    slots: [
+      { label: 'Image 1', hint: 'Fold · tall block, spans page 1 → page 2' },
+      { label: 'Image 2', hint: 'Page 1 · lower-left' },
+      { label: 'Image 3', hint: 'Page 1 · lower-right' },
+      { label: 'Image 4', hint: 'Page 2 · lower-left' },
+      { label: 'Image 5', hint: 'Page 2 · lower-right' },
+    ],
+  },
 };
 
 /** Caption is stored as "**Title**\nDescription"; expose it as two fields. */
