@@ -24,6 +24,17 @@ export type Block =
   | { id: string; type: 'paragraph'; text: string }
   | {
       id: string;
+      /** A display equation that stands on its own line, outside any paragraph.
+       *  `tex` is verbatim LaTeX rendered by KaTeX in display mode; `caption` is
+       *  an optional line under it. Atomic in the flow, like a figure. */
+      type: 'equation';
+      tex: string;
+      caption: string;
+      /** Caption text alignment. Absent = center (a display block reads centered). */
+      align?: 'left' | 'center' | 'right';
+    }
+  | {
+      id: string;
       type: 'figure';
       assetId: string;
       caption: string;

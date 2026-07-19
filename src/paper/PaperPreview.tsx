@@ -3,7 +3,7 @@ import { useDoc } from '../store/useDoc';
 import { familyOf } from '../schema/document';
 import { cssVars, grid, PAGE_W, PAGE_H } from '../lib/geometry';
 import { paginate, paginateHosts, fitMessage, type FlowItem, type Pagination } from '../lib/paginate';
-import { applyMark } from '../lib/activeEditor';
+import { applyMark, insertMath } from '../lib/activeEditor';
 import { MAG2_STRIP } from '../lib/magSplit';
 import { paper2Grid, paper2Fit } from '../lib/paper2';
 import { P3_BAND_W } from '../lib/paper3';
@@ -45,6 +45,7 @@ export function PaperPreview() {
     () =>
       doc.blocks.map((b) => {
         if (b.type === 'paragraph') return { kind: 'text', text: b.text };
+        if (b.type === 'equation') return { kind: 'equation', id: b.id, tex: b.tex, caption: b.caption };
         const asset = doc.assets[b.assetId];
         return {
           kind: 'figure',
@@ -377,6 +378,17 @@ export function PaperPreview() {
               {f.label}
             </button>
           ))}
+          <button
+            type="button"
+            className="format-btn format-btn--math"
+            title="Inline formula — wraps the selection in $…$ (LaTeX/KaTeX)"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              insertMath();
+            }}
+          >
+            ∑
+          </button>
         </div>
         <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
         {(isMag || isGallery) && (

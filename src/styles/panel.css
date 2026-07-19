@@ -433,6 +433,11 @@
   min-height: 46px;
 }
 
+/* Monospace for the LaTeX equation editor — operators/braces read clearly. */
+.field-mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 /* ---- List items (paragraphs, highlights, references) ---------------------- */
 
 .list-item {

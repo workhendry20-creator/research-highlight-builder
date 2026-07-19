@@ -56,6 +56,24 @@ export function BodySection() {
       if (b.type === 'figure') b.caption = caption;
     });
 
+  const setTex = (i: number, tex: string) =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'equation') b.tex = tex;
+    });
+
+  const setEqCaption = (i: number, caption: string) =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'equation') b.caption = caption;
+    });
+
+  const setEqAlign = (i: number, align: 'left' | 'center' | 'right') =>
+    update((d) => {
+      const b = d.blocks[i];
+      if (b.type === 'equation') b.align = align;
+    });
+
   const setSpan = (i: number, span: 1 | 'body' | 'bleed') =>
     update((d) => {
       const b = d.blocks[i];
@@ -90,6 +108,11 @@ export function BodySection() {
   const addParagraph = () =>
     update((d) => {
       d.blocks.push({ id: uid(), type: 'paragraph', text: '' });
+    });
+
+  const addEquation = () =>
+    update((d) => {
+      d.blocks.push({ id: uid(), type: 'equation', tex: '', caption: '', align: 'center' });
     });
 
   const readAsset = async (file: File, then: (aid: string, d: Doc) => void) => {
@@ -145,6 +168,10 @@ export function BodySection() {
 
   return (
     <Section title={isGallery ? 'Text cards' : 'Content (paragraphs & images)'}>
+      <p className="hint">
+        Formatting: <code>**bold**</code>, <code>*italic*</code>, <code>__underline__</code>.
+        Math: wrap LaTeX in <code>$…$</code>, e.g. <code>$E = mc^2$</code>.
+      </p>
       {view.map(({ b, i }) => (
         <div
           key={b.id}
@@ -193,6 +220,36 @@ export function BodySection() {
                 autosize(e.currentTarget);
               }}
             />
+          ) : b.type === 'equation' ? (
+            <div className="figure-edit">
+              <textarea
+                ref={autosize}
+                className="field-input field-textarea field-textarea--grow field-mono"
+                value={b.tex}
+                rows={2}
+                placeholder="LaTeX, e.g. E = mc^2  or  \int_0^\infty e^{-x}\,dx"
+                onChange={(e) => {
+                  setTex(i, e.target.value);
+                  autosize(e.currentTarget);
+                }}
+              />
+              <input
+                className="field-input"
+                value={b.caption}
+                placeholder="Equation caption (optional)…"
+                onChange={(e) => setEqCaption(i, e.target.value)}
+              />
+              <SegmentField<'left' | 'center' | 'right'>
+                label="Caption align"
+                value={b.align ?? 'center'}
+                options={[
+                  { value: 'left', label: 'Left' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'right', label: 'Right' },
+                ]}
+                onChange={(v) => setEqAlign(i, v)}
+              />
+            </div>
           ) : (
             <div className="figure-edit">
               <div className="figure-thumb">
@@ -249,9 +306,14 @@ export function BodySection() {
           {isGallery ? '+ Text card' : '+ Paragraph'}
         </button>
         {!isGallery && (
-          <button type="button" className="add-btn" onClick={addImage}>
-            + Image
-          </button>
+          <>
+            <button type="button" className="add-btn" onClick={addImage}>
+              + Image
+            </button>
+            <button type="button" className="add-btn" onClick={addEquation}>
+              + Equation
+            </button>
+          </>
         )}
       </div>
 

@@ -1,14 +1,36 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react';
 import type { Doc } from '../schema/document';
 import type { Piece } from '../lib/paginate';
-import { parseRuns } from '../lib/richtext';
+import { parseRuns, renderTex } from '../lib/richtext';
+import { fitEquation } from '../lib/mathfit';
 import { HighlightsBody } from './Sidebar';
 import { MagSplitAside } from './MagSplitHead';
 
-/** Turn a paragraph string with **bold** / *italic* / __underline__ markers into
- *  styled inline nodes. React escapes the text, so it's injection-safe. */
+/** A standalone display equation with an optional caption. KaTeX can't wrap math,
+ *  so a too-wide formula is scaled down to the column rather than running off the
+ *  edge — re-fit after every render (covers tex edits and column-width changes). */
+function DisplayEquation({ tex, caption, align }: { tex: string; caption: string; align?: 'left' | 'center' | 'right' }) {
+  const texRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (texRef.current) fitEquation(texRef.current);
+  });
+  return (
+    <figure className="flow-eq">
+      <span ref={texRef} className="flow-eq-tex" dangerouslySetInnerHTML={{ __html: renderTex(tex, true) }} />
+      {caption.trim() && (
+        <figcaption style={{ textAlign: align ?? 'center' }}>{renderRuns(caption)}</figcaption>
+      )}
+    </figure>
+  );
+}
+
+/** Turn a paragraph string with **bold** / *italic* / __underline__ markers and
+ *  `$…$` math into styled inline nodes. React escapes the text; KaTeX HTML is
+ *  trusted output rendered with throwOnError:false. */
 function renderRuns(text: string): ReactNode {
   return parseRuns(text).map((r, j) => {
+    if (r.math)
+      return <span key={j} className="tex" dangerouslySetInnerHTML={{ __html: renderTex(r.text) }} />;
     let node: ReactNode = r.text;
     if (r.b) node = <strong>{node}</strong>;
     if (r.i) node = <em>{node}</em>;
@@ -34,6 +56,11 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
   return (
     <>
       {pieces.map((pc, i) => {
+        if (pc.kind === 'equation') {
+          const block = doc.blocks.find((b) => b.id === pc.id);
+          if (!block || block.type !== 'equation') return null;
+          return <DisplayEquation key={i} tex={block.tex} caption={block.caption} align={block.align} />;
+        }
         if (pc.kind === 'figure') {
           if (pc.id === MAG2_ASIDE_ID) return <MagSplitAside doc={doc} key={i} />;
           if (pc.id === HIGHLIGHTS_BLOCK_ID) {
@@ -54,7 +81,9 @@ export function Flow({ pieces, doc }: { pieces: Piece[]; doc: Doc }) {
             <figure className={`flow-fig ${spanClass}`} key={i}>
               <img src={asset.src} alt="" />
               {block.caption.trim() && (
-                <figcaption style={{ textAlign: block.align ?? 'left' }}>{block.caption}</figcaption>
+                <figcaption style={{ textAlign: block.align ?? 'left' }}>
+                  {renderRuns(block.caption)}
+                </figcaption>
               )}
             </figure>
           );
