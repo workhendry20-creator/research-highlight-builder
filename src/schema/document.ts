@@ -34,6 +34,12 @@ export type Block =
       span: 1 | 'body' | 'bleed';
       /** Caption text alignment. Absent = left (back-compat with v1 files). */
       align?: 'left' | 'center' | 'right';
+      /**
+       * Zoom/pan of the image inside its box, used by the gallery tiles to
+       * reframe a photo without changing the tile size. Absent = fill (scale 1,
+       * no shift). scale ≥ 1; offsets are percent of the box.
+       */
+      frame?: { scale: number; offsetX: number; offsetY: number };
     };
 
 export interface Asset {

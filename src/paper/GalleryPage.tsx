@@ -33,9 +33,13 @@ function TileText({ text, className }: { text: string; className: string }) {
 function ImageCell({ doc, block, area }: { doc: Doc; block?: Block; area: string }) {
   const asset = block && block.type === 'figure' ? doc.assets[block.assetId] : undefined;
   const caption = block && block.type === 'figure' ? block.caption : '';
+  const fr = block && block.type === 'figure' ? block.frame : undefined;
+  const imgStyle: CSSProperties = fr
+    ? { transform: `translate(${fr.offsetX}%, ${fr.offsetY}%) scale(${fr.scale})` }
+    : {};
   return (
     <figure className="g-img" style={{ gridArea: area }}>
-      {asset ? <img src={asset.src} alt="" /> : <span className="g-img-empty" />}
+      {asset ? <img src={asset.src} alt="" style={imgStyle} /> : <span className="g-img-empty" />}
       {caption.trim() && <figcaption><TileText text={caption} className="g-cap" /></figcaption>}
     </figure>
   );

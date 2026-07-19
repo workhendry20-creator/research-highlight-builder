@@ -1,6 +1,11 @@
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
-import { Section } from '../Field';
+import { LabeledRange, Section } from '../Field';
+
+/** Slot index of the fold image (spans both pages) — framing is fixed for it so
+ *  the two halves stay joined at the fold. */
+const FOLD_SLOT = 1;
+const DEFAULT_FRAME = { scale: 1, offsetX: 0, offsetY: 0 };
 
 /** The five image slots the gallery template exposes, in the order figures fill
  *  them. Slot i edits the i-th figure block. */
@@ -90,6 +95,13 @@ export function GallerySection() {
       if (b.type === 'figure') b.caption = caption;
     });
 
+  const setFrame = (blockIdx: number, key: 'scale' | 'offsetX' | 'offsetY') => (v: number) =>
+    update((d) => {
+      const b = d.blocks[blockIdx];
+      if (b.type !== 'figure') return;
+      b.frame = { ...DEFAULT_FRAME, ...b.frame, [key]: v };
+    });
+
   return (
     <Section title="Gallery images">
       {SLOTS.map((s, n) => {
@@ -98,6 +110,8 @@ export function GallerySection() {
         const asset = block && block.type === 'figure' ? assets[block.assetId] : undefined;
         const caption = block && block.type === 'figure' ? block.caption : '';
         const { title, desc } = splitCaption(caption);
+        const frame = (block && block.type === 'figure' && block.frame) || DEFAULT_FRAME;
+        const canFrame = bi !== undefined && n !== FOLD_SLOT;
         return (
           <div className="gallery-slot" key={s.label}>
             <div className="gallery-slot-head">
@@ -105,7 +119,15 @@ export function GallerySection() {
               <span className="gallery-slot-hint">{s.hint}</span>
             </div>
             <div className="figure-thumb gallery-slot-thumb">
-              {asset ? <img src={asset.src} alt="" /> : <span className="figure-missing">No image</span>}
+              {asset ? (
+                <img
+                  src={asset.src}
+                  alt=""
+                  style={{ transform: `translate(${frame.offsetX}%, ${frame.offsetY}%) scale(${frame.scale})` }}
+                />
+              ) : (
+                <span className="figure-missing">No image</span>
+              )}
             </div>
             <button type="button" className="add-btn" onClick={() => setImage(n)}>
               {asset ? 'Replace image' : `Upload ${s.label}`}
@@ -126,6 +148,16 @@ export function GallerySection() {
                   onChange={(e) => setCaption(bi, joinCaption(title, e.target.value))}
                 />
               </>
+            )}
+            {canFrame && (
+              <>
+                <LabeledRange label="Zoom" value={frame.scale} min={1} max={3} step={0.05} format={(v) => `${v.toFixed(2)}×`} onChange={setFrame(bi, 'scale')} />
+                <LabeledRange label="Shift horizontally" value={frame.offsetX} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setFrame(bi, 'offsetX')} />
+                <LabeledRange label="Shift vertically" value={frame.offsetY} min={-50} max={50} step={1} format={(v) => `${v}%`} onChange={setFrame(bi, 'offsetY')} />
+              </>
+            )}
+            {bi !== undefined && n === FOLD_SLOT && (
+              <p className="gallery-slot-hint">Spans the fold — framing fixed so the halves stay aligned.</p>
             )}
           </div>
         );
