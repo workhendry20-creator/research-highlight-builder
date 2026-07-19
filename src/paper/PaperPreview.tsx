@@ -19,6 +19,7 @@ import { MagSplitCover, MagPhotoPage } from './MagSplitCover';
 import { MagSplitHead, MagSplitAside } from './MagSplitHead';
 import { HighlightsBody } from './Sidebar';
 import { HIGHLIGHTS_BLOCK_ID, MAG2_ASIDE_ID } from './Flow';
+import { GalleryPage } from './GalleryPage';
 
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
@@ -58,6 +59,8 @@ export function PaperPreview() {
   );
 
   const isMag = familyOf(doc.templateId) === 'magazine';
+  // Gallery: a fixed photo collage, no text flow — one A4 page, no pagination.
+  const isGallery = familyOf(doc.templateId) === 'gallery';
   // magazine-2 runs a different sheet plan: sheet 1 is the article + photo strip,
   // sheet 2 is that same photo continued, spill goes to sheet 3+.
   const isSplit = doc.templateId === 'magazine-2';
@@ -114,7 +117,8 @@ export function PaperPreview() {
   // the cover and its facing page read together. View-only — pagination, pt/mm
   // sizes and the PDF are untouched.
   const [spread, setSpread] = useState(false);
-  const spreadOn = isMag && spread;
+  // Gallery is a two-page spread too — the fold image only reads right side-by-side.
+  const spreadOn = (isMag || isGallery) && spread;
   const cols = spreadOn ? 2 : 1;
 
   useEffect(() => {
@@ -137,6 +141,12 @@ export function PaperPreview() {
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
     if (!scroll) return;
+
+    // Gallery is a fixed collage — nothing to break, so skip the measuring rig.
+    if (isGallery) {
+      setPagination(EMPTY);
+      return;
+    }
 
     // Magazine: page 1 is a cover (no flow). The body flows from page 2 into a
     // 2-column box. The first spread reserves room for the pull-quote, so its
@@ -292,7 +302,7 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2, isP3]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2, isP3, isGallery]);
 
   const vars = {
     ...baseVars,
@@ -319,20 +329,24 @@ export function PaperPreview() {
 
   // paper-2 spends two of paginateHosts' regions on sheet 1, so the fit badge
   // has to count sheets, not regions.
-  const fit = fitMessage(isP2 ? paper2Fit(pagination) : pagination);
+  const fit = isGallery
+    ? ({ level: 'ok', text: '2 pages · spread' } as const)
+    : fitMessage(isP2 ? paper2Fit(pagination) : pagination);
   const pages = pagination.pages;
 
   const scale = zoom === 'fit' ? fitScale : zoom;
   const pct = Math.round(scale * 100);
   // Magazine adds the cover sheet on top of the flowed content pages. magazine-2
   // instead puts the flow's first page ON sheet 1 and spends sheet 2 on the photo.
-  const nPages = isSplit
-    ? 2 + Math.max(0, pages.length - 1)
-    : isMag
-      ? 1 + pages.length
-      : isP2
-        ? 1 + Math.max(0, pages.length - 2)
-        : Math.max(1, pages.length);
+  const nPages = isGallery
+    ? 2
+    : isSplit
+      ? 2 + Math.max(0, pages.length - 1)
+      : isMag
+        ? 1 + pages.length
+        : isP2
+          ? 1 + Math.max(0, pages.length - 2)
+          : Math.max(1, pages.length);
   const rows = Math.ceil(nPages / cols);
   const frame = {
     width: (cols * PAGE_W_PX + (cols - 1) * PAGE_GAP_PX) * scale,
@@ -365,7 +379,7 @@ export function PaperPreview() {
           ))}
         </div>
         <span className={`fit-badge fit-${fit.level}`}>{fit.text}</span>
-        {isMag && (
+        {(isMag || isGallery) && (
           <div className="view-bar">
             <button
               type="button"
@@ -409,7 +423,9 @@ export function PaperPreview() {
           className={`pages${spreadOn ? ' pages--spread' : ''}`}
           style={{ transform: `scale(${scale})` }}
         >
-          {isSplit ? (
+          {isGallery ? (
+            <GalleryPage doc={doc} vars={vars} />
+          ) : isSplit ? (
             <>
               <MagSplitCover doc={doc} vars={vars} pieces={pages[0] ?? []} />
               <MagPhotoPage doc={doc} vars={vars} />

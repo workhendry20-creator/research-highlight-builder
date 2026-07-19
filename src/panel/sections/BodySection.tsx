@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useDoc } from '../../store/useDoc';
-import { uid, type Doc } from '../../schema/document';
+import { familyOf, uid, type Doc } from '../../schema/document';
 import { RowButtons, Section, SegmentField } from '../Field';
 import { TOKEN, wrapSelection, type Mark } from '../../lib/richtext';
 import { setActiveEditor } from '../../lib/activeEditor';
@@ -26,6 +26,9 @@ export function BodySection() {
   const blocks = useDoc((s) => s.doc.blocks);
   const assets = useDoc((s) => s.doc.assets);
   const update = useDoc((s) => s.update);
+  // Gallery manages its images in the Images tab (fixed slots), so Content only
+  // edits the text cards here — no inline figures, no "+ Image".
+  const isGallery = useDoc((s) => familyOf(s.doc.templateId) === 'gallery');
   // Ref, not state: the drop handler must read the source index synchronously,
   // without waiting for a re-render between dragstart and drop.
   const dragFrom = useRef<number | null>(null);
@@ -127,9 +130,22 @@ export function BodySection() {
     setDragOver(null);
   };
 
+  // Nearest paragraph neighbour (gallery skips figures when reordering cards).
+  const paraNeighbour = (i: number, dir: -1 | 1) => {
+    for (let k = i + dir; k >= 0 && k < blocks.length; k += dir) {
+      if (blocks[k].type === 'paragraph') return k;
+    }
+    return -1;
+  };
+
+  // Gallery shows only its text cards; other templates show every block.
+  const view = blocks
+    .map((b, i) => ({ b, i }))
+    .filter(({ b }) => !isGallery || b.type === 'paragraph');
+
   return (
-    <Section title="Content (paragraphs & images)">
-      {blocks.map((b, i) => (
+    <Section title={isGallery ? 'Text cards' : 'Content (paragraphs & images)'}>
+      {view.map(({ b, i }) => (
         <div
           key={b.id}
           className={`list-item${b.type === 'figure' ? ' list-item--stack' : ''}${
@@ -219,22 +235,24 @@ export function BodySection() {
           )}
 
           <RowButtons
-            onUp={() => swap(i, i - 1)}
-            onDown={() => swap(i, i + 1)}
+            onUp={() => swap(i, isGallery ? paraNeighbour(i, -1) : i - 1)}
+            onDown={() => swap(i, isGallery ? paraNeighbour(i, 1) : i + 1)}
             onRemove={() => remove(i)}
-            disableUp={i === 0}
-            disableDown={i === blocks.length - 1}
+            disableUp={isGallery ? paraNeighbour(i, -1) === -1 : i === 0}
+            disableDown={isGallery ? paraNeighbour(i, 1) === -1 : i === blocks.length - 1}
           />
         </div>
       ))}
 
       <div className="add-row">
         <button type="button" className="add-btn" onClick={addParagraph}>
-          + Paragraph
+          {isGallery ? '+ Text card' : '+ Paragraph'}
         </button>
-        <button type="button" className="add-btn" onClick={addImage}>
-          + Image
-        </button>
+        {!isGallery && (
+          <button type="button" className="add-btn" onClick={addImage}>
+            + Image
+          </button>
+        )}
       </div>
     </Section>
   );
