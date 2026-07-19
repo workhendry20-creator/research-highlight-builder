@@ -106,6 +106,7 @@ function Head({ doc }: { doc: Doc }) {
 export function GalleryPage({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
   if (doc.templateId === 'gallery-2') return <GalleryTwo doc={doc} vars={vars} />;
   if (doc.templateId === 'gallery-3') return <GalleryThree doc={doc} vars={vars} />;
+  if (doc.templateId === 'gallery-4') return <GalleryFour doc={doc} vars={vars} />;
 
   const figures = doc.blocks.filter((b) => b.type === 'figure');
   const cards = doc.blocks.filter((b) => b.type === 'paragraph');
@@ -201,6 +202,41 @@ function GalleryThree({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
         <ImageCell doc={doc} block={figures[7]} area="img-7" />
         <CardCell block={cards[2]} area="card-3" />
         <CardCell block={cards[3]} area="card-4" />
+      </div>
+    </>
+  );
+}
+
+/**
+ * gallery-4: a text-forward spread with only five photos. The fold image is a
+ * tall block on the inner edge of each page (right on page 1, left on page 2),
+ * crossing the fold; four small tiles and six text cards carry the rest, so the
+ * copy dominates. fig[0] is the fold, fig[1..4] the tiles, in order.
+ */
+function GalleryFour({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
+  const figures = doc.blocks.filter((b) => b.type === 'figure');
+  const cards = doc.blocks.filter((b) => b.type === 'paragraph');
+
+  return (
+    <>
+      <div className="page gallery gallery--p1 gallery4--p1" style={vars}>
+        <Head doc={doc} />
+        <FoldCell doc={doc} block={figures[0]} area="fold" half="left" />
+        <CardCell block={cards[0]} area="card-1" />
+        <CardCell block={cards[1]} area="card-2" />
+        <ImageCell doc={doc} block={figures[1]} area="img-1" />
+        <ImageCell doc={doc} block={figures[2]} area="img-2" />
+        <CardCell block={cards[2]} area="card-3" />
+      </div>
+
+      <div className="page gallery gallery--p2 gallery4--p2" style={vars}>
+        <Head doc={doc} />
+        <FoldCell doc={doc} block={figures[0]} area="fold" half="right" />
+        <CardCell block={cards[3]} area="card-4" />
+        <CardCell block={cards[4]} area="card-5" />
+        <ImageCell doc={doc} block={figures[3]} area="img-3" />
+        <ImageCell doc={doc} block={figures[4]} area="img-4" />
+        <CardCell block={cards[5]} area="card-6" />
       </div>
     </>
   );

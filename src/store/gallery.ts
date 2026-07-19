@@ -257,3 +257,66 @@ export function makeGallery3(): Doc {
   d.hero = { assetId: null, offsetX: 0, offsetY: 0, scale: 1 };
   return d;
 }
+
+// ---- gallery-4 placeholder photos (fewer photos, more text) ----------------
+const G4_FOLD = foldPhoto('#1e3a8a', '#0ea5e9');
+const G4_A = photo('#0f766e', '#2dd4bf', '<circle r="120" fill="none" stroke="#fff" stroke-width="12" opacity="0.85"/><circle r="34"/>');
+const G4_B = photo('#7c2d12', '#f59e0b', '<rect x="-150" y="-100" width="300" height="200" rx="16" opacity="0.85"/>');
+const G4_C = photo('#4c1d95', '#a855f7', '<circle cx="-100" r="66"/><circle cx="100" r="66"/><path d="M-100 0 H100" stroke="#fff" stroke-width="10"/>');
+const G4_D = photo('#134e4a', '#22d3ee', '<path d="M-200 120 L0 -180 L200 120 Z" opacity="0.8"/>');
+
+/**
+ * gallery-4 — a text-forward spread. Only FIVE photos: one fold image (a tall
+ * block on the inner edge, crossing the fold) plus four small tiles, so the rest
+ * of the spread is given to SIX text cards with longer copy. A quieter, editorial
+ * layout for when the story carries more than the pictures.
+ */
+export function makeGallery4(): Doc {
+  const d = emptyDoc();
+  d.templateId = 'gallery-4';
+  d.meta = {
+    ...d.meta,
+    masthead: 'LONG READ',
+    title: 'THE QUIET WORK',
+    categoryLabel: 'USM School of Physics',
+  };
+  d.design = {
+    ...d.design,
+    bodyAlign: 'left',
+    fontDisplay: 'Source Sans 3',
+    colors: { hero: '#0f172a', accent: '#1d4ed8', accentSoft: '#e2e8f0', ink: '#0f172a' },
+    paperBg: '#eef2f7',
+    margin: 12,
+  };
+
+  const ids = [uid(), uid(), uid(), uid(), uid()];
+  const dims = (src: string, w: number, h: number) => ({ src, naturalWidth: w, naturalHeight: h });
+  d.assets = {
+    [ids[0]]: dims(G4_FOLD, 2400, 900),
+    [ids[1]]: dims(G4_A, 1200, 900),
+    [ids[2]]: dims(G4_B, 1200, 900),
+    [ids[3]]: dims(G4_C, 1200, 900),
+    [ids[4]]: dims(G4_D, 1200, 900),
+  };
+
+  d.blocks = [
+    // fig[0] is the fold; fig[1..4] are the four small tiles.
+    fig(ids[0], '**Between the pages**\nOne image carried across the fold of the spread.'),
+    fig(ids[1], '**Micro-cavity**\nLight circling a ring thousands of times.'),
+    fig(ids[2], '**The sample**\nA thin film mounted for spectroscopy.'),
+    fig(ids[3], '**The group**\nStudent and supervisor at the bench.'),
+    fig(ids[4], '**Detector**\nWhere the signal is finally read.'),
+    // Six text cards, longer copy — this template is text-forward.
+    card('**A patient discipline**\nMost of the work is invisible: aligning mirrors to a fraction of a wavelength, chasing a drift of a few nanometres, repeating a measurement until the noise gives way to a signal you can trust.'),
+    card('**Light as a tool**\nBy shaping how light moves through engineered structures, the group builds sensors and links that electronics alone cannot match — smaller, faster, and far more sensitive.'),
+    card('**On a chip**\nWhat once filled an optical table is being pressed onto silicon a few millimetres wide, where photons are routed along engineered edges instead of copper wires.'),
+    card('**Why it matters**\nThe payoff reaches from medical imaging to secure quantum communication and low-power computing — fields where a better way to move light changes what is possible.'),
+    card('**Made at USM**\nEvery instrument here is designed, fabricated, and tuned in-house, giving students end-to-end command of the experiment rather than a black box.'),
+    card('**What comes next**\nThe near-term goal is to join single devices into complete photonic circuits — many functions on one chip, working together at the speed of light.'),
+  ];
+
+  d.highlights = [];
+  d.references = [];
+  d.hero = { assetId: null, offsetX: 0, offsetY: 0, scale: 1 };
+  return d;
+}

@@ -206,3 +206,27 @@
     'card-3 img-7'
     'card-4 img-7';
 }
+
+/* ---- gallery-4: text-forward. The fold is a tall block on the inner edge of
+   each page (crossing the fold), with only four small tiles; six text cards get
+   the rest of the room, so the copy leads. */
+.gallery4--p1 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1.1fr 1.1fr 0.9fr 1fr;
+  grid-template-areas:
+    'head   head'
+    'card-1 fold'
+    'card-2 fold'
+    'img-1  img-2'
+    'card-3 card-3';
+}
+.gallery4--p2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1.1fr 1.1fr 0.9fr 1fr;
+  grid-template-areas:
+    'head   head'
+    'fold   card-4'
+    'fold   card-5'
+    'img-3  img-4'
+    'card-6 card-6';
+}
