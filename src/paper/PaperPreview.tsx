@@ -20,6 +20,7 @@ import { MagSplitHead, MagSplitAside } from './MagSplitHead';
 import { HighlightsBody } from './Sidebar';
 import { HIGHLIGHTS_BLOCK_ID, MAG2_ASIDE_ID } from './Flow';
 import { GalleryPage } from './GalleryPage';
+import { MagGateA, MagGateB } from './MagGate';
 
 const EMPTY: Pagination = { pages: [], fill: 0, spill: 0 };
 
@@ -65,6 +66,9 @@ export function PaperPreview() {
   // magazine-2 runs a different sheet plan: sheet 1 is the article + photo strip,
   // sheet 2 is that same photo continued, spill goes to sheet 3+.
   const isSplit = doc.templateId === 'magazine-2';
+  // magazine-3 is a gatefold: two facing cover sheets share one photo across the
+  // fold, then the article flows as plain columns (no lead hero) from sheet 3.
+  const isGate = doc.templateId === 'magazine-3';
   // paper-2 splits sheet 1 into two text regions (beside the header, then under
   // the hero) that start at different heights, so it breaks across three hosts.
   const isP2 = doc.templateId === 'paper-2';
@@ -181,6 +185,31 @@ export function PaperPreview() {
         ];
       }
       setPagination(paginate(sh1, mh2, flow));
+      return;
+    }
+
+    // magazine-3 gatefold: the two cover sheets carry the photo, so the article
+    // is plain columns with no lead hero — measure it against one full-height host
+    // (no --mag-head-h reservation), reused for every article sheet.
+    if (isGate) {
+      const mh2 = magHost2Ref.current;
+      if (!mh2) return;
+      setMagHeadPx(0);
+      const root = mh2.closest<HTMLElement>('.measure-root');
+      if (root) {
+        root.style.setProperty('--footer-h', '10mm');
+        root.style.setProperty('--mag-head-h', '0px');
+      }
+      let gateFlow = items;
+      const gateHl = hlBelow ? hlRef.current : null;
+      if (gateHl) {
+        const w = gateHl.offsetWidth || 1;
+        gateFlow = [
+          ...items,
+          { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: gateHl.offsetHeight / w, hasCaption: false, full: true },
+        ];
+      }
+      setPagination(paginate(mh2, mh2, gateFlow));
       return;
     }
 
@@ -303,7 +332,7 @@ export function PaperPreview() {
       ];
     }
     setPagination(paginate(h1, h2, flow));
-  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isP2, isP3, isGallery]);
+  }, [baseVars, items, doc.meta, doc.design, doc.highlights, doc.references, hlBelow, hlFlow, isMag, isSplit, isGate, isP2, isP3, isGallery]);
 
   const vars = {
     ...baseVars,
@@ -343,9 +372,11 @@ export function PaperPreview() {
     ? 2
     : isSplit
       ? 2 + Math.max(0, pages.length - 1)
-      : isMag
-        ? 1 + pages.length
-        : isP2
+      : isGate
+        ? 2 + pages.length
+        : isMag
+          ? 1 + pages.length
+          : isP2
           ? 1 + Math.max(0, pages.length - 2)
           : Math.max(1, pages.length);
   const rows = Math.ceil(nPages / cols);
@@ -443,6 +474,14 @@ export function PaperPreview() {
               <MagPhotoPage doc={doc} vars={vars} />
               {pages.slice(1).map((pcs, i) => (
                 <MagazinePage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 3} lead={false} />
+              ))}
+            </>
+          ) : isGate ? (
+            <>
+              <MagGateA doc={doc} vars={vars} />
+              <MagGateB doc={doc} vars={vars} />
+              {pages.map((pcs, i) => (
+                <MagazinePage key={i} doc={doc} vars={vars} pieces={pcs} pageNo={i + 3} lead={i === 0} head={false} />
               ))}
             </>
           ) : isMag ? (

@@ -581,3 +581,131 @@
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
+
+/* ---- magazine-3: gatefold cover -------------------------------------------
+   ONE photo split across the two facing cover sheets. Each sheet paints the
+   image at 200% width and shows one half (`position: left` / `right`), so the
+   two halves join at the fold like an open gatefold. Sheet 1 carries the
+   masthead + title, sheet 2 the lede + pull-quote + byline; then the article
+   flows as plain columns from sheet 3 (no lead hero — the photo lives here). */
+.mag-gate {
+  --mag-red: var(--accent, #e11d2e);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  color: #fff;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.mag-gate--a {
+  background-position: left center;
+}
+.mag-gate--b {
+  background-position: right center;
+}
+
+.mag-gate-scrim {
+  position: absolute;
+  inset: 0;
+}
+.mag-gate-scrim--a {
+  background:
+    linear-gradient(90deg, rgba(6, 10, 25, 0.9) 0%, rgba(6, 10, 25, 0.35) 55%, rgba(6, 10, 25, 0) 100%),
+    linear-gradient(180deg, rgba(6, 10, 25, 0.5) 0%, rgba(6, 10, 25, 0) 32%, rgba(6, 10, 25, 0.85) 100%);
+}
+.mag-gate-scrim--b {
+  background:
+    linear-gradient(270deg, rgba(6, 10, 25, 0.72) 0%, rgba(6, 10, 25, 0.2) 55%, rgba(6, 10, 25, 0) 100%),
+    linear-gradient(180deg, rgba(6, 10, 25, 0.45) 0%, rgba(6, 10, 25, 0) 34%, rgba(6, 10, 25, 0.9) 100%);
+}
+
+.mag-gate-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--sans);
+}
+.mag-gate-inner--b {
+  text-align: right;
+}
+
+.mag-gate-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 9pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e5e7eb;
+}
+.mag-gate-vol {
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  color: #cbd5e1;
+}
+
+.mag-gate-mid {
+  margin: auto 0;
+}
+.mag-gate-title {
+  font-size: 46pt;
+}
+
+.mag-gate-lede {
+  margin: 0 0 18px auto;
+  max-width: 84%;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14pt;
+  line-height: 1.45;
+  color: #eef2f7;
+}
+.mag-gate-quote {
+  margin: 0 0 0 auto;
+  max-width: 90%;
+  padding-top: 12px;
+  border-top: 3px solid var(--mag-red);
+}
+.mag-gate-quote-text {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 17pt;
+  line-height: 1.3;
+  color: #fff;
+}
+.mag-gate-quote-by {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mag-red);
+}
+
+.mag-gate-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+.mag-gate-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  text-align: left;
+}
