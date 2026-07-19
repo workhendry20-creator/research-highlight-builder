@@ -5,14 +5,23 @@ import type { Doc } from '../schema/document';
  *  with its last word in red, kicker above it, masthead + volume on top, and the
  *  byline / photo credit at the foot over a dark gradient scrim. */
 export function MagazineCover({ doc, vars }: { doc: Doc; vars: CSSProperties }) {
-  const { meta, hero, assets } = doc;
-  const photo = hero.assetId ? assets[hero.assetId] : null;
+  const { meta, assets } = doc;
+  // Page 1 uses the cover image; falls back to the hero for v1 files that never
+  // set one, so their look is unchanged.
+  const cover = doc.cover ?? doc.hero;
+  const photo = cover.assetId ? assets[cover.assetId] : null;
   const words = meta.title.trim().split(/\s+/).filter(Boolean);
   const mag1 = doc.templateId === 'magazine-1';
 
   const style: CSSProperties = {
     ...vars,
-    ...(photo ? { backgroundImage: `url("${photo.src}")` } : null),
+    ...(photo
+      ? {
+          backgroundImage: `url("${photo.src}")`,
+          backgroundPosition: `${50 + cover.offsetX}% ${50 + cover.offsetY}%`,
+          backgroundSize: cover.scale === 1 ? 'cover' : `${cover.scale * 100}%`,
+        }
+      : null),
   };
 
   return (

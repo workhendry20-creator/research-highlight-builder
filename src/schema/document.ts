@@ -148,6 +148,12 @@ export interface Doc {
   highlights: string[];
   references: Reference[];
   hero: { assetId: string | null; offsetX: number; offsetY: number; scale: number };
+  /**
+   * Page-1 cover photo, distinct from the page-2 hero. Only magazine-1/-3 read
+   * it (their MagazineCover). Absent = fall back to `hero`, so v1 files and the
+   * other templates keep their look — the cover only diverges once it's set.
+   */
+  cover?: { assetId: string | null; offsetX: number; offsetY: number; scale: number };
   assets: Record<string, Asset>;
   design: Design;
 }

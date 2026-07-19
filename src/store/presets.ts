@@ -268,6 +268,7 @@ interface MagInput {
 function makeMagazine(m: MagInput): Doc {
   const d = emptyDoc();
   const photoId = uid();
+  const coverId = uid();
   d.templateId = m.id;
   d.meta = {
     masthead: 'KUANTA',
@@ -294,7 +295,13 @@ function makeMagazine(m: MagInput): Doc {
     colors: { hero: '#0b1220', accent: m.accent, accentSoft: m.accentSoft, ink: '#14181f' },
   };
   d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
-  d.assets = { [photoId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 } };
+  // Cover (page 1) starts from the same photo but is its own asset, so replacing
+  // one image never touches the other.
+  d.cover = { assetId: coverId, offsetX: 0, offsetY: 0, scale: 1 };
+  d.assets = {
+    [photoId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 },
+    [coverId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 },
+  };
   d.blocks = paras(m.body);
   d.highlights = [];
   d.references = [];
