@@ -7,7 +7,11 @@
   display: grid;
   gap: 6mm;
   align-content: stretch;
-  background: #fff;
+  background: var(--paper-bg, #fff);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  /* Muted text tone that holds on any sheet colour: ink pulled toward the bg. */
+  --paper-ink-soft: color-mix(in srgb, var(--paper-ink, #111418) 62%, var(--paper-bg, #fff));
 }
 
 /* Masthead band: a black rule with the section label, echoing the wireframe. */
@@ -20,7 +24,7 @@
 .g-head-bar {
   flex: 1;
   height: 7mm;
-  background: var(--accent, #111418);
+  background: var(--paper-ink, #111418);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -31,7 +35,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 11pt;
-  color: var(--ink, #111418);
+  color: var(--paper-ink, #111418);
 }
 /* Page 1 pins the label left, page 2 pins it right — they mirror at the fold. */
 .gallery--p1 .g-head-label {
@@ -85,6 +89,8 @@
   padding: 2.5mm 3mm;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
   color: #fff;
+  /* Captions ride the author's Body alignment, same as the cards. */
+  text-align: var(--body-align, left);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -97,12 +103,15 @@
   font-size: 7.5pt;
 }
 
-/* Text card: bold title + description, no image. */
+/* Text card: bold title + description, no image. Alignment is author-controlled
+   (Design panel → Body alignment); gallery columns are narrow so it defaults to
+   left, not the global justify. */
 .g-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 1mm 0;
+  text-align: var(--body-align, left);
 }
 .g-title {
   margin: 0 0 1mm;
@@ -112,14 +121,14 @@
   text-transform: uppercase;
   font-size: 12pt;
   line-height: 1.2;
-  color: var(--ink, #111418);
+  color: var(--paper-ink, #111418);
 }
 .g-desc {
   margin: 0;
   font-family: var(--sans);
   font-size: 10pt;
   line-height: 1.45;
-  color: #334155;
+  color: var(--paper-ink-soft, #334155);
 }
 
 /* ---- Page 1: two heroes up top (right one is the fold); text pair + tall image below */
@@ -145,4 +154,29 @@
     'img-2 img-4'
     'img-5 card-4'
     'img-5 card-5';
+}
+
+/* ---- gallery-2: a vertical centre fold. The fold column runs full height on
+   the inner edge of each page (right on page 1, left on page 2) and bleeds to
+   the fold, so its two halves join down the middle of the open spread. These
+   override the gallery-1 grids above (same specificity, later in the file). */
+.gallery2--p1 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr 1fr 1.05fr;
+  grid-template-areas:
+    'head   head'
+    'img-1  fold'
+    'img-2  fold'
+    'card-1 fold'
+    'img-3  card-2';
+}
+.gallery2--p2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr 1fr 1.05fr;
+  grid-template-areas:
+    'head   head'
+    'fold   img-4'
+    'fold   img-5'
+    'fold   card-3'
+    'card-4 img-6';
 }

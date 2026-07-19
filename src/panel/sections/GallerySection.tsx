@@ -1,21 +1,37 @@
 import { useDoc } from '../../store/useDoc';
 import { uid, type Doc } from '../../schema/document';
-import { LabeledRange, Section } from '../Field';
+import { LabeledColor, LabeledRange, Section } from '../Field';
 
-/** Slot index of the fold image (spans both pages) — framing is fixed for it so
- *  the two halves stay joined at the fold. */
-const FOLD_SLOT = 1;
 const DEFAULT_FRAME = { scale: 1, offsetX: 0, offsetY: 0 };
 
-/** The five image slots the gallery template exposes, in the order figures fill
- *  them. Slot i edits the i-th figure block. */
-const SLOTS = [
-  { label: 'Image 1', hint: 'Page 1 · top-left' },
-  { label: 'Image 2', hint: 'Fold · spans page 1 → page 2' },
-  { label: 'Image 3', hint: 'Page 1 · bottom-right' },
-  { label: 'Image 4', hint: 'Page 2 · mid-right' },
-  { label: 'Image 5', hint: 'Page 2 · bottom-left' },
-];
+/** Per-template image slots, in the order figures fill them, plus which slot is
+ *  the fold image (spans both pages — its framing is locked so the two halves
+ *  stay joined). Slot i edits the i-th figure block. */
+type Layout = { fold: number; slots: { label: string; hint: string }[] };
+const LAYOUTS: Record<string, Layout> = {
+  'gallery-1': {
+    fold: 1,
+    slots: [
+      { label: 'Image 1', hint: 'Page 1 · top-left' },
+      { label: 'Image 2', hint: 'Fold · spans page 1 → page 2' },
+      { label: 'Image 3', hint: 'Page 1 · bottom-right' },
+      { label: 'Image 4', hint: 'Page 2 · mid-right' },
+      { label: 'Image 5', hint: 'Page 2 · bottom-left' },
+    ],
+  },
+  'gallery-2': {
+    fold: 0,
+    slots: [
+      { label: 'Image 1', hint: 'Fold · vertical, spans page 1 → page 2' },
+      { label: 'Image 2', hint: 'Page 1 · top-left' },
+      { label: 'Image 3', hint: 'Page 1 · mid-left' },
+      { label: 'Image 4', hint: 'Page 1 · bottom-left' },
+      { label: 'Image 5', hint: 'Page 2 · top-right' },
+      { label: 'Image 6', hint: 'Page 2 · mid-right' },
+      { label: 'Image 7', hint: 'Page 2 · bottom-right' },
+    ],
+  },
+};
 
 /** Caption is stored as "**Title**\nDescription"; expose it as two fields. */
 function splitCaption(caption: string): { title: string; desc: string } {
@@ -45,7 +61,18 @@ function pickImage(onPick: (file: File) => void) {
 export function GallerySection() {
   const blocks = useDoc((s) => s.doc.blocks);
   const assets = useDoc((s) => s.doc.assets);
+  const paperBg = useDoc((s) => s.doc.design.paperBg ?? '#ffffff');
+  const templateId = useDoc((s) => s.doc.templateId ?? 'gallery-1');
   const update = useDoc((s) => s.update);
+
+  const layout = LAYOUTS[templateId] ?? LAYOUTS['gallery-1'];
+  const SLOTS = layout.slots;
+  const FOLD_SLOT = layout.fold;
+
+  const setPaperBg = (v: string) =>
+    update((d) => {
+      d.design.paperBg = v;
+    });
 
   // The block index of each figure, in order → figIndex[n] is slot n's block.
   const figIndex = blocks.reduce<number[]>((acc, b, i) => {
@@ -104,6 +131,8 @@ export function GallerySection() {
 
   return (
     <Section title="Gallery images">
+      <LabeledColor label="Paper background" value={paperBg} onChange={setPaperBg} />
+      <p className="gallery-slot-hint">Text flips to black on light sheets, white on dark.</p>
       {SLOTS.map((s, n) => {
         const bi = figIndex[n];
         const block = bi === undefined ? undefined : blocks[bi];

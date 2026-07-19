@@ -1,6 +1,6 @@
 import { emptyDoc, uid, type Doc, type TemplateFamily, type TemplateId } from '../schema/document';
 import { sampleDoc } from '../sample';
-import { makeGallery1 } from './gallery';
+import { makeGallery1, makeGallery2 } from './gallery';
 
 /**
  * Template registry. Two families (paper / magazine), each with several presets.
@@ -256,6 +256,7 @@ interface MagInput {
 function makeMagazine(m: MagInput): Doc {
   const d = emptyDoc();
   const photoId = uid();
+  const coverId = uid();
   d.templateId = m.id;
   d.meta = {
     masthead: 'KUANTA',
@@ -282,7 +283,13 @@ function makeMagazine(m: MagInput): Doc {
     colors: { hero: '#0b1220', accent: m.accent, accentSoft: m.accentSoft, ink: '#14181f' },
   };
   d.hero = { assetId: photoId, offsetX: 0, offsetY: 0, scale: 1 };
-  d.assets = { [photoId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 } };
+  // Cover (page 1) starts from the same photo but is its own asset, so replacing
+  // one image never touches the other.
+  d.cover = { assetId: coverId, offsetX: 0, offsetY: 0, scale: 1 };
+  d.assets = {
+    [photoId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 },
+    [coverId]: { src: m.photo, naturalWidth: 1600, naturalHeight: 900 },
+  };
   d.blocks = paras(m.body);
   d.highlights = [];
   d.references = [];
@@ -403,7 +410,8 @@ export const TEMPLATES: (TemplateMeta & { make: () => Doc })[] = [
   { id: 'magazine-1', family: 'magazine', name: 'Magazine 1', kind: 'Modern Editorial', make: makeMagazine1 },
   { id: 'magazine-2', family: 'magazine', name: 'Magazine 2', kind: 'Particle Feature', make: makeMagazine2 },
   { id: 'magazine-3', family: 'magazine', name: 'Magazine 3', kind: 'Cosmos Spread', make: makeMagazine3 },
-  { id: 'gallery-1', family: 'gallery', name: 'Gallery', kind: 'Photo Spread', make: makeGallery1 },
+  { id: 'gallery-1', family: 'gallery', name: 'Gallery 1', kind: 'Photo Spread', make: makeGallery1 },
+  { id: 'gallery-2', family: 'gallery', name: 'Gallery 2', kind: 'Centre Fold', make: makeGallery2 },
 ];
 
 export const TEMPLATE_META: TemplateMeta[] = TEMPLATES.map(({ id, family, name, kind }) => ({

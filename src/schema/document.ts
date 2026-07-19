@@ -12,7 +12,8 @@ export type TemplateId =
   | 'magazine-1'
   | 'magazine-2'
   | 'magazine-3'
-  | 'gallery-1';
+  | 'gallery-1'
+  | 'gallery-2';
 
 /** The layout engine a template runs on — derived from the id, never stored. */
 export const familyOf = (id: TemplateId | undefined): TemplateFamily =>
@@ -86,6 +87,12 @@ export interface Design {
   fontAffiliation?: string;
   colors: { hero: string; accent: string; accentSoft: string; ink: string };
   /**
+   * Gallery sheet background. Absent = white. The gallery reads it as `--paper-bg`
+   * and derives a readable text colour (`--paper-ink`, black on light / white on
+   * dark) from its luminance, so titles/labels stay legible on any colour.
+   */
+  paperBg?: string;
+  /**
    * paper-2's top band. Absent = the defaults below, so v1 files and the other
    * templates (which never draw the band) are unaffected.
    * `barColor` = the rule itself, `barTagColor` = the block holding the tag
@@ -142,6 +149,12 @@ export interface Doc {
   highlights: string[];
   references: Reference[];
   hero: { assetId: string | null; offsetX: number; offsetY: number; scale: number };
+  /**
+   * Page-1 cover photo, distinct from the page-2 hero. Only magazine-1/-3 read
+   * it (their MagazineCover). Absent = fall back to `hero`, so v1 files and the
+   * other templates keep their look — the cover only diverges once it's set.
+   */
+  cover?: { assetId: string | null; offsetX: number; offsetY: number; scale: number };
   assets: Record<string, Asset>;
   design: Design;
 }
