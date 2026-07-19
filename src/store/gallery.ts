@@ -187,3 +187,73 @@ export function makeGallery2(): Doc {
   d.hero = { assetId: null, offsetX: 0, offsetY: 0, scale: 1 };
   return d;
 }
+
+// ---- gallery-3 placeholder photos -----------------------------------------
+const G3_FOLD = foldPhoto('#134e4a', '#f59e0b');
+const G3_A = photo('#0c4a6e', '#38bdf8', '<circle r="120" fill="none" stroke="#fff" stroke-width="12" opacity="0.85"/><circle r="34"/>');
+const G3_B = photo('#78350f', '#fbbf24', '<rect x="-150" y="-110" width="300" height="220" rx="16" opacity="0.85"/>');
+const G3_C = photo('#312e81', '#818cf8', '<path d="M-200 130 L0 -190 L200 130 Z" opacity="0.8"/>');
+const G3_D = photo('#064e3b', '#34d399', '<rect x="-170" y="-10" width="340" height="20" opacity="0.7"/><circle r="64"/>');
+const G3_E = photo('#7f1d1d', '#f87171', '<circle cx="-95" r="62"/><circle cx="95" r="62"/><path d="M-95 0 H95" stroke="#fff" stroke-width="10"/>');
+const G3_F = photo('#155e75', '#22d3ee', '<circle r="130" fill="none" stroke="#fff" stroke-width="10" opacity="0.8"/><path d="M-90 -90 L90 90" stroke="#fff" stroke-width="10"/>');
+const G3_G = photo('#581c87', '#c084fc', '<circle r="70"/><rect x="-260" y="-6" width="520" height="12" opacity="0.55"/>');
+
+/**
+ * gallery-3 — a third photo spread. The fold image is a horizontal BAND across
+ * the middle of the open spread (full width of page 1 → full width of page 2),
+ * with a mosaic of tiles above and below on each page and four text cards. Eight
+ * photos in all. Ships a warm off-white sheet.
+ */
+export function makeGallery3(): Doc {
+  const d = emptyDoc();
+  d.templateId = 'gallery-3';
+  d.meta = {
+    ...d.meta,
+    masthead: 'THE LAB',
+    title: 'IN FOCUS',
+    categoryLabel: 'USM School of Physics',
+  };
+  d.design = {
+    ...d.design,
+    bodyAlign: 'left',
+    fontDisplay: 'Source Sans 3',
+    colors: { hero: '#0f172a', accent: '#111418', accentSoft: '#efe9df', ink: '#1c1917' },
+    paperBg: '#f7f4ee',
+    margin: 12,
+  };
+
+  const ids = [uid(), uid(), uid(), uid(), uid(), uid(), uid(), uid()];
+  const dims = (src: string, w: number, h: number) => ({ src, naturalWidth: w, naturalHeight: h });
+  d.assets = {
+    [ids[0]]: dims(G3_FOLD, 2400, 900),
+    [ids[1]]: dims(G3_A, 1200, 900),
+    [ids[2]]: dims(G3_B, 1200, 900),
+    [ids[3]]: dims(G3_C, 1200, 900),
+    [ids[4]]: dims(G3_D, 1200, 900),
+    [ids[5]]: dims(G3_E, 1200, 900),
+    [ids[6]]: dims(G3_F, 1200, 900),
+    [ids[7]]: dims(G3_G, 1200, 900),
+  };
+
+  d.blocks = [
+    // fig[0] is the horizontal fold band; the rest fill the mosaic tiles in order.
+    fig(ids[0], '**Across the spread**\nOne wide frame bridging the two pages at the fold.'),
+    fig(ids[1], '**Cavity mode**\nLight trapped between two mirrors.'),
+    fig(ids[2], '**Thin film**\nThe sample under the microscope.'),
+    fig(ids[3], '**Alignment**\nSteering the beam onto the detector.'),
+    fig(ids[4], '**Waveguide**\nGuiding light along an engineered edge.'),
+    fig(ids[5], '**The team**\nStudent and supervisor at the bench.'),
+    fig(ids[6], '**Diffraction**\nA pattern read for structure.'),
+    fig(ids[7], '**Emission**\nThe first measured signal.'),
+    // Cards (4):
+    card('**Light on a chip**\nEngineered structures route photons where electronics cannot follow.'),
+    card('**Why it matters**\nSharper sensing, quantum links, lower-power computing.'),
+    card('**Made at USM**\nDesigned, fabricated, and measured by the group in-house.'),
+    card('**Next steps**\nFrom single devices toward complete photonic circuits.'),
+  ];
+
+  d.highlights = [];
+  d.references = [];
+  d.hero = { assetId: null, offsetX: 0, offsetY: 0, scale: 1 };
+  return d;
+}

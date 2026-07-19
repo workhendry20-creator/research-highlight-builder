@@ -1,6 +1,6 @@
 import { emptyDoc, uid, type Doc, type TemplateFamily, type TemplateId } from '../schema/document';
 import { sampleDoc } from '../sample';
-import { makeGallery1, makeGallery2 } from './gallery';
+import { makeGallery1, makeGallery2, makeGallery3 } from './gallery';
 
 /**
  * Template registry. Two families (paper / magazine), each with several presets.
@@ -412,6 +412,7 @@ export const TEMPLATES: (TemplateMeta & { make: () => Doc })[] = [
   { id: 'magazine-3', family: 'magazine', name: 'Magazine 3', kind: 'Cosmos Spread', make: makeMagazine3 },
   { id: 'gallery-1', family: 'gallery', name: 'Gallery 1', kind: 'Photo Spread', make: makeGallery1 },
   { id: 'gallery-2', family: 'gallery', name: 'Gallery 2', kind: 'Centre Fold', make: makeGallery2 },
+  { id: 'gallery-3', family: 'gallery', name: 'Gallery 3', kind: 'Mosaic Band', make: makeGallery3 },
 ];
 
 export const TEMPLATE_META: TemplateMeta[] = TEMPLATES.map(({ id, family, name, kind }) => ({
