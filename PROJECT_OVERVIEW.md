@@ -18,6 +18,7 @@ PDF through the browser's own print pipeline.
 | UI | React 19 + Vite 8 + TypeScript |
 | State | Zustand 5 (store) + zundo (undo/redo history) |
 | Persistence | Dexie (IndexedDB) — local autosave, no server |
+| Math | KaTeX (inline `$…$` + standalone display equations) |
 | Tests | Vitest + jsdom |
 | Lint | oxlint |
 | Fonts | Playfair Display bundled as `.woff2`; other families web-safe/system |
@@ -59,7 +60,7 @@ A document is one flat, serializable object. The renderer derives pages from it.
 ```
 Doc
 ├─ schemaVersion         number (SCHEMA_VERSION = 1)
-├─ templateId            'paper-1|2|3' | 'magazine-1|2|3' | 'gallery-1|2'
+├─ templateId            'paper-1|2|3' | 'magazine-1|2|3' | 'gallery-1|2|3|4'
 ├─ meta                  masthead, title, subtitle, categoryLabel, author,
 │                        affiliation, volume, location, photoCredit, pullQuote,
 │                        pullQuoteBy, heroCaption …
@@ -76,12 +77,15 @@ Doc
 **Block** is a discriminated union:
 
 - `{ type: 'paragraph', text }` — text carries inline `**bold**`, `*italic*`,
-  `__underline__` markup (parsed by `lib/richtext.ts`).
+  `__underline__` markup **and inline math `$…$`** (parsed by `lib/richtext.ts`).
 - `{ type: 'figure', assetId, caption, span, align?, frame? }`
   - `span`: `1` (one column), `'body'` (full body width), `'bleed'` (full width
     carried past the margin to the sheet edge). All still anchor to a paragraph.
   - `frame`: `{ scale, offsetX, offsetY }` — zoom/pan the image inside its box
     without resizing the box. Used by the gallery tiles.
+- `{ type: 'equation', tex, caption, align? }` — a standalone display equation
+  that stands on its own line outside any paragraph, rendered by KaTeX with an
+  optional caption. Atomic in the flow, like a figure (see §Math).
 
 `familyOf(id)` derives the layout engine from the id prefix; the family is never
 stored. `migrate()` upgrades older saved docs. `emptyDoc()` seeds a blank doc.
@@ -118,10 +122,20 @@ A gallery is a **CSS grid, not a text flow**: no pagination, always exactly 2 A4
 pages read as an open spread. `grid-template-areas` owns every slot; `doc.blocks`
 fill them in order (figures → `img-*`/`fold`, paragraphs → `card-*`).
 
-| id | name | notes |
-|----|------|-------|
-| `gallery-1` | Photo Spread | 5 photos + 5 text cards. **Horizontal fold** image across the top (top-right of page 1 → top-left of page 2). |
-| `gallery-2` | Centre Fold | 7 photos + 4 text cards. **Vertical fold** image down the centre of the spread (inner column of page 1 → inner column of page 2). Ships a dark sheet to show off auto-contrast text. |
+Each preset branches to its own layout component in `GalleryPage` and its own
+`grid-template-areas` (`galleryN--p1/--p2` in `gallery.css`), but they all reuse
+the same `FoldCell`/`ImageCell`/`CardCell` cells and the shared `gallery--p1/--p2`
+classes (fold-edge bleed + mirrored masthead).
+
+| id | name | photos · cards | fold |
+|----|------|------|------|
+| `gallery-1` | Photo Spread | 5 · 5 | **Horizontal** across the top (top-right of page 1 → top-left of page 2). |
+| `gallery-2` | Centre Fold | 7 · 4 | **Vertical**, full height down the centre (inner column of each page). Dark sheet. |
+| `gallery-3` | Mosaic Band | 8 · 4 | **Horizontal band** across the middle, full page width on each side. Warm off-white sheet. |
+| `gallery-4` | Long Read | 5 · 6 | **Tall block** on the inner edge of each page. Text-forward (fewer photos, longer cards). Cool light sheet. |
+
+Which figure slot is the fold, and the per-slot labels/hints, live in the
+`LAYOUTS` map in `GallerySection`.
 
 **The fold image** ("foto yang memotong halaman") is one asset painted as two
 halves by `FoldCell`: the `<img>` is 200% of the cell width, anchored at the fold
@@ -174,9 +188,13 @@ twin overflows.
 
 - **`overflows(el)`** = `scrollWidth > clientWidth+1 || scrollHeight > clientHeight+1`
   — reads both axes (see rule #2).
-- **`FlowItem`** describes each block for measuring (text vs figure, aspect,
-  caption, `full`/`bleed`). **`Piece`** is a placed fragment; **`Pagination`** =
-  `{ pages, fill, spill }`.
+- **`FlowItem`** describes each block for measuring — `text`, `figure` (aspect,
+  caption, `full`/`bleed`), or `equation` (its TeX + caption). **`Piece`** is a
+  placed fragment; **`Pagination`** = `{ pages, fill, spill }`.
+- A figure is measured with a height-only placeholder; an **equation** is painted
+  as the **real KaTeX** (display mode, shrunk to the column by `fitEquation`) so
+  its true height sets the break. Both are atomic — they move whole to the next
+  page rather than split.
 - **`paginate(host1, host2, flow)`** — breaks the flow across a short first host
   (room reserved for the header/quote) and a plain host for later pages.
 - **`paginateHosts([...], flow)`** — for templates whose sheet 1 spends several
@@ -196,18 +214,20 @@ twin overflows.
 2. Runs the measuring rig in a `useLayoutEffect`, choosing the right host plan per
    template (paper / paper-2 / paper-3 / magazine / magazine-2 / gallery).
 3. Renders the real pages for the active family, plus preview chrome: a formatting
-   bar (B/I/U), the fit badge, a **Spread** toggle (magazine + gallery), and a
-   zoom control (Fit / manual %).
+   bar (B/I/U + **∑** inline-math), the fit badge, a **Spread** toggle (magazine +
+   gallery), and a zoom control (Fit / manual %).
 
 Per-family components (none import from `panel/`):
 
 - Paper: `Page1`, `ContPage`, `PaperTwo`, `PaperThree*`, `Sidebar`, `TagBar`, `Flow`.
 - Magazine: `MagazineCover`, `MagazineHead`, `MagazinePage`; split variant
   `MagSplitCover`, `MagSplitHead`, `MagPhotoPage`.
-- Gallery: `GalleryPage` (branches to `GalleryTwo` for `gallery-2`), with shared
-  cells `ImageCell`, `FoldCell`, `CardCell`, `Head`.
-- `Flow.tsx` renders the block stream into columns; figure captions honour
-  `block.align`.
+- Gallery: `GalleryPage` (branches to `GalleryTwo`/`GalleryThree`/`GalleryFour`
+  for `gallery-2/3/4`), with shared cells `ImageCell`, `FoldCell`, `CardCell`,
+  `Head`.
+- `Flow.tsx` renders the block stream into columns; paragraphs, figures (captions
+  honour `block.align`), and `DisplayEquation` blocks. Inline runs (incl. `$…$`
+  math) go through its `renderRuns`.
 
 Styles live in `src/styles/` (`page.css`, `magazine.css`, `gallery.css`,
 `paper2.css`, `paper3.css`, `panel.css`, `fonts.css`).
@@ -242,11 +262,14 @@ Styles live in `src/styles/` (`page.css`, `magazine.css`, `gallery.css`,
 `Panel.tsx` — left sidebar. A **template switcher** (paper / magazine / gallery
 accordions) plus four tabs:
 
-- **Content** → `MetaSection` + `BodySection` (paragraphs, figures, span, align).
-- **Images** → `GallerySection` for galleries (per-template image slots: 5 for
-  gallery-1 with the fold at slot 1; 7 for gallery-2 with the fold at slot 0; plus
-  a paper-background colour picker), otherwise `HeroSection` (cover + hero pickers
-  for magazine-1/-3, single hero elsewhere, framing + hero height).
+- **Content** → `MetaSection` + `BodySection`. Add **+ Paragraph**, **+ Image**,
+  and **+ Equation** blocks (the last two hidden for galleries, which manage
+  images in the Images tab and are text-card only). Per-block: text/tex, caption,
+  span, alignment.
+- **Images** → `GallerySection` for galleries (per-template image slots from the
+  `LAYOUTS` map — 5/7/8/5 for gallery-1/2/3/4, fold at slot 1 for gallery-1 else
+  slot 0 — plus a paper-background colour picker), otherwise `HeroSection` (cover +
+  hero pickers for magazine-1/-3, single hero elsewhere, framing + hero height).
 - **Highlights** → `HighlightsSection` + `ReferencesSection` (with a count badge).
 - **Design** → `DesignSection` (columns, alignment, fonts, sizes, colours, bars,
   custom CSS).
@@ -275,8 +298,9 @@ src/
 ├─ lib/
 │  ├─ geometry.ts         grid() invariant, cssVars(), readableInk(), cplWarning()
 │  ├─ paginate.ts         overflows(), paginate(), paginateHosts(), fitMessage()
-│  ├─ richtext.ts         **bold**/*italic*/__underline__ parser
-│  ├─ activeEditor.ts     apply B/I/U to the focused textarea
+│  ├─ richtext.ts         **bold**/*italic*/__underline__ + `$…$` parser, renderTex()
+│  ├─ mathfit.ts          shrink a display equation to fit the column width
+│  ├─ activeEditor.ts     apply B/I/U and insert `$…$` on the focused textarea
 │  ├─ loadImage.ts        validated image upload → data URL
 │  ├─ magSplit.ts         magazine-2 photo-strip geometry
 │  └─ paper2.ts / paper3.ts   per-template grid maths
@@ -323,7 +347,7 @@ Tests sit next to their subjects: `paginate.test.ts`, `richtext.test.ts`,
 
 | Term | Meaning |
 |------|---------|
-| **Fold** | The image that crosses the page boundary of a spread. One asset painted as two halves by `FoldCell` (page 1 inner edge → page 2 inner edge), bleeding to the seam so the halves meet with no gutter. Horizontal in gallery-1, vertical in gallery-2. |
+| **Fold** | The image that crosses the page boundary of a spread. One asset painted as two halves by `FoldCell` (page 1 inner edge → page 2 inner edge), bleeding to the seam so the halves meet with no gutter. Horizontal top (gallery-1), vertical centre (gallery-2), horizontal middle band (gallery-3), tall inner block (gallery-4). |
 | **Spanner** | A `column-span: all` figure (`span: 'body'`/`'bleed'`). It breaks a multi-column box into stacked column-rows, so overflow spills **downward** — why `overflows()` must read `scrollHeight`, not just `scrollWidth`. |
 | **Rail** | A separate sidebar column reserved for highlights/references. Computed in `grid()`; present when `sidebar` is on and `highlightsPlacement` is `page1`/`all`. |
 | **Host / twin / measuring rig** | Hidden boxes in `PaperPreview`, sized identically to the real body columns. The paginator measures a *twin* (not the visible page) to decide where the flow breaks. |
@@ -333,6 +357,8 @@ Tests sit next to their subjects: `paginate.test.ts`, `richtext.test.ts`,
 | **Masthead** | The publication name/logo on a magazine cover and spread header (e.g. "KUANTA"). |
 | **Folio** | The page-number footer (e.g. `001`). |
 | **Fit badge** | Toolbar indicator (`ok`/`warn`/`bad`) from `fitMessage()`, showing whether the content fits the sheets. |
+| **Inline math** | A `$…$` span inside any text: verbatim LaTeX rendered by KaTeX, works wherever text runs (body, captions, gallery cards). |
+| **Display equation** | A standalone `equation` block on its own line with an optional caption, rendered centered full-width by KaTeX. |
 | **Spread** | Two A4 sheets shown side by side (an open magazine/gallery). A view-only toggle — it never changes pagination or the PDF. |
 
 ---
@@ -383,3 +409,27 @@ flowchart TD
   hydrate --> load["useDoc.load(doc)"]
   load --> edit
 ```
+
+---
+
+## 19. Math (KaTeX)
+
+Two levels of LaTeX, both via KaTeX (`throwOnError:false`, so a bad formula shows
+KaTeX's inline error rather than crashing the page):
+
+- **Inline `$…$`** — parsed inside `lib/richtext.ts`. The span's content is
+  verbatim TeX: B/I/U markers inside it are left alone, and the page-break marker
+  balancer (`openMarkers`) skips over the span. `runsToHtml` renders the math too,
+  so the measuring twins get the real width. Works in any text run — body
+  paragraphs, figure/tile captions, gallery cards. The **∑** button in the format
+  bar wraps the current selection in `$…$` (`activeEditor.insertMath`).
+- **Standalone display equations** — the `equation` block (§3), added with the
+  **+ Equation** button. Rendered by `DisplayEquation` (Flow) as an atomic,
+  centered, full-width `column-span:all` block with an optional caption. A formula
+  wider than the column is scaled down by `fitEquation` (`lib/mathfit.ts`) — KaTeX
+  can't wrap math, so it shrinks the font size rather than overflow. `paginate()`
+  has an `equation` kind that paints the real KaTeX to measure the true height, so
+  it breaks pages correctly.
+
+KaTeX's CSS is imported globally (`main.tsx`) and its fonts are bundled into
+`dist/` (hashed filenames), so the GitHub Pages base path is honoured.
