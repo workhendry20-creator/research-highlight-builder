@@ -14,7 +14,8 @@
  * boundaries) and figures (atomic full-width blocks). A figure never splits —
  * if it straddles the break it moves whole to page 2.
  */
-import { runsToHtml, openMarkers } from './richtext';
+import { runsToHtml, openMarkers, renderTex } from './richtext';
+import { fitEquation } from './mathfit';
 
 export const overflows = (el: HTMLElement) =>
   el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
@@ -28,17 +29,20 @@ const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
  *  paint() measures it rather than doing the arithmetic here. */
 export type FlowItem =
   | { kind: 'text'; text: string }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean }
+  | { kind: 'equation'; id: string; tex: string; caption: string };
 
 /** Working item during the search — a text run may be flagged as a continuation. */
 type PaintItem =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean };
+  | { kind: 'figure'; id: string; aspect: number; hasCaption: boolean; full: boolean; bleed?: boolean }
+  | { kind: 'equation'; id: string; tex: string; caption: string };
 
-/** Output piece. Pages are rendered from these; figures resolve by id. */
+/** Output piece. Pages are rendered from these; figures/equations resolve by id. */
 export type Piece =
   | { kind: 'text'; text: string; cont?: boolean }
-  | { kind: 'figure'; id: string };
+  | { kind: 'figure'; id: string }
+  | { kind: 'equation'; id: string };
 
 export interface Pagination {
   /** pages[0] = page-1 geometry (hero + header). pages[1..] = continuation pages,
@@ -52,7 +56,11 @@ export interface Pagination {
 
 const toPieces = (items: PaintItem[]): Piece[] =>
   items.map((it) =>
-    it.kind === 'figure' ? { kind: 'figure', id: it.id } : { kind: 'text', text: it.text, cont: it.cont },
+    it.kind === 'figure'
+      ? { kind: 'figure', id: it.id }
+      : it.kind === 'equation'
+        ? { kind: 'equation', id: it.id }
+        : { kind: 'text', text: it.text, cont: it.cont },
   );
 
 /**
@@ -80,6 +88,25 @@ function paint(el: HTMLElement, items: PaintItem[]) {
     probe.remove();
   }
   for (const it of items) {
+    if (it.kind === 'equation') {
+      // A display equation is an atomic full-width spanner. Render the real KaTeX
+      // (and shrink a too-wide formula, exactly as the visible page does) so the
+      // measured height matches what paints on the sheet.
+      const fig = document.createElement('figure');
+      fig.className = 'flow-eq';
+      const tex = document.createElement('span');
+      tex.className = 'flow-eq-tex';
+      tex.innerHTML = renderTex(it.tex, true);
+      fig.appendChild(tex);
+      if (it.caption.trim()) {
+        const cap = document.createElement('figcaption');
+        cap.innerHTML = runsToHtml(it.caption);
+        fig.appendChild(cap);
+      }
+      el.appendChild(fig);
+      fitEquation(tex);
+      continue;
+    }
     if (it.kind === 'figure') {
       const d = document.createElement('div');
       // Full-width figures span all columns; one-column figures displace only a
@@ -127,8 +154,8 @@ function fillOne(
 
   const straddle = src[n];
 
-  if (straddle.kind === 'figure') {
-    // Atomic: the figure can't split, so it starts the next page.
+  if (straddle.kind === 'figure' || straddle.kind === 'equation') {
+    // Atomic: a figure/equation can't split, so it starts the next page.
     return { placed: src.slice(0, n), rest: src.slice(n) };
   }
 
@@ -179,7 +206,7 @@ export function paginateHosts(
   items: FlowItem[],
   isOverflowing: (el: HTMLElement) => boolean = overflows,
 ): Pagination {
-  const src: PaintItem[] = items.filter((it) => it.kind === 'figure' || it.text.trim() !== '');
+  const src: PaintItem[] = items.filter((it) => it.kind !== 'text' || it.text.trim() !== '');
   if (!src.length) return { pages: [], fill: 0, spill: 0 };
 
   const hostAt = (i: number) => hosts[Math.min(i, hosts.length - 1)];

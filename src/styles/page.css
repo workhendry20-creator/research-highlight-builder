@@ -433,6 +433,44 @@
   text-decoration: underline;
 }
 
+.format-btn--math {
+  font-size: 15px;
+}
+
+/* Standalone display equation: an atomic full-width block in the text flow.
+   column-span:all makes it a spanner (its overflow shows on scrollHeight, which
+   paginate() already reads). Centered, with an optional caption underneath. */
+.flow-eq {
+  column-span: all;
+  margin: 2mm 0 2.5mm;
+  text-align: center;
+  break-inside: avoid;
+}
+.flow-eq-tex {
+  display: block;
+  overflow: hidden;
+}
+.flow-eq-tex .katex-display {
+  margin: 0;
+}
+.flow-eq figcaption {
+  margin-top: 1mm;
+  font-family: var(--sans);
+  font-size: 8pt;
+  line-height: 1.35;
+  color: #555;
+}
+
+/* Inline KaTeX span: keep formulas on the text baseline and let a wide one
+   shrink rather than blow out the narrow column. */
+.tex {
+  display: inline-block;
+  max-width: 100%;
+}
+.tex .katex {
+  font-size: 1em;
+}
+
 .zoom-bar {
   display: inline-flex;
   align-items: center;

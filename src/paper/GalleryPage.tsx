@@ -1,10 +1,12 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import type { Doc, Block } from '../schema/document';
-import { parseRuns } from '../lib/richtext';
+import { parseRuns, renderTex } from '../lib/richtext';
 
-/** Inline **bold** / *italic* / __underline__ → styled nodes (injection-safe). */
+/** Inline **bold** / *italic* / __underline__ + `$…$` math → styled nodes. */
 function renderRuns(text: string): ReactNode {
   return parseRuns(text).map((r, j) => {
+    if (r.math)
+      return <span key={j} className="tex" dangerouslySetInnerHTML={{ __html: renderTex(r.text) }} />;
     let node: ReactNode = r.text;
     if (r.b) node = <strong>{node}</strong>;
     if (r.i) node = <em>{node}</em>;

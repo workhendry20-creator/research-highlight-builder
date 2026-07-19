@@ -4,7 +4,7 @@ import { emptyDoc, uid, type Doc } from './schema/document';
 // appears on its own the moment the author writes past this.
 const P = [
   `Topological photonic crystals guide light along their edges with a robustness ordinary waveguides cannot match. We report a silicon-on-insulator platform whose valley-Hall edge states carry telecom-band light around sharp corners with negligible back-scattering.`,
-  `The device is a honeycomb lattice of triangular holes. Breaking the inversion symmetry of the unit cell opens a band gap and imprints opposite Berry curvature on the two valleys, so a gapless edge mode forms where two mirrored domains meet.`,
+  `The device is a honeycomb lattice of triangular holes. Breaking the inversion symmetry of the unit cell opens a band gap and imprints opposite Berry curvature on the two valleys, so a gapless edge mode forms where two mirrored domains meet. The valley Chern number $C_v = \\pm\\tfrac{1}{2}$ fixes the number of protected edge channels.`,
   `Across waveguides with up to ten sixty-degree bends the valley-Hall guide stays within one decibel over the full C-band, where conventional line-defect guides lose several decibels per bend — a practical building block for dense photonic circuits.`,
 ];
 

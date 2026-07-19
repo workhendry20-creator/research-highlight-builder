@@ -10,9 +10,20 @@
  * `__` (double underscore) for underline — not single `_` — so physics
  * subscripts like `x_1` are never mistaken for formatting. A stray, unmatched
  * marker renders literally (see `parseRuns` pairing check).
+ *
+ * Inline math: `$…$` wraps LaTeX rendered by KaTeX (e.g. `$E = mc^2$`). Inside a
+ * `$…$` span the content is verbatim TeX — B/I/U markers are NOT parsed there, so
+ * `a^*` or `x_1` in a formula never trip the B/I/U machinery. A lone unmatched `$`
+ * renders literally, same forgiving rule as the markers.
  */
+import katex from 'katex';
 
 export type Mark = 'b' | 'i' | 'u';
+
+/** Render one TeX fragment to an HTML string. Never throws — a syntax error shows
+ *  as KaTeX's inline red error instead of breaking the whole page. */
+export const renderTex = (tex: string, display = false): string =>
+  katex.renderToString(tex, { throwOnError: false, displayMode: display });
 
 /** Longest tokens first so `**` wins over `*`, `__` over a lone `_`. */
 export const DELIMS: { tok: string; mark: Mark }[] = [
@@ -28,6 +39,8 @@ export interface Run {
   b: boolean;
   i: boolean;
   u: boolean;
+  /** True for a `$…$` span — `text` is raw TeX, rendered by KaTeX, not B/I/U. */
+  math?: boolean;
 }
 
 /** Does `tok` appear again at or after `from`? Guards against treating a lone,
@@ -59,6 +72,18 @@ export function parseRuns(src: string): Run[] {
 
   let k = 0;
   while (k < src.length) {
+    // Inline math wins over every B/I/U marker: a `$…$` span is captured whole
+    // and its TeX kept verbatim, so markers/operators inside never parse.
+    if (src[k] === '$') {
+      const close = src.indexOf('$', k + 1);
+      if (close !== -1) {
+        flush();
+        runs.push({ text: src.slice(k + 1, close), b: false, i: false, u: false, math: true });
+        k = close + 1;
+        continue;
+      }
+      // Lone `$` with no closer — treat as literal text.
+    }
     let handled = false;
     for (const { tok } of DELIMS) {
       if (!src.startsWith(tok, k)) continue;
@@ -100,6 +125,8 @@ const escapeHtml = (s: string) => s.replace(/[&<>]/g, (c) => ESC[c]);
 export function runsToHtml(src: string): string {
   return parseRuns(src)
     .map((r) => {
+      // Math is measured at its real KaTeX width so the break point matches.
+      if (r.math) return renderTex(r.text);
       let html = escapeHtml(r.text);
       if (r.b) html = `<strong>${html}</strong>`;
       if (r.i) html = `<em>${html}</em>`;
@@ -120,6 +147,15 @@ export function openMarkers(s: string): string[] {
   const open: string[] = [];
   let k = 0;
   while (k < s.length) {
+    // Skip over a `$…$` math span whole — markers inside it are verbatim TeX and
+    // must not count toward the B/I/U balance carried across a page break.
+    if (s[k] === '$') {
+      const close = s.indexOf('$', k + 1);
+      if (close !== -1) {
+        k = close + 1;
+        continue;
+      }
+    }
     let hit = false;
     for (const { tok } of DELIMS) {
       if (s.startsWith(tok, k)) {
