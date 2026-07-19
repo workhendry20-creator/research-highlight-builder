@@ -24,7 +24,9 @@
 .g-head-bar {
   flex: 1;
   height: 7mm;
-  background: var(--paper-ink, #111418);
+  /* The masthead rule follows the Bar color control (design.colors.accent).
+     Presets seed it to read on their sheet (dark on light paper, light on dark). */
+  background: var(--accent, #111418);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
