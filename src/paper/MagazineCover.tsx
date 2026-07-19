@@ -8,6 +8,7 @@ export function MagazineCover({ doc, vars }: { doc: Doc; vars: CSSProperties }) 
   const { meta, hero, assets } = doc;
   const photo = hero.assetId ? assets[hero.assetId] : null;
   const words = meta.title.trim().split(/\s+/).filter(Boolean);
+  const mag1 = doc.templateId === 'magazine-1';
 
   const style: CSSProperties = {
     ...vars,
@@ -45,8 +46,11 @@ export function MagazineCover({ doc, vars }: { doc: Doc; vars: CSSProperties }) 
 
         <div className="mag-cover-foot">
           <div className="mag-cover-credits">
-            {meta.author && <span>OLEH {meta.author}</span>}
-            {meta.photoCredit && <span>FOTO: {meta.photoCredit}</span>}
+            {/* magazine-1 shows the raw values; other magazines keep the labels. */}
+            {meta.author && <span>{mag1 ? meta.author : `OLEH ${meta.author}`}</span>}
+            {meta.photoCredit && (
+              <span>{mag1 ? meta.photoCredit : `FOTO: ${meta.photoCredit}`}</span>
+            )}
           </div>
           <span className="mag-folio">001</span>
         </div>

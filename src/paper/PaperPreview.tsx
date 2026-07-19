@@ -184,7 +184,18 @@ export function PaperPreview() {
         root.style.setProperty('--footer-h', '10mm');
         root.style.setProperty('--mag-head-h', `${headH}px`);
       }
-      setPagination(paginate(mh1, mh2, items));
+      // Highlights close the article as a full-width band, riding the flow's tail
+      // as one atomic full-span item — same trick paper uses for 'below'.
+      let magFlow = items;
+      const magHl = hlBelow ? hlRef.current : null;
+      if (magHl) {
+        const w = magHl.offsetWidth || 1;
+        magFlow = [
+          ...items,
+          { kind: 'figure', id: HIGHLIGHTS_BLOCK_ID, aspect: magHl.offsetHeight / w, hasCaption: false, full: true },
+        ];
+      }
+      setPagination(paginate(mh1, mh2, magFlow));
       return;
     }
 
@@ -506,11 +517,12 @@ export function PaperPreview() {
         <div className="page">
           <div className={`body-cols body-cols--p2${railedEvery}`} ref={host2Ref} />
         </div>
-        {/* Below-article highlights: measured at body width to size its atom. */}
+        {/* Below-article highlights: measured at body width to size its atom.
+            Magazine's band spans its own content width, not the paper --body-1. */}
         {hlBelow && (
-          <div style={{ width: 'var(--body-1)' }}>
+          <div style={{ width: isMag ? 'calc(var(--page-w) - 2 * var(--margin))' : 'var(--body-1)' }}>
             <aside className="hl-below" ref={hlRef}>
-              <HighlightsBody doc={doc} />
+              <HighlightsBody doc={doc} hideRefs={doc.templateId === 'magazine-1'} />
             </aside>
           </div>
         )}

@@ -300,8 +300,8 @@ function makeMagazine(m: MagInput): Doc {
   return d;
 }
 
-const makeMagazine1 = (): Doc =>
-  makeMagazine({
+const makeMagazine1 = (): Doc => {
+  const d = makeMagazine({
     id: 'magazine-1',
     photo: PHOTO_OBSERVATORY,
     accent: '#e11d2e',
@@ -326,6 +326,15 @@ const makeMagazine1 = (): Doc =>
       'Menjelang fajar astronomis, langit di ufuk timur mulai merekah keunguan. Kubah menutup pelan-pelan, menyimpan kembali keheningannya. Namun di dalam server dingin di kaki gunung, semesta yang baru saja terekam mulai diurai—satu foton, satu petunjuk, satu bab dari kisah yang dimulai empat belas miliar tahun lalu.',
     ],
   });
+  // Highlights ride the flow's tail as a full-width band under the article.
+  d.design.highlightsPlacement = 'below';
+  d.highlights = [
+    'Cermin selebar delapan meter dipoles hingga sepersejuta milimeter untuk menangkap foton purba.',
+    'Di 4.200 mdpl udara kering membuat bintang tak berkedip—ideal memburu cahaya galaksi jauh.',
+    'Spektrum cahaya terurai jadi garis terang-gelap, mengungkap komposisi, suhu, dan kecepatan benda langit.',
+  ];
+  return d;
+};
 
 /** magazine-2 splits one photo across sheets 1–2, and its sheet 1 carries the
  *  quote + a highlights box in the foot, so unlike the other magazines it ships

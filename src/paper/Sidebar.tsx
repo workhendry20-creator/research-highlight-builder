@@ -2,7 +2,7 @@ import type { Doc } from '../schema/document';
 
 /** The highlights + references content, shared by the right rail (Sidebar) and
  *  the full-width end-of-article block (HighlightsBody in a .hl-below wrapper). */
-export function HighlightsBody({ doc }: { doc: Doc }) {
+export function HighlightsBody({ doc, hideRefs = false }: { doc: Doc; hideRefs?: boolean }) {
   const highlights = doc.highlights.filter((h) => h.trim());
   return (
     <>
@@ -12,7 +12,7 @@ export function HighlightsBody({ doc }: { doc: Doc }) {
           <li key={i}>{h}</li>
         ))}
       </ul>
-      {doc.references.length > 0 && (
+      {!hideRefs && doc.references.length > 0 && (
         <>
           <h3>References</h3>
           <ol className="references">
